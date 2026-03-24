@@ -1,0 +1,74 @@
+---
+globs: lib/**/*.dart
+alwaysApply: false
+---
+# 云端健身房架构规范 (Cloud Gym Architecture)
+
+你是一个资深的 Flutter 架构师。在编写代码时，必须严格遵守以下分层架构和目录结构。
+
+## 1. 目录结构规范
+
+所有代码必须安置在指定的目录下：
+
+- `lib/core/`: 存放全局常量、通用工具类（Utils）、主题（Theme）、以及不属于特定业务的 UI 组件。
+- `lib/domain/`: 存放跨功能的通用业务实体（Entities）和业务逻辑。
+- `lib/firestore/`: 存放 Firebase/Firestore 的初始化配置、全局封装类和通用的数据监听器。
+- `lib/features/`: 核心业务逻辑按功能模块划分：
+    - `auth/`: 登录与用户状态。
+    - `room/`: 房间管理与社交。
+    - `action/`: 健身卡片与计时。
+    - `avatar/`: Rive 角色与动画驱动。
+
+## 2. 功能模块内部结构 (Feature Layering)
+
+每个 feature 内部必须严格分为以下三层：
+
+### A. Presentation 层 (`features/x/presentation/`)
+- **职责**: 负责 UI 渲染、动画展示、处理用户输入。
+- **组件**: Widgets, Pages, 状态管理 (Riverpod/Provider/Bloc)。
+- **禁令**: 
+    - ❌ 禁止直接调用 `FirebaseFirestore.instance`。
+    - ❌ 禁止包含复杂的业务算法（应放入 usecase）。
+    - ❌ 禁止处理数据转换（如 JSON 解析）。
+
+### B. Usecase 层 (`features/x/usecase/`)
+- **职责**: 核心业务大脑。负责协调数据转换、权限校验、计时逻辑、状态流转。
+- **原则**: 每一个 Usecase 类通常只负责一个具体动作（如 `JoinRoomUsecase`, `StartWorkoutUsecase`）。
+- **禁令**: 
+    - ❌ 禁止引用任何 `material.dart` 或 UI 组件。
+    - ❌ 禁止处理底层的网络请求细节。
+
+### C. Data 层 (`features/x/data/`)
+- **职责**: 定义数据模型 (Models/DTOs)、实现数据的序列化 (`fromJson`/`toJson`)、调用外部 API 或 `lib/firestore/`。
+- **禁令**: 
+    - ❌ 禁止包含 UI 状态信息。
+    - ❌ 禁止包含业务决策逻辑。
+
+## 3. 依赖调用链路 (Dependency Flow)
+
+必须遵守单向依赖原则：
+**View (Presentation) -> Usecase -> Data -> Firestore/Remote API**
+
+1. **View** 调用 **Usecase** 来触发业务逻辑。
+2. **Usecase** 调用 **Data 层定义的方法** 获取数据模型。
+3. **Data 层** 与 **Firestore** 通信并将结果转化为领域模型返回。
+
+## 4. 代码命名规范
+
+- **Page**: `{feature_name}_page.dart` (例: `room_main_page.dart`)
+- **Widget**: `_widgets/` 目录下 `{component_name}_card.dart`
+- **Usecase**: `{action}_usecase.dart` (例: `sync_action_usecase.dart`)
+- **Model**: `{entity_name}_model.dart` (例: `user_avatar_model.dart`)
+- **Rive 控制**: `avatar_rive_controller.dart`
+
+## 5. 关键技术约束
+
+- **Firebase**: 所有 Firestore 写入操作必须先在 Data 层定义 Model。
+- **Rive**: Rive 动画的状态切换逻辑必须封装在 `avatar/` 的控制器中，View 只通过改变简单的 `state` 枚举来驱动。
+- **无感数据**: 优先使用 `Stream` 订阅 Firestore，确保状态同步是响应式的。
+
+## 6. 违规自检清单 (AI 任务前必读)
+
+1. 我是否在 Widget 里写了 `setDelta()` 或复杂的 `map` 计算？如果是，请移至 **Usecase**。
+2. 我是否在业务代码里看到了 `FirebaseFirestore` 实例？如果是，请移至 **Data** 或 **Firestore** 封装类。
+3. 我是否在 Usecase 里导入了 `package:flutter/material.dart`？如果是，请立即解耦。

@@ -1,1 +1,26 @@
-{"flutter":{"platforms":{"ios":{"default":{"projectId":"cofit-lmdyd","appId":"1:154412755372:ios:5b994b758606edf0017209","uploadDebugSymbols":false,"fileOutput":"ios/Runner/GoogleService-Info.plist"}},"dart":{"lib/firebase_options.dart":{"projectId":"cofit-lmdyd","configurations":{"ios":"1:154412755372:ios:5b994b758606edf0017209"}}}}}}
+{
+    "firestore": {
+        "rules": "firestore.rules",
+        "indexes": "firestore.indexes.json"
+    },
+    "flutter":{
+        "platforms":{
+            "ios":{
+                "default":{
+                    "projectId":"cofit-lmdyd",
+                    "appId":"1:154412755372:ios:5b994b758606edf0017209",
+                    "uploadDebugSymbols":false,
+                    "fileOutput":"ios/Runner/GoogleService-Info.plist"
+                }
+            },
+            "dart":{
+                    "lib/firebase_options.dart":{
+                        "projectId":"cofit-lmdyd",
+                        "configurations":{
+                            "ios":"1:154412755372:ios:5b994b758606edf0017209"
+                        }
+                    }
+                }
+            }
+        }
+}

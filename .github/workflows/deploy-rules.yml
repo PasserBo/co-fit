@@ -1,0 +1,24 @@
+name: Deploy Firestore Rules
+
+on:
+  push:
+    branches:
+      - main  # 或者是你的主分支名
+    paths:
+      - 'firestore.rules' # 只有当规则文件变动时才触发，节省资源
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Deploy Firestore Rules
+        uses: FirebaseExtended/action-firebase@v0
+        with:
+          # repoToken: "${{ secrets.GITHUB_TOKEN }}"
+          firebaseServiceAccount: "${{ secrets.FIREBASE_SERVICE_ACCOUNT }}"
+          projectId: "你的项目ID"
+          # 只部署 rules，不触碰 functions 或 hosting
+          args: deploy --only firestore:rules

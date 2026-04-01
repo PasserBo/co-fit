@@ -1,11 +1,10 @@
 name: Deploy Firestore Rules
-
 on:
   push:
     branches:
-      - main  # 或者是你的主分支名
+      - main
     paths:
-      - 'firestore.rules' # 只有当规则文件变动时才触发，节省资源
+      - 'firestore.rules'
 
 jobs:
   deploy:
@@ -14,11 +13,14 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v4
 
-      - name: Deploy Firestore Rules
-        uses: FirebaseExtended/action-firebase@v0
-        with:
-          # repoToken: "${{ secrets.GITHUB_TOKEN }}"
-          firebaseServiceAccount: "${{ secrets.FIREBASE_SERVICE_ACCOUNT }}"
-          projectId: "你的项目ID"
-          # 只部署 rules，不触碰 functions 或 hosting
-          args: deploy --only firestore:rules
+      - name: Install Firebase CLI
+        run: npm install -g firebase-tools
+
+      - name: Deploy Rules
+        # 使用服务账号密钥进行认证
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          echo $GOOGLE_APPLICATION_CREDENTIALS_JSON > service-account.json
+          export GOOGLE_APPLICATION_CREDENTIALS=service-account.json
+          firebase deploy --only firestore:rules --project cofit-lmdyd

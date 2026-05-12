@@ -34,15 +34,15 @@ class AblyService {
     required String eventName,
     required Map<String, dynamic> payload,
   }) async {
-    final dynamic channel = _getRoomChannel(roomId);
-    await channel.publish(eventName, payload);
+    final channel = _getRoomChannel(roomId);
+    await channel.publish(name: eventName, data: payload);
   }
 
   Stream<Map<String, dynamic>> watchRoomEvents({
     required String roomId,
   }) {
-    final dynamic channel = _getRoomChannel(roomId);
-    return (channel.subscribe() as Stream<dynamic>).map((dynamic message) {
+    final channel = _getRoomChannel(roomId);
+    return channel.subscribe().map((message) {
       final dynamic data = message.data;
       if (data is Map<String, dynamic>) {
         return data;
@@ -64,22 +64,22 @@ class AblyService {
     required String roomId,
     required String userId,
   }) async {
-    final dynamic channel = _getRoomChannel(roomId);
+    final channel = _getRoomChannel(roomId);
     await channel.presence.enter({'userId': userId});
   }
 
   Future<void> leavePresence({
     required String roomId,
   }) async {
-    final dynamic channel = _getRoomChannel(roomId);
+    final channel = _getRoomChannel(roomId);
     await channel.presence.leave();
   }
 
   Stream<List<Map<String, String>>> watchPresence({
     required String roomId,
   }) {
-    final dynamic channel = _getRoomChannel(roomId);
-    final Stream<dynamic> updates = channel.presence.subscribe();
+    final channel = _getRoomChannel(roomId);
+    final updates = channel.presence.subscribe();
     return (() async* {
       yield await _getPresenceMembers(roomId);
       await for (final _ in updates) {
@@ -89,13 +89,9 @@ class AblyService {
   }
 
   Future<List<Map<String, String>>> _getPresenceMembers(String roomId) async {
-    final dynamic channel = _getRoomChannel(roomId);
-    final dynamic members = await channel.presence.get();
-    if (members is! Iterable) {
-      return const [];
-    }
-
-    return members.map<Map<String, String>>((dynamic member) {
+    final channel = _getRoomChannel(roomId);
+    final members = await channel.presence.get();
+    return members.map<Map<String, String>>((member) {
       final clientId = (member.clientId ?? '').toString();
       final dynamic memberData = member.data;
       String userId = clientId;
@@ -109,7 +105,7 @@ class AblyService {
     }).toList(growable: false);
   }
 
-  dynamic _getRoomChannel(String roomId) {
+  ably.RealtimeChannel _getRoomChannel(String roomId) {
     final channelName = 'room:$roomId:events';
     return _realtime.channels.get(channelName);
   }

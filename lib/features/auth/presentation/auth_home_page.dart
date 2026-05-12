@@ -25,7 +25,7 @@ class _AuthHomePageState extends State<AuthHomePage> {
   @override
   Widget build(BuildContext context) {
     final pages = [
-      const RoomMainPage(),
+      RoomMainPage(userId: widget.user.uid),
       AuthMyPage(
         user: widget.user,
         signOutUsecase: widget.signOutUsecase,

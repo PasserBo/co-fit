@@ -43,3 +43,28 @@ This is a concise, high-level project specification designed to serve as the "so
 2.  **Phase 2:** Action Cards + Rive Animation Sync (See who is doing what).
 3.  **Phase 3:** Room Creation & Isometric Neighborhood Hub.
 4.  **Phase 4:** iOS Live Activities & HealthKit Integration.
+
+## 5. Fast-Track Delivery Mode (Event-First)
+
+To accelerate delivery, CoFit can run in an event-first mode:
+
+- Skip all manual animation setup and custom visual asset production.
+- Replace animation synchronization with explicit room events over Ably.
+- Keep UI intentionally minimal: room join, online members, action controls, event timeline.
+
+### Fast-Track Technical Rules
+
+- **Transport:** Ably `Channel + Presence`.
+- **Channel format:** `room:{roomId}:events`.
+- **Presence identity:** Firebase UID or `anon_{uid}`.
+- **Action event types:**
+  - `action_started`
+  - `action_paused`
+  - `action_resumed`
+  - `action_completed`
+
+### Fast-Track Success Criteria
+
+- Two devices in the same `roomId` can see each other online.
+- One device publishes action events and the other receives them in near real time.
+- Basic reconnect behavior preserves room participation and event subscription.

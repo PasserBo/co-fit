@@ -1,18 +1,65 @@
-enum RoomEventType {
-  actionStarted('action_started'),
-  actionPaused('action_paused'),
-  actionResumed('action_resumed'),
-  actionCompleted('action_completed');
+class RoomEventType {
+  static const String actionStarted = 'action_started';
+  static const String actionPaused = 'action_paused';
+  static const String actionResumed = 'action_resumed';
+  static const String actionCompleted = 'action_completed';
+}
 
-  const RoomEventType(this.value);
+class RoomEventPayload {
+  RoomEventPayload({
+    required this.schemaVersion,
+    required this.actionKey,
+    required this.durationSec,
+    required this.remainingSec,
+    required this.sessionId,
+    this.customData = const {},
+  });
 
-  final String value;
+  factory RoomEventPayload.fromMap(Map<String, dynamic> source) {
+    final knownKeys = {
+      'schemaVersion',
+      'actionKey',
+      'durationSec',
+      'remainingSec',
+      'sessionId',
+    };
+    final custom = Map<String, dynamic>.from(source)
+      ..removeWhere((key, _) => knownKeys.contains(key));
 
-  static RoomEventType? fromValue(String raw) {
-    for (final type in RoomEventType.values) {
-      if (type.value == raw) {
-        return type;
-      }
+    return RoomEventPayload(
+      schemaVersion: _asInt(source['schemaVersion']) ?? 1,
+      actionKey: (source['actionKey'] ?? 'unknown').toString(),
+      durationSec: _asInt(source['durationSec']) ?? 0,
+      remainingSec: _asInt(source['remainingSec']) ?? 0,
+      sessionId: (source['sessionId'] ?? '').toString(),
+      customData: custom,
+    );
+  }
+
+  final int schemaVersion;
+  final String actionKey;
+  final int durationSec;
+  final int remainingSec;
+  final String sessionId;
+  final Map<String, dynamic> customData;
+
+  Map<String, dynamic> toMap() {
+    return {
+      'schemaVersion': schemaVersion,
+      'actionKey': actionKey,
+      'durationSec': durationSec,
+      'remainingSec': remainingSec,
+      'sessionId': sessionId,
+      ...customData,
+    };
+  }
+
+  static int? _asInt(Object? value) {
+    if (value is int) {
+      return value;
+    }
+    if (value is String) {
+      return int.tryParse(value);
     }
     return null;
   }
@@ -31,57 +78,48 @@ class RoomEvent {
   final String eventId;
   final String roomId;
   final String userId;
-  final RoomEventType type;
+  final String type;
   final DateTime timestamp;
-  final Map<String, dynamic> payload;
+  final RoomEventPayload payload;
 
   Map<String, dynamic> toMap() {
     return {
       'eventId': eventId,
       'roomId': roomId,
       'userId': userId,
-      'type': type.value,
+      'type': type,
       'timestamp': timestamp.toIso8601String(),
-      'payload': payload,
+      'payload': payload.toMap(),
     };
   }
 
-  static RoomEvent? fromMap(Map<String, dynamic> source) {
+  static RoomEvent fromMap(Map<String, dynamic> source) {
     final rawType = source['type'] as String?;
-    final parsedType = rawType == null ? null : RoomEventType.fromValue(rawType);
-    if (parsedType == null) {
-      return null;
-    }
+    final parsedType = rawType ?? 'unknown';
 
     final rawTimestamp = source['timestamp'] as String?;
     final timestamp = rawTimestamp == null
-        ? null
-        : DateTime.tryParse(rawTimestamp)?.toLocal();
-    if (timestamp == null) {
-      return null;
-    }
+        ? DateTime.now().toLocal()
+        : (DateTime.tryParse(rawTimestamp)?.toLocal() ?? DateTime.now().toLocal());
 
     final eventId = source['eventId'] as String?;
     final roomId = source['roomId'] as String?;
     final userId = source['userId'] as String?;
-    if (eventId == null || roomId == null || userId == null) {
-      return null;
-    }
 
     final rawPayload = source['payload'];
-    final payload = rawPayload is Map
+    final payloadMap = rawPayload is Map
         ? rawPayload.map(
             (key, value) => MapEntry(key.toString(), value),
           )
         : <String, dynamic>{};
 
     return RoomEvent(
-      eventId: eventId,
-      roomId: roomId,
-      userId: userId,
+      eventId: eventId ?? 'missing-event-id',
+      roomId: roomId ?? 'missing-room-id',
+      userId: userId ?? 'unknown-user',
       type: parsedType,
       timestamp: timestamp,
-      payload: payload,
+      payload: RoomEventPayload.fromMap(payloadMap),
     );
   }
 }

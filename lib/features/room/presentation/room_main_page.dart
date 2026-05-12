@@ -1,21 +1,14 @@
 import 'dart:async';
 
+import 'package:ably_flutter/ably_flutter.dart' as ably;
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../firestore/ably_service.dart';
+import '../../../firestore/ably_state_machine.dart';
 import '../data/room_event.dart';
 import '../data/room_presence_member.dart';
-import '../data/room_realtime_repository.dart';
-import '../usecase/connect_realtime_usecase.dart';
-import '../usecase/disconnect_realtime_usecase.dart';
-import '../usecase/join_room_usecase.dart';
-import '../usecase/leave_room_usecase.dart';
-import '../usecase/publish_room_event_usecase.dart';
-import '../usecase/watch_connection_state_usecase.dart';
-import '../usecase/watch_room_events_usecase.dart';
-import '../usecase/watch_room_presence_usecase.dart';
 
-class RoomMainPage extends StatefulWidget {
+class RoomMainPage extends ConsumerStatefulWidget {
   const RoomMainPage({
     required this.userId,
     super.key,
@@ -24,10 +17,10 @@ class RoomMainPage extends StatefulWidget {
   final String userId;
 
   @override
-  State<RoomMainPage> createState() => _RoomMainPageState();
+  ConsumerState<RoomMainPage> createState() => _RoomMainPageState();
 }
 
-class _RoomMainPageState extends State<RoomMainPage> {
+class _RoomMainPageState extends ConsumerState<RoomMainPage> {
   final _roomIdController = TextEditingController(text: 'main-room');
   final _seenEventIds = <String>{};
   final _actionOptions = const ['squat', 'plank', 'jumping_jack'];
@@ -35,24 +28,8 @@ class _RoomMainPageState extends State<RoomMainPage> {
 
   StreamSubscription<List<RoomPresenceMember>>? _presenceSubscription;
   StreamSubscription<RoomEvent>? _eventsSubscription;
-  StreamSubscription<String>? _connectionSubscription;
   Timer? _timer;
 
-  late final String _apiKey;
-  late final bool _isConfigured;
-
-  AblyService? _ablyService;
-  RoomRealtimeRepository? _repository;
-  ConnectRealtimeUsecase? _connectRealtimeUsecase;
-  DisconnectRealtimeUsecase? _disconnectRealtimeUsecase;
-  JoinRoomUsecase? _joinRoomUsecase;
-  LeaveRoomUsecase? _leaveRoomUsecase;
-  PublishRoomEventUsecase? _publishRoomEventUsecase;
-  WatchConnectionStateUsecase? _watchConnectionStateUsecase;
-  WatchRoomEventsUsecase? _watchRoomEventsUsecase;
-  WatchRoomPresenceUsecase? _watchRoomPresenceUsecase;
-
-  String _connectionState = 'disconnected';
   String? _activeRoomId;
   String _selectedAction = 'squat';
   int _selectedDurationSec = 30;
@@ -61,6 +38,7 @@ class _RoomMainPageState extends State<RoomMainPage> {
   bool _isJoining = false;
   String? _errorMessage;
   DateTime? _lastPublishedAt;
+  String? _activeSessionId;
 
   List<RoomPresenceMember> _presenceMembers = const [];
   List<RoomEvent> _events = const [];
@@ -70,41 +48,9 @@ class _RoomMainPageState extends State<RoomMainPage> {
   @override
   void initState() {
     super.initState();
-    _apiKey = const String.fromEnvironment('ABLY_API_KEY');
-    _isConfigured = _apiKey.isNotEmpty;
-
-    if (!_isConfigured) {
-      _errorMessage = 'Missing ABLY_API_KEY. Run with --dart-define=ABLY_API_KEY=...';
-      return;
-    }
-
-    final clientIdPrefix = const String.fromEnvironment(
-      'ABLY_CLIENT_ID_PREFIX',
-      defaultValue: 'cofit',
+    unawaited(
+      ref.read(ablyRuntimeProvider.notifier).initializeForUser(widget.userId),
     );
-    final clientId = '$clientIdPrefix-${widget.userId}';
-    _ablyService = AblyService(apiKey: _apiKey, clientId: clientId);
-    _repository = RoomRealtimeRepository(_ablyService!);
-    _connectRealtimeUsecase = ConnectRealtimeUsecase(_repository!);
-    _disconnectRealtimeUsecase = DisconnectRealtimeUsecase(_repository!);
-    _joinRoomUsecase = JoinRoomUsecase(_repository!);
-    _leaveRoomUsecase = LeaveRoomUsecase(_repository!);
-    _publishRoomEventUsecase = PublishRoomEventUsecase(_repository!);
-    _watchConnectionStateUsecase = WatchConnectionStateUsecase(_repository!);
-    _watchRoomEventsUsecase = WatchRoomEventsUsecase(_repository!);
-    _watchRoomPresenceUsecase = WatchRoomPresenceUsecase(_repository!);
-
-    unawaited(_connectRealtimeUsecase!.execute());
-    _connectionSubscription = _watchConnectionStateUsecase!.execute().listen((
-      state,
-    ) {
-      if (!mounted) {
-        return;
-      }
-      setState(() {
-        _connectionState = state;
-      });
-    });
   }
 
   @override
@@ -112,19 +58,21 @@ class _RoomMainPageState extends State<RoomMainPage> {
     _timer?.cancel();
     _presenceSubscription?.cancel();
     _eventsSubscription?.cancel();
-    _connectionSubscription?.cancel();
-    if (_isJoined && _leaveRoomUsecase != null) {
-      unawaited(_leaveRoomUsecase!.execute(roomId: _activeRoomId!));
-    }
-    if (_disconnectRealtimeUsecase != null) {
-      unawaited(_disconnectRealtimeUsecase!.execute());
+    if (_isJoined) {
+      unawaited(
+        ref.read(ablyRuntimeProvider.notifier).leaveRoom(roomId: _activeRoomId!),
+      );
     }
     _roomIdController.dispose();
     super.dispose();
   }
 
   Future<void> _joinRoom() async {
-    if (!_isConfigured || _joinRoomUsecase == null) {
+    final runtime = ref.read(ablyRuntimeProvider);
+    if (!runtime.isConfigured) {
+      setState(() {
+        _errorMessage = runtime.lastError ?? 'Ably is not configured.';
+      });
       return;
     }
 
@@ -142,17 +90,16 @@ class _RoomMainPageState extends State<RoomMainPage> {
     });
 
     try {
+      final notifier = ref.read(ablyRuntimeProvider.notifier);
       if (_isJoined) {
         await _leaveRoom();
       }
-      await _joinRoomUsecase!.execute(roomId: roomId, userId: widget.userId);
+      await notifier.joinRoom(roomId: roomId, userId: widget.userId);
 
       await _presenceSubscription?.cancel();
       await _eventsSubscription?.cancel();
 
-      _presenceSubscription = _watchRoomPresenceUsecase!
-          .execute(roomId: roomId)
-          .listen((members) {
+      _presenceSubscription = notifier.watchPresence(roomId: roomId).listen((members) {
             if (!mounted) {
               return;
             }
@@ -161,7 +108,7 @@ class _RoomMainPageState extends State<RoomMainPage> {
             });
           });
 
-      _eventsSubscription = _watchRoomEventsUsecase!.execute(roomId: roomId).listen(
+      _eventsSubscription = notifier.watchRoomEvents(roomId: roomId).listen(
         (event) {
           if (_seenEventIds.contains(event.eventId)) {
             return;
@@ -207,7 +154,7 @@ class _RoomMainPageState extends State<RoomMainPage> {
   }
 
   Future<void> _leaveRoom() async {
-    if (!_isJoined || _leaveRoomUsecase == null) {
+    if (!_isJoined) {
       return;
     }
 
@@ -215,7 +162,7 @@ class _RoomMainPageState extends State<RoomMainPage> {
     _timer?.cancel();
     _isTimerRunning = false;
     _remainingSec = 0;
-    await _leaveRoomUsecase!.execute(roomId: roomId);
+    await ref.read(ablyRuntimeProvider.notifier).leaveRoom(roomId: roomId);
     await _presenceSubscription?.cancel();
     await _eventsSubscription?.cancel();
     _presenceSubscription = null;
@@ -232,8 +179,8 @@ class _RoomMainPageState extends State<RoomMainPage> {
     });
   }
 
-  Future<void> _publishActionEvent(RoomEventType type) async {
-    if (!_isJoined || _publishRoomEventUsecase == null) {
+  Future<void> _publishActionEvent(String type) async {
+    if (!_isJoined) {
       return;
     }
 
@@ -251,15 +198,18 @@ class _RoomMainPageState extends State<RoomMainPage> {
       userId: widget.userId,
       type: type,
       timestamp: now,
-      payload: {
-        'actionKey': _selectedAction,
-        'durationSec': _selectedDurationSec,
-        'remainingSec': _remainingSec,
-      },
+      payload: RoomEventPayload(
+        schemaVersion: 1,
+        actionKey: _selectedAction,
+        durationSec: _selectedDurationSec,
+        remainingSec: _remainingSec,
+        sessionId: _activeSessionId ?? '${widget.userId}-${now.millisecondsSinceEpoch}',
+        customData: const {},
+      ),
     );
 
     try {
-      await _publishRoomEventUsecase!.execute(event: event);
+      await ref.read(ablyRuntimeProvider.notifier).publishRoomEvent(event: event);
     } catch (error) {
       if (!mounted) {
         return;
@@ -271,7 +221,9 @@ class _RoomMainPageState extends State<RoomMainPage> {
   }
 
   Future<void> _startAction() async {
+    final now = DateTime.now();
     setState(() {
+      _activeSessionId = '${widget.userId}-${now.millisecondsSinceEpoch}';
       _remainingSec = _selectedDurationSec;
       _isTimerRunning = true;
     });
@@ -305,6 +257,11 @@ class _RoomMainPageState extends State<RoomMainPage> {
       _remainingSec = 0;
     });
     await _publishActionEvent(RoomEventType.actionCompleted);
+    if (mounted) {
+      setState(() {
+        _activeSessionId = null;
+      });
+    }
   }
 
   void _startTimer() {
@@ -327,6 +284,15 @@ class _RoomMainPageState extends State<RoomMainPage> {
 
   @override
   Widget build(BuildContext context) {
+    final runtime = ref.watch(ablyRuntimeProvider);
+    final roomChannelState =
+        _activeRoomId == null ? null : runtime.channelStates[_activeRoomId!];
+    final effectiveError = _errorMessage ?? runtime.lastError;
+    final connectionLabel = _connectionLabel(runtime);
+    final connectionColor = _connectionColor(runtime, context);
+    final channelLabel = _channelLabel(roomChannelState);
+    final channelColor = _channelColor(roomChannelState, context);
+
     return ListView(
       padding: const EdgeInsets.all(20),
       children: [
@@ -341,7 +307,20 @@ class _RoomMainPageState extends State<RoomMainPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Connection: $_connectionState'),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    _statusChip(
+                      label: 'Ably: $connectionLabel',
+                      color: connectionColor,
+                    ),
+                    _statusChip(
+                      label: 'Room Channel: $channelLabel',
+                      color: channelColor,
+                    ),
+                  ],
+                ),
                 const SizedBox(height: 8),
                 TextField(
                   controller: _roomIdController,
@@ -356,7 +335,7 @@ class _RoomMainPageState extends State<RoomMainPage> {
                   children: [
                     Expanded(
                       child: FilledButton(
-                        onPressed: _isJoining || !_isConfigured ? null : _joinRoom,
+                        onPressed: _isJoining || !runtime.isConfigured ? null : _joinRoom,
                         child: Text(_isJoined ? 'Switch Room' : 'Join Room'),
                       ),
                     ),
@@ -369,10 +348,10 @@ class _RoomMainPageState extends State<RoomMainPage> {
                     ),
                   ],
                 ),
-                if (_errorMessage != null) ...[
+                if (effectiveError != null) ...[
                   const SizedBox(height: 12),
                   Text(
-                    _errorMessage!,
+                    effectiveError,
                     style: TextStyle(color: Theme.of(context).colorScheme.error),
                   ),
                 ],
@@ -521,11 +500,13 @@ class _RoomMainPageState extends State<RoomMainPage> {
                       dense: true,
                       contentPadding: EdgeInsets.zero,
                       leading: const Icon(Icons.bolt_outlined),
-                      title: Text('${event.userId} -> ${event.type.value}'),
+                      title: Text('${event.userId} -> ${event.type}'),
                       subtitle: Text(
                         '${event.timestamp.toIso8601String()} | '
-                        'action=${event.payload['actionKey']} '
-                        'remaining=${event.payload['remainingSec']}',
+                        'action=${event.payload.actionKey} '
+                        'remaining=${event.payload.remainingSec} '
+                        'session=${event.payload.sessionId} '
+                        'v=${event.payload.schemaVersion}',
                       ),
                     );
                   }),
@@ -534,6 +515,80 @@ class _RoomMainPageState extends State<RoomMainPage> {
           ),
         ),
       ],
+    );
+  }
+
+  String _connectionLabel(AblyRuntimeState runtime) {
+    switch (runtime.runtimePhase) {
+      case AblyRuntimePhase.idle:
+        return 'idle';
+      case AblyRuntimePhase.unconfigured:
+        return 'unconfigured';
+      case AblyRuntimePhase.active:
+        final state = runtime.connectionState;
+        if (state == null) {
+          return 'unknown';
+        }
+        return state.name;
+    }
+  }
+
+  Color _connectionColor(AblyRuntimeState runtime, BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    if (runtime.runtimePhase == AblyRuntimePhase.unconfigured) {
+      return scheme.error;
+    }
+    final state = runtime.connectionState;
+    if (state == ably.ConnectionState.connected) {
+      return Colors.green;
+    }
+    if (state == ably.ConnectionState.connecting) {
+      return Colors.orange;
+    }
+    if (state == ably.ConnectionState.disconnected) {
+      return Colors.orange;
+    }
+    if (state == ably.ConnectionState.failed) {
+      return scheme.error;
+    }
+    return Colors.blueGrey;
+  }
+
+  String _channelLabel(ably.ChannelState? state) {
+    if (_activeRoomId == null) {
+      return 'n/a';
+    }
+    return state?.name ?? 'unknown';
+  }
+
+  Color _channelColor(ably.ChannelState? state, BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    if (_activeRoomId == null) {
+      return Colors.blueGrey;
+    }
+    if (state == ably.ChannelState.attached) {
+      return Colors.green;
+    }
+    if (state == ably.ChannelState.attaching ||
+        state == ably.ChannelState.detaching) {
+      return Colors.orange;
+    }
+    if (state == ably.ChannelState.failed) {
+      return scheme.error;
+    }
+    return Colors.blueGrey;
+  }
+
+  Widget _statusChip({
+    required String label,
+    required Color color,
+  }) {
+    return Chip(
+      avatar: CircleAvatar(
+        backgroundColor: color,
+        radius: 5,
+      ),
+      label: Text(label),
     );
   }
 }

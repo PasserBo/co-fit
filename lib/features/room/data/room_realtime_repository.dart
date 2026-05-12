@@ -52,12 +52,8 @@ class RoomRealtimeRepository {
   Stream<RoomEvent> watchRoomEvents({
     required String roomId,
   }) {
-    return _ablyService.watchRoomEvents(roomId: roomId).asyncMap((payload) async {
-      final event = RoomEvent.fromMap(payload);
-      if (event == null) {
-        throw const FormatException('Invalid room event payload');
-      }
-      return event;
+    return _ablyService.watchRoomEvents(roomId: roomId).map((payload) {
+      return RoomEvent.fromMap(payload);
     });
   }
 
@@ -66,7 +62,7 @@ class RoomRealtimeRepository {
   }) {
     return _ablyService.publishRoomEvent(
       roomId: event.roomId,
-      eventName: event.type.value,
+      eventName: event.type,
       payload: event.toMap(),
     );
   }

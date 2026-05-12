@@ -29,6 +29,16 @@ class AblyService {
     return _realtime.connection.on();
   }
 
+  Stream<ably.ChannelStateChange> watchRoomChannelState({
+    required String roomId,
+  }) {
+    return _getRoomChannel(roomId).on();
+  }
+
+  ably.ChannelState getRoomChannelState(String roomId) {
+    return _getRoomChannel(roomId).state;
+  }
+
   Future<void> publishRoomEvent({
     required String roomId,
     required String eventName,

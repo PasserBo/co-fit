@@ -63,7 +63,7 @@ class CreateRoomUsecase {
       shareSalt: shareSalt,
     );
 
-    return _repository.createRoom(room: room);
+    return _repository.createRoomWithMembership(room: room);
   }
 
   String _generateRandomSalt() {

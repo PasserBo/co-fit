@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../data/firebase_room_repository.dart';
 import '../data/room_info_model.dart';
+import '../data/room_repository_provider.dart';
 import '../usecase/create_room_usecase.dart';
 
 class CreateRoomState {
@@ -142,10 +142,6 @@ class CreateRoomNotifier extends Notifier<CreateRoomState> {
     return raw;
   }
 }
-
-final firebaseRoomRepositoryProvider = Provider<FirebaseRoomRepository>((ref) {
-  return FirebaseRoomRepository();
-});
 
 final createRoomUsecaseProvider = Provider<CreateRoomUsecase>((ref) {
   return CreateRoomUsecase(ref.watch(firebaseRoomRepositoryProvider));

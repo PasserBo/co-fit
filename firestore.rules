@@ -22,6 +22,7 @@ service cloud.firestore {
           'ownerId',
           'shareLinkHash',
           'shareSalt',
+          'members',
           'createdAt',
           'updatedAt',
         ]) &&
@@ -33,9 +34,21 @@ service cloud.firestore {
           'ownerId',
           'shareLinkHash',
           'shareSalt',
+          'members',
           'createdAt',
           'updatedAt',
         ]);
+    }
+
+    function hasValidOwnerMember(members, ownerId) {
+      return members is map &&
+        members.keys().hasAll([ownerId]) &&
+        members[ownerId] is map &&
+        members[ownerId].keys().hasAll(['userId', 'role', 'joinedAt']) &&
+        members[ownerId].keys().hasOnly(['userId', 'role', 'joinedAt']) &&
+        members[ownerId].userId == ownerId &&
+        members[ownerId].role == 'owner' &&
+        members[ownerId].joinedAt is timestamp;
     }
 
     function hasValidRoomValues(data, roomId) {
@@ -45,7 +58,31 @@ service cloud.firestore {
         isVisibilityAllowed(data.visibility) &&
         isNonEmptyString(data.ownerId) &&
         isNonEmptyString(data.shareLinkHash) &&
-        isNonEmptyString(data.shareSalt);
+        isNonEmptyString(data.shareSalt) &&
+        hasValidOwnerMember(data.members, data.ownerId);
+    }
+
+    function hasValidMembershipShape(data) {
+      return data.keys().hasAll([
+          'roomId',
+          'userId',
+          'role',
+          'createdAt',
+          'updatedAt',
+        ]) &&
+        data.keys().hasOnly([
+          'roomId',
+          'userId',
+          'role',
+          'createdAt',
+          'updatedAt',
+        ]);
+    }
+
+    function hasValidMembershipValues(data, userId, roomId) {
+      return data.roomId == roomId &&
+        data.userId == userId &&
+        data.role == 'owner';
     }
 
     function isOwner(data) {
@@ -68,6 +105,15 @@ service cloud.firestore {
         request.resource.data.createdAt == resource.data.createdAt;
 
       allow delete: if isOwner(resource.data);
+    }
+
+    match /users/{userId}/memberships/{roomId} {
+      allow read: if isSignedIn() && request.auth.uid == userId;
+
+      allow create: if isSignedIn() &&
+        request.auth.uid == userId &&
+        hasValidMembershipShape(request.resource.data) &&
+        hasValidMembershipValues(request.resource.data, userId, roomId);
     }
 
     match /{document=**} {

@@ -22,7 +22,6 @@ service cloud.firestore {
           'ownerId',
           'shareLinkHash',
           'shareSalt',
-          'members',
           'createdAt',
           'updatedAt',
         ]) &&
@@ -38,6 +37,10 @@ service cloud.firestore {
           'createdAt',
           'updatedAt',
         ]);
+    }
+
+    function hasMembersIfPresent(data) {
+      return !data.keys().hasAny(['members']) || data.members is map;
     }
 
     function hasValidOwnerMember(members, ownerId) {
@@ -58,7 +61,11 @@ service cloud.firestore {
         isVisibilityAllowed(data.visibility) &&
         isNonEmptyString(data.ownerId) &&
         isNonEmptyString(data.shareLinkHash) &&
-        isNonEmptyString(data.shareSalt) &&
+        isNonEmptyString(data.shareSalt);
+    }
+
+    function hasValidOwnerMemberIfPresent(data) {
+      return !data.keys().hasAny(['members']) ||
         hasValidOwnerMember(data.members, data.ownerId);
     }
 
@@ -82,7 +89,33 @@ service cloud.firestore {
     function hasValidMembershipValues(data, userId, roomId) {
       return data.roomId == roomId &&
         data.userId == userId &&
-        data.role == 'owner';
+        data.role in ['owner', 'member'];
+    }
+
+    function roomExistsAfter(roomId) {
+      return existsAfter(/databases/$(database)/documents/rooms/$(roomId));
+    }
+
+    function roomAfter(roomId) {
+      return getAfter(/databases/$(database)/documents/rooms/$(roomId)).data;
+    }
+
+    function hasSyncedRoomMemberAfter(userId, roomId, role) {
+      return roomExistsAfter(roomId) &&
+        roomAfter(roomId).members[userId] is map &&
+        roomAfter(roomId).members[userId].userId == userId &&
+        roomAfter(roomId).members[userId].role == role;
+    }
+
+    function isOwnerMembershipCreate(userId, roomId) {
+      return request.resource.data.role == 'owner' &&
+        hasSyncedRoomMemberAfter(userId, roomId, 'owner') &&
+        roomAfter(roomId).ownerId == userId;
+    }
+
+    function isMemberMembershipCreate(userId, roomId) {
+      return request.resource.data.role == 'member' &&
+        hasSyncedRoomMemberAfter(userId, roomId, 'member');
     }
 
     function isOwner(data) {
@@ -92,17 +125,42 @@ service cloud.firestore {
     match /rooms/{roomId} {
       allow create: if isOwner(request.resource.data) &&
         hasValidRoomShape(request.resource.data) &&
-        hasValidRoomValues(request.resource.data, roomId);
-
-      allow read: if resource.data.visibility == 'public' ||
-        isOwner(resource.data);
-
-      allow update: if isOwner(resource.data) &&
-        hasValidRoomShape(request.resource.data) &&
+        hasMembersIfPresent(request.resource.data) &&
         hasValidRoomValues(request.resource.data, roomId) &&
-        request.resource.data.ownerId == resource.data.ownerId &&
-        request.resource.data.roomId == resource.data.roomId &&
-        request.resource.data.createdAt == resource.data.createdAt;
+        hasValidOwnerMemberIfPresent(request.resource.data);
+
+      allow read: if isSignedIn();
+
+      allow update: if (
+          isOwner(resource.data) &&
+          hasValidRoomShape(request.resource.data) &&
+          hasMembersIfPresent(request.resource.data) &&
+          hasValidRoomValues(request.resource.data, roomId) &&
+          hasValidOwnerMemberIfPresent(request.resource.data) &&
+          request.resource.data.ownerId == resource.data.ownerId &&
+          request.resource.data.roomId == resource.data.roomId &&
+          request.resource.data.createdAt == resource.data.createdAt
+        ) || (
+          isSignedIn() &&
+          hasValidRoomShape(request.resource.data) &&
+          hasMembersIfPresent(request.resource.data) &&
+          request.resource.data.roomId == resource.data.roomId &&
+          request.resource.data.ownerId == resource.data.ownerId &&
+          request.resource.data.createdAt == resource.data.createdAt &&
+          request.resource.data.name == resource.data.name &&
+          request.resource.data.description == resource.data.description &&
+          request.resource.data.visibility == resource.data.visibility &&
+          request.resource.data.shareLinkHash == resource.data.shareLinkHash &&
+          request.resource.data.shareSalt == resource.data.shareSalt &&
+          resource.data.diff(request.resource.data).affectedKeys().hasOnly(['members', 'updatedAt']) &&
+          resource.data.members.diff(request.resource.data.members).affectedKeys().hasOnly([request.auth.uid]) &&
+          request.resource.data.members[request.auth.uid] is map &&
+          request.resource.data.members[request.auth.uid].keys().hasAll(['userId', 'role', 'joinedAt']) &&
+          request.resource.data.members[request.auth.uid].keys().hasOnly(['userId', 'role', 'joinedAt']) &&
+          request.resource.data.members[request.auth.uid].userId == request.auth.uid &&
+          request.resource.data.members[request.auth.uid].role == 'member' &&
+          request.resource.data.members[request.auth.uid].joinedAt is timestamp
+        );
 
       allow delete: if isOwner(resource.data);
     }
@@ -113,7 +171,27 @@ service cloud.firestore {
       allow create: if isSignedIn() &&
         request.auth.uid == userId &&
         hasValidMembershipShape(request.resource.data) &&
-        hasValidMembershipValues(request.resource.data, userId, roomId);
+        hasValidMembershipValues(request.resource.data, userId, roomId) &&
+        (
+          isOwnerMembershipCreate(userId, roomId) ||
+          isMemberMembershipCreate(userId, roomId)
+        );
+
+      allow update: if isSignedIn() &&
+        request.auth.uid == userId &&
+        hasValidMembershipShape(request.resource.data) &&
+        hasValidMembershipValues(request.resource.data, userId, roomId) &&
+        request.resource.data.roomId == resource.data.roomId &&
+        request.resource.data.userId == resource.data.userId &&
+        request.resource.data.role == resource.data.role &&
+        request.resource.data.createdAt == resource.data.createdAt &&
+        hasSyncedRoomMemberAfter(
+          userId,
+          roomId,
+          request.resource.data.role
+        );
+
+      allow delete: if isSignedIn() && request.auth.uid == userId;
     }
 
     match /{document=**} {

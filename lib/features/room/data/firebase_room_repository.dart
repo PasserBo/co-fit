@@ -19,33 +19,12 @@ class FirebaseRoomRepository {
   Future<RoomInfoModel> createRoomWithMembership({
     required RoomInfoModel room,
   }) async {
-    final roomRef = _firestore.collection('rooms').doc(room.roomId);
-    final membershipRef = _firestore
-        .collection('users')
-        .doc(room.ownerId)
-        .collection('memberships')
-        .doc(room.roomId);
-    final batch = _firestore.batch();
-
-    batch.set(roomRef, {
-      ...room.toCreateMap(),
-      'members': {
-        room.ownerId: {
-          'userId': room.ownerId,
-          'role': 'owner',
-          'joinedAt': FieldValue.serverTimestamp(),
-        },
-      },
-    });
-    batch.set(membershipRef, {
-      'roomId': room.roomId,
-      'userId': room.ownerId,
-      'role': 'owner',
-      'createdAt': FieldValue.serverTimestamp(),
-      'updatedAt': FieldValue.serverTimestamp(),
-    });
-
-    await batch.commit();
+    await createRoom(room: room);
+    await _joinRoomWithMembership(
+      roomId: room.roomId,
+      userId: room.ownerId,
+      role: 'owner',
+    );
     return room;
   }
 
@@ -69,10 +48,25 @@ class FirebaseRoomRepository {
     required String roomId,
     required String userId,
   }) async {
+    await _joinRoomWithMembership(
+      roomId: roomId,
+      userId: userId,
+      role: 'member',
+    );
+  }
+
+  Future<void> _joinRoomWithMembership({
+    required String roomId,
+    required String userId,
+    required String role,
+  }) async {
     final trimmedRoomId = roomId.trim();
     final trimmedUserId = userId.trim();
-    if (trimmedRoomId.isEmpty || trimmedUserId.isEmpty) {
-      throw ArgumentError('roomId and userId must not be empty.');
+    if (trimmedRoomId.isEmpty || trimmedUserId.isEmpty || role.trim().isEmpty) {
+      throw ArgumentError('roomId, userId and role must not be empty.');
+    }
+    if (role != 'owner' && role != 'member') {
+      throw ArgumentError('role must be owner or member.');
     }
 
     final roomRef = _firestore.collection('rooms').doc(trimmedRoomId);
@@ -90,14 +84,14 @@ class FirebaseRoomRepository {
     batch.set(membershipRef, {
       'roomId': trimmedRoomId,
       'userId': trimmedUserId,
-      'role': 'member',
+      'role': role,
       'createdAt': FieldValue.serverTimestamp(),
       'updatedAt': FieldValue.serverTimestamp(),
     }, SetOptions(merge: true));
     batch.set(roomRef, {
       'members.$trimmedUserId': {
         'userId': trimmedUserId,
-        'role': 'member',
+        'role': role,
         'joinedAt': FieldValue.serverTimestamp(),
       },
       'updatedAt': FieldValue.serverTimestamp(),

@@ -7,12 +7,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../firestore/ably_state_machine.dart';
 import '../data/room_event.dart';
 import '../data/room_presence_member.dart';
+import 'room_create_page.dart';
 
 class RoomMainPage extends ConsumerStatefulWidget {
-  const RoomMainPage({
-    required this.userId,
-    super.key,
-  });
+  const RoomMainPage({required this.userId, super.key});
 
   final String userId;
 
@@ -60,7 +58,9 @@ class _RoomMainPageState extends ConsumerState<RoomMainPage> {
     _eventsSubscription?.cancel();
     if (_isJoined) {
       unawaited(
-        ref.read(ablyRuntimeProvider.notifier).leaveRoom(roomId: _activeRoomId!),
+        ref
+            .read(ablyRuntimeProvider.notifier)
+            .leaveRoom(roomId: _activeRoomId!),
       );
     }
     _roomIdController.dispose();
@@ -99,37 +99,41 @@ class _RoomMainPageState extends ConsumerState<RoomMainPage> {
       await _presenceSubscription?.cancel();
       await _eventsSubscription?.cancel();
 
-      _presenceSubscription = notifier.watchPresence(roomId: roomId).listen((members) {
-            if (!mounted) {
-              return;
-            }
-            setState(() {
-              _presenceMembers = members;
-            });
-          });
+      _presenceSubscription = notifier.watchPresence(roomId: roomId).listen((
+        members,
+      ) {
+        if (!mounted) {
+          return;
+        }
+        setState(() {
+          _presenceMembers = members;
+        });
+      });
 
-      _eventsSubscription = notifier.watchRoomEvents(roomId: roomId).listen(
-        (event) {
-          if (_seenEventIds.contains(event.eventId)) {
-            return;
-          }
-          _seenEventIds.add(event.eventId);
-          if (!mounted) {
-            return;
-          }
-          setState(() {
-            _events = [event, ..._events].take(100).toList(growable: false);
-          });
-        },
-        onError: (Object error) {
-          if (!mounted) {
-            return;
-          }
-          setState(() {
-            _errorMessage = 'Event stream error: $error';
-          });
-        },
-      );
+      _eventsSubscription = notifier
+          .watchRoomEvents(roomId: roomId)
+          .listen(
+            (event) {
+              if (_seenEventIds.contains(event.eventId)) {
+                return;
+              }
+              _seenEventIds.add(event.eventId);
+              if (!mounted) {
+                return;
+              }
+              setState(() {
+                _events = [event, ..._events].take(100).toList(growable: false);
+              });
+            },
+            onError: (Object error) {
+              if (!mounted) {
+                return;
+              }
+              setState(() {
+                _errorMessage = 'Event stream error: $error';
+              });
+            },
+          );
 
       if (!mounted) {
         return;
@@ -203,13 +207,17 @@ class _RoomMainPageState extends ConsumerState<RoomMainPage> {
         actionKey: _selectedAction,
         durationSec: _selectedDurationSec,
         remainingSec: _remainingSec,
-        sessionId: _activeSessionId ?? '${widget.userId}-${now.millisecondsSinceEpoch}',
+        sessionId:
+            _activeSessionId ??
+            '${widget.userId}-${now.millisecondsSinceEpoch}',
         customData: const {},
       ),
     );
 
     try {
-      await ref.read(ablyRuntimeProvider.notifier).publishRoomEvent(event: event);
+      await ref
+          .read(ablyRuntimeProvider.notifier)
+          .publishRoomEvent(event: event);
     } catch (error) {
       if (!mounted) {
         return;
@@ -285,8 +293,9 @@ class _RoomMainPageState extends ConsumerState<RoomMainPage> {
   @override
   Widget build(BuildContext context) {
     final runtime = ref.watch(ablyRuntimeProvider);
-    final roomChannelState =
-        _activeRoomId == null ? null : runtime.channelStates[_activeRoomId!];
+    final roomChannelState = _activeRoomId == null
+        ? null
+        : runtime.channelStates[_activeRoomId!];
     final effectiveError = _errorMessage ?? runtime.lastError;
     final connectionLabel = _connectionLabel(runtime);
     final connectionColor = _connectionColor(runtime, context);
@@ -335,7 +344,9 @@ class _RoomMainPageState extends ConsumerState<RoomMainPage> {
                   children: [
                     Expanded(
                       child: FilledButton(
-                        onPressed: _isJoining || !runtime.isConfigured ? null : _joinRoom,
+                        onPressed: _isJoining || !runtime.isConfigured
+                            ? null
+                            : _joinRoom,
                         child: Text(_isJoined ? 'Switch Room' : 'Join Room'),
                       ),
                     ),
@@ -348,11 +359,25 @@ class _RoomMainPageState extends ConsumerState<RoomMainPage> {
                     ),
                   ],
                 ),
+                const SizedBox(height: 8),
+                OutlinedButton.icon(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => RoomCreatePage(userId: widget.userId),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.add_circle_outline),
+                  label: const Text('Create Room'),
+                ),
                 if (effectiveError != null) ...[
                   const SizedBox(height: 12),
                   Text(
                     effectiveError,
-                    style: TextStyle(color: Theme.of(context).colorScheme.error),
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
+                    ),
                   ),
                 ],
               ],
@@ -374,10 +399,12 @@ class _RoomMainPageState extends ConsumerState<RoomMainPage> {
                 DropdownButtonFormField<String>(
                   initialValue: _selectedAction,
                   items: _actionOptions
-                      .map((action) => DropdownMenuItem(
-                            value: action,
-                            child: Text(action),
-                          ))
+                      .map(
+                        (action) => DropdownMenuItem(
+                          value: action,
+                          child: Text(action),
+                        ),
+                      )
                       .toList(growable: false),
                   onChanged: _isJoined
                       ? (value) {
@@ -398,10 +425,12 @@ class _RoomMainPageState extends ConsumerState<RoomMainPage> {
                 DropdownButtonFormField<int>(
                   initialValue: _selectedDurationSec,
                   items: _durationOptions
-                      .map((duration) => DropdownMenuItem(
-                            value: duration,
-                            child: Text('$duration sec'),
-                          ))
+                      .map(
+                        (duration) => DropdownMenuItem(
+                          value: duration,
+                          child: Text('$duration sec'),
+                        ),
+                      )
                       .toList(growable: false),
                   onChanged: _isJoined
                       ? (value) {
@@ -433,11 +462,14 @@ class _RoomMainPageState extends ConsumerState<RoomMainPage> {
                       child: const Text('Start'),
                     ),
                     OutlinedButton(
-                      onPressed: _isJoined && _isTimerRunning ? _pauseAction : null,
+                      onPressed: _isJoined && _isTimerRunning
+                          ? _pauseAction
+                          : null,
                       child: const Text('Pause'),
                     ),
                     OutlinedButton(
-                      onPressed: _isJoined && !_isTimerRunning && _remainingSec > 0
+                      onPressed:
+                          _isJoined && !_isTimerRunning && _remainingSec > 0
                           ? _resumeAction
                           : null,
                       child: const Text('Resume'),
@@ -579,15 +611,9 @@ class _RoomMainPageState extends ConsumerState<RoomMainPage> {
     return Colors.blueGrey;
   }
 
-  Widget _statusChip({
-    required String label,
-    required Color color,
-  }) {
+  Widget _statusChip({required String label, required Color color}) {
     return Chip(
-      avatar: CircleAvatar(
-        backgroundColor: color,
-        radius: 5,
-      ),
+      avatar: CircleAvatar(backgroundColor: color, radius: 5),
       label: Text(label),
     );
   }

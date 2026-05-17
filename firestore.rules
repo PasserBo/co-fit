@@ -1,8 +1,77 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isNonEmptyString(value) {
+      return value is string && value.size() > 0;
+    }
+
+    function isVisibilityAllowed(visibility) {
+      return visibility in ['public', 'unlisted'];
+    }
+
+    function hasValidRoomShape(data) {
+      return data.keys().hasAll([
+          'roomId',
+          'name',
+          'description',
+          'visibility',
+          'ownerId',
+          'shareLinkHash',
+          'shareSalt',
+          'createdAt',
+          'updatedAt',
+        ]) &&
+        data.keys().hasOnly([
+          'roomId',
+          'name',
+          'description',
+          'visibility',
+          'ownerId',
+          'shareLinkHash',
+          'shareSalt',
+          'createdAt',
+          'updatedAt',
+        ]);
+    }
+
+    function hasValidRoomValues(data, roomId) {
+      return data.roomId == roomId &&
+        isNonEmptyString(data.name) &&
+        data.description is string &&
+        isVisibilityAllowed(data.visibility) &&
+        isNonEmptyString(data.ownerId) &&
+        isNonEmptyString(data.shareLinkHash) &&
+        isNonEmptyString(data.shareSalt);
+    }
+
+    function isOwner(data) {
+      return isSignedIn() && data.ownerId == request.auth.uid;
+    }
+
+    match /rooms/{roomId} {
+      allow create: if isOwner(request.resource.data) &&
+        hasValidRoomShape(request.resource.data) &&
+        hasValidRoomValues(request.resource.data, roomId);
+
+      allow read: if resource.data.visibility == 'public' ||
+        isOwner(resource.data);
+
+      allow update: if isOwner(resource.data) &&
+        hasValidRoomShape(request.resource.data) &&
+        hasValidRoomValues(request.resource.data, roomId) &&
+        request.resource.data.ownerId == resource.data.ownerId &&
+        request.resource.data.roomId == resource.data.roomId &&
+        request.resource.data.createdAt == resource.data.createdAt;
+
+      allow delete: if isOwner(resource.data);
+    }
+
     match /{document=**} {
-      allow read, write: if false;   
+      allow read, write: if false;
     }
   }
 }

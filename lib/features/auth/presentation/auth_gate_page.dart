@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/firebase_auth_repository.dart';
 import '../usecase/register_usecase.dart';
@@ -8,20 +11,22 @@ import '../usecase/sign_out_usecase.dart';
 import '../usecase/watch_auth_state_usecase.dart';
 import 'auth_login_page.dart';
 import 'auth_home_page.dart';
+import 'user_bootstrap_provider.dart';
 
-class AuthGatePage extends StatefulWidget {
+class AuthGatePage extends ConsumerStatefulWidget {
   const AuthGatePage({super.key});
 
   @override
-  State<AuthGatePage> createState() => _AuthGatePageState();
+  ConsumerState<AuthGatePage> createState() => _AuthGatePageState();
 }
 
-class _AuthGatePageState extends State<AuthGatePage> {
+class _AuthGatePageState extends ConsumerState<AuthGatePage> {
   late final FirebaseAuthRepository _repository;
   late final WatchAuthStateUsecase _watchAuthStateUsecase;
   late final SignInUsecase _signInUsecase;
   late final RegisterUsecase _registerUsecase;
   late final SignOutUsecase _signOutUsecase;
+  String? _bootstrappedUserId;
 
   @override
   void initState() {
@@ -46,16 +51,27 @@ class _AuthGatePageState extends State<AuthGatePage> {
 
         final user = snapshot.data;
         if (user == null) {
+          _bootstrappedUserId = null;
+          ref.read(userBootstrapProvider.notifier).clear();
           return AuthLoginPage(
             signInUsecase: _signInUsecase,
             registerUsecase: _registerUsecase,
           );
         }
 
-        return AuthHomePage(
-          user: user,
-          signOutUsecase: _signOutUsecase,
-        );
+        if (_bootstrappedUserId != user.uid) {
+          _bootstrappedUserId = user.uid;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted) {
+              return;
+            }
+            unawaited(
+              ref.read(userBootstrapProvider.notifier).bootstrap(user.uid),
+            );
+          });
+        }
+
+        return AuthHomePage(user: user, signOutUsecase: _signOutUsecase);
       },
     );
   }

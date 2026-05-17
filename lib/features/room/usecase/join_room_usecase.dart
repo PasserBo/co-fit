@@ -9,6 +9,6 @@ class JoinRoomUsecase {
     required String roomId,
     required String userId,
   }) {
-    return _repository.joinRoom(roomId: roomId, userId: userId);
+    return _repository.subscribeRoom(roomId: roomId, userId: userId);
   }
 }

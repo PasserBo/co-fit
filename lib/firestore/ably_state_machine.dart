@@ -126,7 +126,7 @@ class AblyRuntimeNotifier extends Notifier<AblyRuntimeState> {
     await _repository!.connect();
   }
 
-  Future<void> joinRoom({
+  Future<void> subscribeRoom({
     required String roomId,
     required String userId,
   }) async {
@@ -136,7 +136,7 @@ class AblyRuntimeNotifier extends Notifier<AblyRuntimeState> {
     }
 
     await _ensureRoomChannelWatched(roomId);
-    await _repository!.joinRoom(roomId: roomId, userId: userId);
+    await _repository!.subscribeRoom(roomId: roomId, userId: userId);
   }
 
   Future<void> leaveRoom({

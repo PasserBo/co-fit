@@ -79,7 +79,7 @@ class UserBootstrapNotifier extends Notifier<UserBootstrapState> {
         userId: userId,
       );
       for (final roomId in joinedRoomIds) {
-        await ablyRuntime.joinRoom(roomId: roomId, userId: userId);
+        await ablyRuntime.subscribeRoom(roomId: roomId, userId: userId);
       }
 
       _lastBootstrappedUserId = userId;

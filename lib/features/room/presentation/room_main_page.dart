@@ -4,6 +4,8 @@ import 'package:ably_flutter/ably_flutter.dart' as ably;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../auth/presentation/user_bootstrap_provider.dart';
+import '../data/room_repository_provider.dart';
 import '../../../firestore/ably_state_machine.dart';
 import '../data/room_event.dart';
 import '../data/room_presence_member.dart';
@@ -67,7 +69,18 @@ class _RoomMainPageState extends ConsumerState<RoomMainPage> {
     super.dispose();
   }
 
-  Future<void> _joinRoom() async {
+  Future<void> _subscribeRoom() async {
+    final roomId = _roomIdController.text.trim();
+    if (roomId.isEmpty) {
+      setState(() {
+        _errorMessage = 'roomId is required';
+      });
+      return;
+    }
+    await _subscribeRoomById(roomId);
+  }
+
+  Future<void> _subscribeRoomById(String roomId) async {
     final runtime = ref.read(ablyRuntimeProvider);
     if (!runtime.isConfigured) {
       setState(() {
@@ -76,17 +89,10 @@ class _RoomMainPageState extends ConsumerState<RoomMainPage> {
       return;
     }
 
-    final roomId = _roomIdController.text.trim();
-    if (roomId.isEmpty) {
-      setState(() {
-        _errorMessage = 'roomId is required';
-      });
-      return;
-    }
-
     setState(() {
       _isJoining = true;
       _errorMessage = null;
+      _roomIdController.text = roomId;
     });
 
     try {
@@ -94,7 +100,7 @@ class _RoomMainPageState extends ConsumerState<RoomMainPage> {
       if (_isJoined) {
         await _leaveRoom();
       }
-      await notifier.joinRoom(roomId: roomId, userId: widget.userId);
+      await notifier.subscribeRoom(roomId: roomId, userId: widget.userId);
 
       await _presenceSubscription?.cancel();
       await _eventsSubscription?.cancel();
@@ -141,6 +147,43 @@ class _RoomMainPageState extends ConsumerState<RoomMainPage> {
       setState(() {
         _activeRoomId = roomId;
       });
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _errorMessage = 'Failed to subscribe room: $error';
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isJoining = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _joinAndSubscribeRoom() async {
+    final roomId = _roomIdController.text.trim();
+    if (roomId.isEmpty) {
+      setState(() {
+        _errorMessage = 'roomId is required';
+      });
+      return;
+    }
+    setState(() {
+      _isJoining = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final roomRepository = ref.read(firebaseRoomRepositoryProvider);
+      await roomRepository.joinRoomWithMembership(
+        roomId: roomId,
+        userId: widget.userId,
+      );
+      await ref.read(userBootstrapProvider.notifier).refreshJoinedRooms();
+      await _subscribeRoomById(roomId);
     } catch (error) {
       if (!mounted) {
         return;
@@ -293,10 +336,13 @@ class _RoomMainPageState extends ConsumerState<RoomMainPage> {
   @override
   Widget build(BuildContext context) {
     final runtime = ref.watch(ablyRuntimeProvider);
+    final userBootstrapState = ref.watch(userBootstrapProvider);
+    final joinedRoomIds = userBootstrapState.joinedRoomIds;
     final roomChannelState = _activeRoomId == null
         ? null
         : runtime.channelStates[_activeRoomId!];
-    final effectiveError = _errorMessage ?? runtime.lastError;
+    final effectiveError =
+        _errorMessage ?? userBootstrapState.error ?? runtime.lastError;
     final connectionLabel = _connectionLabel(runtime);
     final connectionColor = _connectionColor(runtime, context);
     final channelLabel = _channelLabel(roomChannelState);
@@ -330,6 +376,34 @@ class _RoomMainPageState extends ConsumerState<RoomMainPage> {
                     ),
                   ],
                 ),
+                const SizedBox(height: 12),
+                Text(
+                  'Joined Rooms (${joinedRoomIds.length})',
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+                const SizedBox(height: 8),
+                if (userBootstrapState.isBootstrapping)
+                  const LinearProgressIndicator()
+                else if (joinedRoomIds.isEmpty)
+                  const Text(
+                    'No joined rooms yet. Use manual roomId fallback below.',
+                  )
+                else
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: joinedRoomIds
+                        .map(
+                          (roomId) => ActionChip(
+                            avatar: const Icon(Icons.meeting_room_outlined, size: 16),
+                            label: Text(roomId),
+                            onPressed: _isJoining
+                                ? null
+                                : () => unawaited(_subscribeRoomById(roomId)),
+                          ),
+                        )
+                        .toList(growable: false),
+                  ),
                 const SizedBox(height: 8),
                 TextField(
                   controller: _roomIdController,
@@ -346,8 +420,17 @@ class _RoomMainPageState extends ConsumerState<RoomMainPage> {
                       child: FilledButton(
                         onPressed: _isJoining || !runtime.isConfigured
                             ? null
-                            : _joinRoom,
-                        child: Text(_isJoined ? 'Switch Room' : 'Join Room'),
+                            : _subscribeRoom,
+                        child: Text(
+                          _isJoined ? 'Switch Subscription' : 'Subscribe Room',
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: _isJoining ? null : _joinAndSubscribeRoom,
+                        child: const Text('Join & Subscribe'),
                       ),
                     ),
                     const SizedBox(width: 12),

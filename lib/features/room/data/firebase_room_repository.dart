@@ -64,4 +64,45 @@ class FirebaseRoomRepository {
 
     return roomIds;
   }
+
+  Future<void> joinRoomWithMembership({
+    required String roomId,
+    required String userId,
+  }) async {
+    final trimmedRoomId = roomId.trim();
+    final trimmedUserId = userId.trim();
+    if (trimmedRoomId.isEmpty || trimmedUserId.isEmpty) {
+      throw ArgumentError('roomId and userId must not be empty.');
+    }
+
+    final roomRef = _firestore.collection('rooms').doc(trimmedRoomId);
+    final membershipRef = _firestore
+        .collection('users')
+        .doc(trimmedUserId)
+        .collection('memberships')
+        .doc(trimmedRoomId);
+    final roomSnapshot = await roomRef.get();
+    if (!roomSnapshot.exists) {
+      throw StateError('Room does not exist: $trimmedRoomId');
+    }
+
+    final batch = _firestore.batch();
+    batch.set(membershipRef, {
+      'roomId': trimmedRoomId,
+      'userId': trimmedUserId,
+      'role': 'member',
+      'createdAt': FieldValue.serverTimestamp(),
+      'updatedAt': FieldValue.serverTimestamp(),
+    }, SetOptions(merge: true));
+    batch.set(roomRef, {
+      'members.$trimmedUserId': {
+        'userId': trimmedUserId,
+        'role': 'member',
+        'joinedAt': FieldValue.serverTimestamp(),
+      },
+      'updatedAt': FieldValue.serverTimestamp(),
+    }, SetOptions(merge: true));
+
+    await batch.commit();
+  }
 }

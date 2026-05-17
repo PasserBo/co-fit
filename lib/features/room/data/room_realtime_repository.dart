@@ -21,7 +21,7 @@ class RoomRealtimeRepository {
     });
   }
 
-  Future<void> joinRoom({
+  Future<void> subscribeRoom({
     required String roomId,
     required String userId,
   }) {

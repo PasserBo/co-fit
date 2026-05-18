@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../room/data/room_repository_provider.dart';
+import '../../room/presentation/room_browser_provider.dart';
 import '../../../firestore/ably_state_machine.dart';
 
 class UserBootstrapState {
@@ -83,6 +86,9 @@ class UserBootstrapNotifier extends Notifier<UserBootstrapState> {
       }
 
       _lastBootstrappedUserId = userId;
+      await ref
+          .read(roomBrowserProvider.notifier)
+          .syncJoinedRooms(joinedRoomIds, userId: userId);
       state = state.copyWith(
         userId: userId,
         joinedRoomIds: joinedRoomIds,
@@ -107,6 +113,9 @@ class UserBootstrapNotifier extends Notifier<UserBootstrapState> {
     final joinedRoomIds = await roomRepository.fetchJoinedRoomIds(
       userId: userId,
     );
+    await ref
+        .read(roomBrowserProvider.notifier)
+        .syncJoinedRooms(joinedRoomIds, userId: userId);
     state = state.copyWith(joinedRoomIds: joinedRoomIds);
   }
 
@@ -114,6 +123,7 @@ class UserBootstrapNotifier extends Notifier<UserBootstrapState> {
     _lastBootstrappedUserId = null;
     _runningBootstrapFuture = null;
     _runningBootstrapUserId = null;
+    unawaited(ref.read(roomBrowserProvider.notifier).clear());
     state = UserBootstrapState.initial();
   }
 }

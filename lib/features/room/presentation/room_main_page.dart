@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:ably_flutter/ably_flutter.dart' as ably;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -10,6 +9,7 @@ import '../../../firestore/ably_state_machine.dart';
 import '../data/room_event.dart';
 import '../data/room_presence_member.dart';
 import 'room_create_page.dart';
+import 'widgets/room_widgets.dart';
 
 class RoomMainPage extends ConsumerStatefulWidget {
   const RoomMainPage({required this.userId, super.key});
@@ -338,15 +338,8 @@ class _RoomMainPageState extends ConsumerState<RoomMainPage> {
     final runtime = ref.watch(ablyRuntimeProvider);
     final userBootstrapState = ref.watch(userBootstrapProvider);
     final joinedRoomIds = userBootstrapState.joinedRoomIds;
-    final roomChannelState = _activeRoomId == null
-        ? null
-        : runtime.channelStates[_activeRoomId!];
     final effectiveError =
         _errorMessage ?? userBootstrapState.error ?? runtime.lastError;
-    final connectionLabel = _connectionLabel(runtime);
-    final connectionColor = _connectionColor(runtime, context);
-    final channelLabel = _channelLabel(roomChannelState);
-    final channelColor = _channelColor(roomChannelState, context);
 
     return ListView(
       padding: const EdgeInsets.all(20),
@@ -356,348 +349,183 @@ class _RoomMainPageState extends ConsumerState<RoomMainPage> {
           style: Theme.of(context).textTheme.headlineSmall,
         ),
         const SizedBox(height: 12),
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    _statusChip(
-                      label: 'Ably: $connectionLabel',
-                      color: connectionColor,
-                    ),
-                    _statusChip(
-                      label: 'Room Channel: $channelLabel',
-                      color: channelColor,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  'Joined Rooms (${joinedRoomIds.length})',
-                  style: Theme.of(context).textTheme.titleSmall,
-                ),
-                const SizedBox(height: 8),
-                if (userBootstrapState.isBootstrapping)
-                  const LinearProgressIndicator()
-                else if (joinedRoomIds.isEmpty)
-                  const Text(
-                    'No joined rooms yet. Use manual roomId fallback below.',
-                  )
-                else
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: joinedRoomIds
-                        .map(
-                          (roomId) => ActionChip(
-                            avatar: const Icon(Icons.meeting_room_outlined, size: 16),
-                            label: Text(roomId),
-                            onPressed: _isJoining
-                                ? null
-                                : () => unawaited(_subscribeRoomById(roomId)),
-                          ),
-                        )
-                        .toList(growable: false),
-                  ),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: _roomIdController,
-                  enabled: !_isJoining,
-                  decoration: const InputDecoration(
-                    labelText: 'roomId',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(
-                      child: FilledButton(
-                        onPressed: _isJoining || !runtime.isConfigured
-                            ? null
-                            : _subscribeRoom,
-                        child: Text(
-                          _isJoined ? 'Switch Subscription' : 'Subscribe Room',
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: _isJoining ? null : _joinAndSubscribeRoom,
-                        child: const Text('Join & Subscribe'),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: _isJoined ? _leaveRoom : null,
-                        child: const Text('Leave Room'),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                OutlinedButton.icon(
-                  onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (_) => RoomCreatePage(userId: widget.userId),
-                      ),
-                    );
-                  },
-                  icon: const Icon(Icons.add_circle_outline),
-                  label: const Text('Create Room'),
-                ),
-                if (effectiveError != null) ...[
-                  const SizedBox(height: 12),
-                  Text(
-                    effectiveError,
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.error,
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
+        _RoomSubscriptionCard(
+          runtime: runtime,
+          activeRoomId: _activeRoomId,
+          joinedRoomIds: joinedRoomIds,
+          isBootstrapping: userBootstrapState.isBootstrapping,
+          roomIdController: _roomIdController,
+          isJoining: _isJoining,
+          isJoined: _isJoined,
+          isConfigured: runtime.isConfigured,
+          onJoinedRoomTap: (roomId) => _subscribeRoomById(roomId),
+          onSubscribe: _subscribeRoom,
+          onJoinAndSubscribe: _joinAndSubscribeRoom,
+          onLeave: _leaveRoom,
+          onCreateRoom: () {
+            Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => RoomCreatePage(userId: widget.userId),
+              ),
+            );
+          },
+          errorMessage: effectiveError,
         ),
         const SizedBox(height: 12),
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Action Event Controls',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: 8),
-                DropdownButtonFormField<String>(
-                  initialValue: _selectedAction,
-                  items: _actionOptions
-                      .map(
-                        (action) => DropdownMenuItem(
-                          value: action,
-                          child: Text(action),
-                        ),
-                      )
-                      .toList(growable: false),
-                  onChanged: _isJoined
-                      ? (value) {
-                          if (value == null) {
-                            return;
-                          }
-                          setState(() {
-                            _selectedAction = value;
-                          });
-                        }
-                      : null,
-                  decoration: const InputDecoration(
-                    labelText: 'Action',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                DropdownButtonFormField<int>(
-                  initialValue: _selectedDurationSec,
-                  items: _durationOptions
-                      .map(
-                        (duration) => DropdownMenuItem(
-                          value: duration,
-                          child: Text('$duration sec'),
-                        ),
-                      )
-                      .toList(growable: false),
-                  onChanged: _isJoined
-                      ? (value) {
-                          if (value == null) {
-                            return;
-                          }
-                          setState(() {
-                            _selectedDurationSec = value;
-                          });
-                        }
-                      : null,
-                  decoration: const InputDecoration(
-                    labelText: 'Duration',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Remaining: $_remainingSec sec',
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    FilledButton(
-                      onPressed: _isJoined ? _startAction : null,
-                      child: const Text('Start'),
-                    ),
-                    OutlinedButton(
-                      onPressed: _isJoined && _isTimerRunning
-                          ? _pauseAction
-                          : null,
-                      child: const Text('Pause'),
-                    ),
-                    OutlinedButton(
-                      onPressed:
-                          _isJoined && !_isTimerRunning && _remainingSec > 0
-                          ? _resumeAction
-                          : null,
-                      child: const Text('Resume'),
-                    ),
-                    OutlinedButton(
-                      onPressed: _isJoined ? _completeAction : null,
-                      child: const Text('Complete'),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
+        RoomActionControlsCard(
+          isJoined: _isJoined,
+          actionOptions: _actionOptions,
+          selectedAction: _selectedAction,
+          onActionChanged: (value) {
+            setState(() {
+              _selectedAction = value;
+            });
+          },
+          durationOptions: _durationOptions,
+          selectedDurationSec: _selectedDurationSec,
+          onDurationChanged: (value) {
+            setState(() {
+              _selectedDurationSec = value;
+            });
+          },
+          remainingSec: _remainingSec,
+          isTimerRunning: _isTimerRunning,
+          onStart: () => unawaited(_startAction()),
+          onPause: () => unawaited(_pauseAction()),
+          onResume: () => unawaited(_resumeAction()),
+          onComplete: () => unawaited(_completeAction()),
         ),
         const SizedBox(height: 12),
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Online Members (${_presenceMembers.length})',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: 8),
-                if (_presenceMembers.isEmpty)
-                  const Text('No members online yet.')
-                else
-                  ..._presenceMembers.map((member) {
-                    return ListTile(
-                      dense: true,
-                      contentPadding: EdgeInsets.zero,
-                      leading: const Icon(Icons.person_outline),
-                      title: Text(member.userId),
-                      subtitle: Text('clientId: ${member.clientId}'),
-                    );
-                  }),
-              ],
-            ),
-          ),
-        ),
+        RoomPresenceCard(members: _presenceMembers),
         const SizedBox(height: 12),
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Event Timeline (${_events.length})',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: 8),
-                if (_events.isEmpty)
-                  const Text('No events received yet.')
-                else
-                  ..._events.take(30).map((event) {
-                    return ListTile(
-                      dense: true,
-                      contentPadding: EdgeInsets.zero,
-                      leading: const Icon(Icons.bolt_outlined),
-                      title: Text('${event.userId} -> ${event.type}'),
-                      subtitle: Text(
-                        '${event.timestamp.toIso8601String()} | '
-                        'action=${event.payload.actionKey} '
-                        'remaining=${event.payload.remainingSec} '
-                        'session=${event.payload.sessionId} '
-                        'v=${event.payload.schemaVersion}',
-                      ),
-                    );
-                  }),
-              ],
-            ),
-          ),
-        ),
+        RoomEventTimelineCard(events: _events),
       ],
     );
   }
+}
 
-  String _connectionLabel(AblyRuntimeState runtime) {
-    switch (runtime.runtimePhase) {
-      case AblyRuntimePhase.idle:
-        return 'idle';
-      case AblyRuntimePhase.unconfigured:
-        return 'unconfigured';
-      case AblyRuntimePhase.active:
-        final state = runtime.connectionState;
-        if (state == null) {
-          return 'unknown';
-        }
-        return state.name;
-    }
-  }
+class _RoomSubscriptionCard extends StatelessWidget {
+  const _RoomSubscriptionCard({
+    required this.runtime,
+    required this.activeRoomId,
+    required this.joinedRoomIds,
+    required this.isBootstrapping,
+    required this.roomIdController,
+    required this.isJoining,
+    required this.isJoined,
+    required this.isConfigured,
+    required this.onJoinedRoomTap,
+    required this.onSubscribe,
+    required this.onJoinAndSubscribe,
+    required this.onLeave,
+    required this.onCreateRoom,
+    required this.errorMessage,
+  });
 
-  Color _connectionColor(AblyRuntimeState runtime, BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    if (runtime.runtimePhase == AblyRuntimePhase.unconfigured) {
-      return scheme.error;
-    }
-    final state = runtime.connectionState;
-    if (state == ably.ConnectionState.connected) {
-      return Colors.green;
-    }
-    if (state == ably.ConnectionState.connecting) {
-      return Colors.orange;
-    }
-    if (state == ably.ConnectionState.disconnected) {
-      return Colors.orange;
-    }
-    if (state == ably.ConnectionState.failed) {
-      return scheme.error;
-    }
-    return Colors.blueGrey;
-  }
+  final AblyRuntimeState runtime;
+  final String? activeRoomId;
+  final List<String> joinedRoomIds;
+  final bool isBootstrapping;
+  final TextEditingController roomIdController;
+  final bool isJoining;
+  final bool isJoined;
+  final bool isConfigured;
+  final Future<void> Function(String roomId) onJoinedRoomTap;
+  final VoidCallback onSubscribe;
+  final VoidCallback onJoinAndSubscribe;
+  final VoidCallback onLeave;
+  final VoidCallback onCreateRoom;
+  final String? errorMessage;
 
-  String _channelLabel(ably.ChannelState? state) {
-    if (_activeRoomId == null) {
-      return 'n/a';
-    }
-    return state?.name ?? 'unknown';
-  }
-
-  Color _channelColor(ably.ChannelState? state, BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    if (_activeRoomId == null) {
-      return Colors.blueGrey;
-    }
-    if (state == ably.ChannelState.attached) {
-      return Colors.green;
-    }
-    if (state == ably.ChannelState.attaching ||
-        state == ably.ChannelState.detaching) {
-      return Colors.orange;
-    }
-    if (state == ably.ChannelState.failed) {
-      return scheme.error;
-    }
-    return Colors.blueGrey;
-  }
-
-  Widget _statusChip({required String label, required Color color}) {
-    return Chip(
-      avatar: CircleAvatar(backgroundColor: color, radius: 5),
-      label: Text(label),
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            RoomConnectionStateView(
+              runtime: runtime,
+              activeRoomId: activeRoomId,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Joined Rooms (${joinedRoomIds.length})',
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
+            const SizedBox(height: 8),
+            if (isBootstrapping)
+              const LinearProgressIndicator()
+            else if (joinedRoomIds.isEmpty)
+              const Text('No joined rooms yet. Use manual roomId fallback below.')
+            else
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: joinedRoomIds
+                    .map(
+                      (roomId) => ActionChip(
+                        avatar: const Icon(Icons.meeting_room_outlined, size: 16),
+                        label: Text(roomId),
+                        onPressed:
+                            isJoining ? null : () => unawaited(onJoinedRoomTap(roomId)),
+                      ),
+                    )
+                    .toList(growable: false),
+              ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: roomIdController,
+              enabled: !isJoining,
+              decoration: const InputDecoration(
+                labelText: 'roomId',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: FilledButton(
+                    onPressed: isJoining || !isConfigured ? null : onSubscribe,
+                    child: Text(isJoined ? 'Switch Subscription' : 'Subscribe Room'),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: isJoining ? null : onJoinAndSubscribe,
+                    child: const Text('Join & Subscribe'),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: isJoined ? onLeave : null,
+                    child: const Text('Leave Room'),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            OutlinedButton.icon(
+              onPressed: onCreateRoom,
+              icon: const Icon(Icons.add_circle_outline),
+              label: const Text('Create Room'),
+            ),
+            if (errorMessage != null) ...[
+              const SizedBox(height: 12),
+              Text(
+                errorMessage!,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.error,
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
     );
   }
 }

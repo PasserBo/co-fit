@@ -287,3 +287,23 @@ final focusedRoomPresenceProvider = Provider<List<RoomPresenceMember>>((ref) {
     }),
   );
 });
+
+final roomEventsByIdProvider = Provider.family<List<RoomEvent>, String>((
+  ref,
+  roomId,
+) {
+  return ref.watch(
+    roomBrowserProvider.select(
+      (state) => state.eventsByRoom[roomId] ?? const <RoomEvent>[],
+    ),
+  );
+});
+
+final roomPresenceByIdProvider =
+    Provider.family<List<RoomPresenceMember>, String>((ref, roomId) {
+      return ref.watch(
+        roomBrowserProvider.select(
+          (state) => state.presenceByRoom[roomId] ?? const <RoomPresenceMember>[],
+        ),
+      );
+    });

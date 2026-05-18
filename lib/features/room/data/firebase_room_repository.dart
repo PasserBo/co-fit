@@ -19,12 +19,39 @@ class FirebaseRoomRepository {
   Future<RoomInfoModel> createRoomWithMembership({
     required RoomInfoModel room,
   }) async {
-    await createRoom(room: room);
-    await _joinRoomWithMembership(
-      roomId: room.roomId,
-      userId: room.ownerId,
-      role: 'owner',
-    );
+    final trimmedRoomId = room.roomId.trim();
+    final trimmedOwnerId = room.ownerId.trim();
+    if (trimmedRoomId.isEmpty || trimmedOwnerId.isEmpty) {
+      throw ArgumentError('roomId and ownerId must not be empty.');
+    }
+
+    final roomRef = _firestore.collection('rooms').doc(trimmedRoomId);
+    final membershipRef = _firestore
+        .collection('users')
+        .doc(trimmedOwnerId)
+        .collection('memberships')
+        .doc(trimmedRoomId);
+
+    final batch = _firestore.batch();
+    batch.set(roomRef, {
+      ...room.toCreateMap(),
+      'members': {
+        trimmedOwnerId: {
+          'userId': trimmedOwnerId,
+          'role': 'owner',
+          'joinedAt': FieldValue.serverTimestamp(),
+        },
+      },
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+    batch.set(membershipRef, {
+      'roomId': trimmedRoomId,
+      'userId': trimmedOwnerId,
+      'role': 'owner',
+      'createdAt': FieldValue.serverTimestamp(),
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+    await batch.commit();
     return room;
   }
 

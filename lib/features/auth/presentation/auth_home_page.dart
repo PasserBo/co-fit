@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-import '../../room/presentation/room_main_page.dart';
+import '../../room/presentation/room_browse_page.dart';
 import '../usecase/sign_out_usecase.dart';
 import 'auth_my_page.dart';
 
@@ -25,7 +25,7 @@ class _AuthHomePageState extends State<AuthHomePage> {
   @override
   Widget build(BuildContext context) {
     final pages = [
-      RoomMainPage(userId: widget.user.uid),
+      RoomBrowsePage(userId: widget.user.uid),
       AuthMyPage(
         user: widget.user,
         signOutUsecase: widget.signOutUsecase,

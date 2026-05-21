@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../room/presentation/room_browse_page.dart';
+import '../../room/presentation/room_community_page.dart';
 import '../usecase/sign_out_usecase.dart';
 import 'auth_my_page.dart';
 
@@ -20,11 +21,12 @@ class AuthHomePage extends StatefulWidget {
 }
 
 class _AuthHomePageState extends State<AuthHomePage> {
-  int _selectedIndex = 0;
+  int _selectedIndex = 1;
 
   @override
   Widget build(BuildContext context) {
     final pages = [
+      RoomCommunityPage(userId: widget.user.uid),
       RoomBrowsePage(userId: widget.user.uid),
       AuthMyPage(
         user: widget.user,
@@ -32,7 +34,7 @@ class _AuthHomePageState extends State<AuthHomePage> {
       ),
     ];
 
-    final titles = ['Rooms', 'My Page'];
+    final titles = ['Community', 'Browser', 'My Page'];
 
     return Scaffold(
       appBar: AppBar(
@@ -51,9 +53,14 @@ class _AuthHomePageState extends State<AuthHomePage> {
         },
         destinations: const [
           NavigationDestination(
+            icon: Icon(Icons.groups_outlined),
+            selectedIcon: Icon(Icons.groups),
+            label: 'Community',
+          ),
+          NavigationDestination(
             icon: Icon(Icons.meeting_room_outlined),
             selectedIcon: Icon(Icons.meeting_room),
-            label: 'Rooms',
+            label: 'Browser',
           ),
           NavigationDestination(
             icon: Icon(Icons.settings_outlined),

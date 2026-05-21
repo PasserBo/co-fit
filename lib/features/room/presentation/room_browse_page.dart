@@ -8,7 +8,7 @@ import '../../auth/presentation/user_bootstrap_provider.dart';
 import '../data/room_event.dart';
 import '../data/room_presence_member.dart';
 import 'room_browser_provider.dart';
-import 'room_main_page.dart';
+import 'room_community_page.dart';
 import 'widgets/room_widgets.dart';
 
 class RoomBrowsePage extends ConsumerStatefulWidget {
@@ -110,12 +110,12 @@ class _RoomBrowsePageState extends ConsumerState<RoomBrowsePage> {
                     onPressed: () {
                       Navigator.of(context).push(
                         MaterialPageRoute<void>(
-                          builder: (_) => RoomMainPage(userId: widget.userId),
+                          builder: (_) => RoomCommunityPage(userId: widget.userId),
                         ),
                       );
                     },
-                    icon: const Icon(Icons.tune),
-                    label: const Text('Open Controls'),
+                    icon: const Icon(Icons.groups_outlined),
+                    label: const Text('Open Community'),
                   ),
                 ],
               ),
@@ -266,7 +266,7 @@ class _EmptyJoinedRoomState extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             const Text(
-              'Join or create a room from the control console to start browsing.',
+              'Join or create a room from Community to start browsing.',
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 12),
@@ -274,12 +274,12 @@ class _EmptyJoinedRoomState extends StatelessWidget {
               onPressed: () {
                 Navigator.of(context).push(
                   MaterialPageRoute<void>(
-                    builder: (_) => RoomMainPage(userId: userId),
+                    builder: (_) => RoomCommunityPage(userId: userId),
                   ),
                 );
               },
-              icon: const Icon(Icons.tune),
-              label: const Text('Open Room Controls'),
+              icon: const Icon(Icons.groups_outlined),
+              label: const Text('Open Community'),
             ),
           ],
         ),

@@ -12,6 +12,9 @@ alwaysApply: false
 
 - `lib/core/`: 存放全局常量、通用工具类（Utils）、主题（Theme）、以及不属于特定业务的 UI 组件。
 - `lib/domain/`: 存放跨功能的通用业务实体（Entities）和业务逻辑。
+    - `entity/`: 通用业务实体
+    - `usecase/`: 业务逻辑。
+- `lib/data/`:　存放与外部数据连通的服务类与接口实现类
 - `lib/firestore/`: 存放 Firebase/Firestore 的初始化配置、全局封装类和通用的数据监听器。
 - `lib/features/`: 核心业务逻辑按功能模块划分：
     - `auth/`: 登录与用户状态。

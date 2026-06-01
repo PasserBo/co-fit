@@ -1,4 +1,4 @@
-import 'action_template_card.dart';
+import '../domain/entity/action_template_card.dart';
 
 abstract class ActionTemplateSelectionRepository {
   Future<void> setSelectedTemplateCard(ActionTemplateCard card);

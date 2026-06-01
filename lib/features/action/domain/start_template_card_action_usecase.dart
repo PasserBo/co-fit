@@ -1,10 +1,10 @@
 import 'package:uuid/uuid.dart';
 
 import '../../room/data/room_event.dart';
-import 'action_template_card.dart';
-import 'action_template_event_repository.dart';
-import 'action_template_selection_repository.dart';
-import 'template_card_session.dart';
+import 'entity/action_template_card.dart';
+import '../data/action_template_event_repository.dart';
+import '../data/action_template_selection_repository.dart';
+import 'entity/template_card_session.dart';
 
 class StartTemplateCardActionUsecase {
   StartTemplateCardActionUsecase(

@@ -1,6 +1,6 @@
-import 'action_template_card.dart';
-import 'action_template_repository.dart';
-import 'action_template_selection_repository.dart';
+import 'entity/action_template_card.dart';
+import '../data/action_template_repository.dart';
+import '../data/action_template_selection_repository.dart';
 
 class SelectTemplateCardUsecase {
   SelectTemplateCardUsecase(

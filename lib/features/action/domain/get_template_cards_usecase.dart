@@ -1,5 +1,5 @@
-import 'action_template_card.dart';
-import 'action_template_repository.dart';
+import 'entity/action_template_card.dart';
+import '../data/action_template_repository.dart';
 
 class GetTemplateCardsUsecase {
   GetTemplateCardsUsecase(this._repository);

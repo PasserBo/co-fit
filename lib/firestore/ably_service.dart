@@ -85,6 +85,14 @@ class AblyService {
     await channel.presence.leave();
   }
 
+  Future<void> updatePresenceData({
+    required String roomId,
+    required Map<String, dynamic> data,
+  }) async {
+    final channel = _getRoomChannel(roomId);
+    await channel.presence.update(data);
+  }
+
   Stream<List<Map<String, dynamic>>> watchPresence({
     required String roomId,
   }) {

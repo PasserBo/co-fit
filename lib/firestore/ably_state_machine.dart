@@ -158,6 +158,17 @@ class AblyRuntimeNotifier extends Notifier<AblyRuntimeState> {
     await _repository!.publishEvent(event: event);
   }
 
+  Future<void> updatePresenceData({
+    required String roomId,
+    required Map<String, dynamic> data,
+  }) async {
+    if (_repository == null) {
+      return;
+    }
+    await _ensureRoomChannelWatched(roomId);
+    await _repository!.updatePresenceData(roomId: roomId, data: data);
+  }
+
   Stream<List<RoomPresenceMember>> watchPresence({
     required String roomId,
   }) {

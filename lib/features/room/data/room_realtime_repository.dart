@@ -34,6 +34,13 @@ class RoomRealtimeRepository {
     return _ablyService.leavePresence(roomId: roomId);
   }
 
+  Future<void> updatePresenceData({
+    required String roomId,
+    required Map<String, dynamic> data,
+  }) {
+    return _ablyService.updatePresenceData(roomId: roomId, data: data);
+  }
+
   Stream<List<RoomPresenceMember>> watchPresence({
     required String roomId,
   }) {

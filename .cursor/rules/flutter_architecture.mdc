@@ -1,77 +1,157 @@
 ---
-globs: lib/**/*.dart
-alwaysApply: false
+alwaysApply: true
 ---
-# 云端健身房架构规范 (Cloud Gym Architecture)
+# Flutter Frontend Architecture (CoFit)
 
-你是一个资深的 Flutter 架构师。在编写代码时，必须严格遵守以下分层架构和目录结构。
+> **🎯 Single Source of Truth (SSOT)**
+>
+> This document is the source of truth for Flutter frontend architecture. If any other rule / doc file conflicts with this one, this one wins.
+>
+> Not every detail is covered here — when in doubt, raise it in the team and align.
 
-## 1. 目录结构规范
+---
 
-所有代码必须安置在指定的目录下：
+## 1. Decision tree: where does my code go?
 
-- `lib/core/`: 存放全局常量、通用工具类（Utils）、主题（Theme）、以及不属于特定业务的 UI 组件。
-- `lib/domain/`: 存放跨功能的通用业务实体（Entities）和业务逻辑。
-    - `entity/`: 通用业务实体
-    - `usecase/`: 业务逻辑。
-- `lib/data/`:　存放与外部数据连通的服务类与接口实现类
-- `lib/firestore/`: 存放 Firebase/Firestore 的初始化配置、全局封装类和通用的数据监听器。
-- `lib/features/`: 核心业务逻辑按功能模块划分：
-    - `auth/`: 登录与用户状态。
-    - `room/`: 房间管理与社交。
-    - `action/`: 健身卡片与计时。
-    - `avatar/`: Rive 角色与动画驱动。
+```mermaid
+flowchart TD
+    Start(["What am I writing?"]) --> Q1{"Renders UI?"}
+    Q1 -->|Yes| Q2{"Reads providers<br/>via ref.watch?"}
+    Q1 -->|No| Q3{"Reads/writes<br/>external data?<br/>(backend / local DB /<br/>cache / file)"}
 
-## 2. 功能模块内部结构 (Feature Layering)
+    Q2 -->|Yes| V["presentation/view/"]
+    Q2 -->|No| W["presentation/widget/"]
 
-每个 feature 内部必须严格分为以下三层：
+    Q3 -->|Yes| Q4{"Interface or<br/>implementation?"}
+    Q3 -->|No| Q5{"Riverpod<br/>provider declaration?"}
 
-### A. Presentation 层 (`features/x/presentation/`)
-- **职责**: 负责 UI 渲染、动画展示、处理用户输入。
-- **组件**: Widgets, Pages, 状态管理 (Riverpod/Provider/Bloc)。
-- **禁令**: 
-    - ❌ 禁止直接调用 `FirebaseFirestore.instance`。
-    - ❌ 禁止包含复杂的业务算法（应放入 usecase）。
-    - ❌ 禁止处理数据转换（如 JSON 解析）。
+    Q4 -->|Interface| DR["domain/repository/"]
+    Q4 -->|Implementation| Q4b{"≥3 cohesive API ops,<br/>or remote + local mix,<br/>or shared client config?"}
 
-### B. Usecase 层 (`features/x/usecase/`)
-- **职责**: 核心业务大脑。负责协调数据转换、权限校验、计时逻辑、状态流转。
-- **原则**: 每一个 Usecase 类通常只负责一个具体动作（如 `JoinRoomUsecase`, `StartWorkoutUsecase`）。
-- **禁令**: 
-    - ❌ 禁止引用任何 `material.dart` 或 UI 组件。
-    - ❌ 禁止处理底层的网络请求细节。
+    Q4b -->|No| IR["infrastructure/repository/<br/>(inline API calls)"]
+    Q4b -->|Yes| DS["infrastructure/datasource/"]
 
-### C. Data 层 (`features/x/data/`)
-- **职责**: 定义数据模型 (Models/DTOs)、实现数据的序列化 (`fromJson`/`toJson`)、调用外部 API 或 `lib/firestore/`。
-- **禁令**: 
-    - ❌ 禁止包含 UI 状态信息。
-    - ❌ 禁止包含业务决策逻辑。
+    Q5 -->|Yes| P["provider/"]
+    Q5 -->|No| Q6{"App-specific action<br/>or flow?<br/>(this app's way of<br/>achieving a goal)"}
 
-## 3. 依赖调用链路 (Dependency Flow)
+    Q6 -->|Yes| U["usecase/"]
+    Q6 -->|No| Q7{"Data shape +<br/>invariants / derived rules?<br/>(would exist without<br/>software)"}
 
-必须遵守单向依赖原则：
-**View (Presentation) -> Usecase -> Data -> Firestore/Remote API**
+    Q7 -->|Yes| E["domain/entity/"]
+    Q7 -->|No| OTHER["share/utils/<br/>or reconsider"]
+```
 
-1. **View** 调用 **Usecase** 来触发业务逻辑。
-2. **Usecase** 调用 **Data 层定义的方法** 获取数据模型。
-3. **Data 层** 与 **Firestore** 通信并将结果转化为领域模型返回。
+> **Q4b — when to extract a datasource**: Pull raw API calls into `infrastructure/datasource/` if any of the three criteria hold; otherwise keep them inline in the repository impl. 
+>
+> **Q6 vs Q7**: `usecase` is a verb — *this app's* specific way of achieving a goal (steps, ordering, side-effects; would change if rewritten on a different platform). `entity` is a noun — data + invariants / derived rules that would still exist if there were no software (per Uncle Bob's Clean Architecture). 
 
-## 4. 代码命名规范
 
-- **Page**: `{feature_name}_page.dart` (例: `room_main_page.dart`)
-- **Widget**: `_widgets/` 目录下 `{component_name}_card.dart`
-- **Usecase**: `{action}_usecase.dart` (例: `sync_action_usecase.dart`)
-- **Model**: `{entity_name}_model.dart` (例: `user_avatar_model.dart`)
-- **Rive 控制**: `avatar_rive_controller.dart`
+### Quick lookup
 
-## 5. 关键技术约束
+| What I'm writing | Goes in | Example |
+|---|---|---|
+| Pure UI component, doesn't read providers | `presentation/widget/` | `bet_card.dart` |
+| Page widget, reads providers | `presentation/view/` | `bet_page_view.dart` |
+| Riverpod provider declaration | `provider/` | `bet_repository_provider.dart` |
+| Data + business rules (Freezed) | `domain/entity/` | `bet_entity.dart` |
+| Repository interface (contract) | `domain/repository/` | `bet_repository.dart` |
+| Repository implementation | `infrastructure/repository/` | `bet_repository_impl.dart` |
+| Raw gRPC / Firebase call | `infrastructure/datasource/` | `bet_service.dart` |
+| Multi-repo orchestration action | `usecase/` | `place_bet_usecase.dart` |
 
-- **Firebase**: 所有 Firestore 写入操作必须先在 Data 层定义 Model。
-- **Rive**: Rive 动画的状态切换逻辑必须封装在 `avatar/` 的控制器中，View 只通过改变简单的 `state` 枚举来驱动。
-- **无感数据**: 优先使用 `Stream` 订阅 Firestore，确保状态同步是响应式的。
+---
 
-## 6. 违规自检清单 (AI 任务前必读)
+## 2. Feature folder layout
 
-1. 我是否在 Widget 里写了 `setDelta()` 或复杂的 `map` 计算？如果是，请移至 **Usecase**。
-2. 我是否在业务代码里看到了 `FirebaseFirestore` 实例？如果是，请移至 **Data** 或 **Firestore** 封装类。
-3. 我是否在 Usecase 里导入了 `package:flutter/material.dart`？如果是，请立即解耦。
+> Route entries live separately in `lib/screens/[name]/top.dart` (thin auto_route wrappers, ~10 lines) and are not detailed here — see existing code for the pattern.
+
+```
+features/[name]/
+├── domain/                                     # 🎯 innermost layer — enterprise-wide business rules (no Flutter / Firebase / Proto deps)
+│   ├── entity/
+│   │   └── [name]_entity.dart                  # data + business rules, use @freezed for entity
+│   └── repository/
+│       └── [name]_repository.dart              # interface ONLY, no impl — the key to Dependency Inversion (Domain owns the contract, Infra implements it)
+├── usecase/                                    # OPTIONAL — add when business logic required
+│   └── place_bet_usecase.dart                  # one file per user action, named by intent
+├── provider/                                   # Riverpod wiring (not a layer). Default: one file per provider; group only when tightly coupled
+│   ├── [name]_repository_provider.dart         # injects NameRepository (DI binding)
+│   ├── [name]_provider.dart                    # read-only data — wraps a repo call as AsyncValue (e.g. teamTrophyProvider)
+│   ├── [name]_notifier.dart                    # mutable page state — exposes methods to update it
+│   └── place_bet_usecase_provider.dart         # OPTIONAL — one file per action usecase
+├── presentation/
+│   ├── widget/                                 # pure presentational components (no ref.watch)
+│   │   └── [name]_card.dart
+│   └── view/                                   # page-level widgets that wire up providers via ref.watch
+│       └── [name]_page_view.dart
+└── infrastructure/                             # split into subfolders when the feature gets large
+    ├── repository/
+    │   └── [name]_repository_impl.dart         # the actual impl — talks to API / Firebase / etc. (outer layer)
+    ├── datasource/                             # OPTIONAL
+    │   └── [name]_service.dart                 # raw gRPC / Firebase calls
+    ├── dto/                                    # OPTIONAL
+    │   └── [name]_dto.dart                     # DTO (Data Transfer Object) — only when it differs from entity
+    └── mapper/                                 # OPTIONAL
+        └── [name]_mapper.dart                  # DTO ↔ NameEntity translation — only when the conversion logic gets complex
+```
+
+**Notifier naming**: new files → `[name]_notifier.dart`. Legacy names (e.g. `*_selection_provider.dart`) are fine.
+
+---
+
+## 3. Data Flow (end-to-end)
+
+```mermaid
+sequenceDiagram
+    actor User
+    participant View as View<br/>(HookConsumerWidget)
+    participant Provider as Provider<br/>(@riverpod)
+    participant UseCase
+    participant Domain
+    participant Infra as Infrastructure<br/>(Repository impl)
+    participant API as Backend<br/>(gRPC/REST/Firebase)
+
+    User->>View: tap / input
+    View->>Provider: ref.read(...).method()
+    Note over Provider,UseCase: UseCase is OPTIONAL
+    Provider->>UseCase: invoke (when orchestration is needed)
+    UseCase->>Domain: validate / apply rules
+    UseCase->>Infra: call (via domain interface)
+    Infra->>API: HTTP / gRPC / Firebase SDK
+    API-->>Infra: response / error
+    Infra-->>UseCase: domain entity or DomainError
+    UseCase-->>Provider: AsyncValue.data / .error
+    Provider-->>View: rebuild via ref.watch
+    View-->>User: UI update (or SnackBar on error)
+```
+
+---
+
+## 4. Clean Architecture — Dependency Rule
+
+```mermaid
+graph LR
+    subgraph Outer["Outer (volatile)"]
+        P[Presentation<br/>widget · view]
+        I[Infrastructure<br/>repository impl · API clients · Firebase]
+    end
+    subgraph Middle["Middle"]
+        U[UseCase<br/>application logic · orchestration]
+    end
+    subgraph Inner["Inner (stable)"]
+        D[Domain<br/>entities · business rules · repository interfaces]
+    end
+
+    P -->|depends on| U
+    U -->|depends on| D
+    I -->|implements interfaces from| D
+
+    classDef inner fill:#ffe0a6,stroke:#b07a00,color:#000,stroke-width:2px
+    classDef middle fill:#d4e4f1,stroke:#2d5a7a,color:#000
+    classDef outer fill:#f1e4d4,stroke:#7a5a2d,color:#000
+    class D inner
+    class U middle
+    class P,I outer
+```
+
+> Riverpod providers are DI wiring, not a layer of their own — see the `provider/` note in §2.

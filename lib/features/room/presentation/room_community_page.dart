@@ -8,7 +8,7 @@ import '../../action/domain/entity/action_template_card.dart';
 import '../../action/presentation/action_template_usecase_provider.dart';
 import '../../action/presentation/widgets/action_template_launch_browser.dart';
 import '../../auth/presentation/user_bootstrap_provider.dart';
-import '../data/room_repository_provider.dart';
+import 'join_room_provider.dart';
 import 'room_create_page.dart';
 
 class RoomCommunityPage extends ConsumerStatefulWidget {
@@ -58,8 +58,8 @@ class _RoomCommunityPageState extends ConsumerState<RoomCommunityPage> {
 
     try {
       await ref
-          .read(firebaseRoomRepositoryProvider)
-          .joinRoomWithMembership(roomId: roomId, userId: widget.userId);
+          .read(joinRoomUsecaseProvider)
+          .execute(roomId: roomId, userId: widget.userId);
       await ref.read(userBootstrapProvider.notifier).refreshJoinedRooms();
       if (!mounted) {
         return;

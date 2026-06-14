@@ -71,29 +71,14 @@ class FirebaseRoomRepository {
     return roomIds;
   }
 
-  Future<void> joinRoomWithMembership({
+  Future<void> joinRoom({
     required String roomId,
     required String userId,
-  }) async {
-    await _joinRoomWithMembership(
-      roomId: roomId,
-      userId: userId,
-      role: 'member',
-    );
-  }
-
-  Future<void> _joinRoomWithMembership({
-    required String roomId,
-    required String userId,
-    required String role,
   }) async {
     final trimmedRoomId = roomId.trim();
     final trimmedUserId = userId.trim();
-    if (trimmedRoomId.isEmpty || trimmedUserId.isEmpty || role.trim().isEmpty) {
-      throw ArgumentError('roomId, userId and role must not be empty.');
-    }
-    if (role != 'owner' && role != 'member') {
-      throw ArgumentError('role must be owner or member.');
+    if (trimmedRoomId.isEmpty || trimmedUserId.isEmpty) {
+      throw ArgumentError('roomId and userId must not be empty.');
     }
 
     final roomRef = _firestore.collection('rooms').doc(trimmedRoomId);
@@ -102,28 +87,61 @@ class FirebaseRoomRepository {
         .doc(trimmedUserId)
         .collection('memberships')
         .doc(trimmedRoomId);
-    final roomSnapshot = await roomRef.get();
-    if (!roomSnapshot.exists) {
-      throw StateError('Room does not exist: $trimmedRoomId');
-    }
 
-    final batch = _firestore.batch();
-    batch.set(membershipRef, {
-      'roomId': trimmedRoomId,
-      'userId': trimmedUserId,
-      'role': role,
-      'createdAt': FieldValue.serverTimestamp(),
-      'updatedAt': FieldValue.serverTimestamp(),
-    }, SetOptions(merge: true));
-    batch.set(roomRef, {
-      'members.$trimmedUserId': {
-        'userId': trimmedUserId,
-        'role': role,
-        'joinedAt': FieldValue.serverTimestamp(),
-      },
-      'updatedAt': FieldValue.serverTimestamp(),
-    }, SetOptions(merge: true));
+    await _firestore.runTransaction((transaction) async {
+      final roomSnapshot = await transaction.get(roomRef);
+      if (!roomSnapshot.exists) {
+        throw StateError('Room does not exist: $trimmedRoomId');
+      }
 
-    await batch.commit();
+      final roomData = roomSnapshot.data();
+      if (roomData == null) {
+        throw StateError('Room data is missing: $trimmedRoomId');
+      }
+
+      final roomOwnerId = (roomData['ownerId'] ?? '').toString().trim();
+      final membershipSnapshot = await transaction.get(membershipRef);
+
+      if (roomOwnerId == trimmedUserId) {
+        // Owner membership is created during room creation. Joining again is a no-op.
+        return;
+      }
+
+      transaction.update(roomRef, {
+        'members.$trimmedUserId': {
+          'userId': trimmedUserId,
+          'role': 'member',
+          'joinedAt': FieldValue.serverTimestamp(),
+        },
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+
+      if (!membershipSnapshot.exists) {
+        transaction.set(membershipRef, {
+          'roomId': trimmedRoomId,
+          'userId': trimmedUserId,
+          'role': 'member',
+          'createdAt': FieldValue.serverTimestamp(),
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
+        return;
+      }
+
+      final membershipData = membershipSnapshot.data();
+      if (membershipData == null) {
+        throw StateError('Membership data is missing for room: $trimmedRoomId');
+      }
+
+      final existingRole = (membershipData['role'] ?? '').toString().trim();
+      if (existingRole != 'member') {
+        throw StateError(
+          'Membership role mismatch. Expected member, got: $existingRole',
+        );
+      }
+
+      transaction.update(membershipRef, {
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+    });
   }
 }

@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../auth/presentation/user_bootstrap_provider.dart';
-import '../data/room_repository_provider.dart';
 import '../../../firestore/ably_state_machine.dart';
 import '../data/room_event.dart';
 import '../data/room_presence_member.dart';
+import 'join_room_provider.dart';
 import 'room_create_page.dart';
 import 'widgets/room_widgets.dart';
 
@@ -177,11 +177,9 @@ class _RoomMainPageState extends ConsumerState<RoomMainPage> {
     });
 
     try {
-      final roomRepository = ref.read(firebaseRoomRepositoryProvider);
-      await roomRepository.joinRoomWithMembership(
-        roomId: roomId,
-        userId: widget.userId,
-      );
+      await ref
+          .read(joinRoomUsecaseProvider)
+          .execute(roomId: roomId, userId: widget.userId);
       await ref.read(userBootstrapProvider.notifier).refreshJoinedRooms();
       await _subscribeRoomById(roomId);
     } catch (error) {

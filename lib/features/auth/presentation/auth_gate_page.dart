@@ -27,6 +27,7 @@ class _AuthGatePageState extends ConsumerState<AuthGatePage> {
   late final RegisterUsecase _registerUsecase;
   late final SignOutUsecase _signOutUsecase;
   String? _bootstrappedUserId;
+  bool _isClearScheduled = false;
 
   @override
   void initState() {
@@ -52,7 +53,16 @@ class _AuthGatePageState extends ConsumerState<AuthGatePage> {
         final user = snapshot.data;
         if (user == null) {
           _bootstrappedUserId = null;
-          ref.read(userBootstrapProvider.notifier).clear();
+          if (!_isClearScheduled) {
+            _isClearScheduled = true;
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              _isClearScheduled = false;
+              if (!mounted) {
+                return;
+              }
+              ref.read(userBootstrapProvider.notifier).clear();
+            });
+          }
           return AuthLoginPage(
             signInUsecase: _signInUsecase,
             registerUsecase: _registerUsecase,

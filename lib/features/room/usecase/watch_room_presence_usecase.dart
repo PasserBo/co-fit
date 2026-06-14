@@ -1,4 +1,4 @@
-import '../data/room_presence_member.dart';
+import '../domain/entity/room_presence_member.dart';
 import '../data/room_realtime_repository.dart';
 
 class WatchRoomPresenceUsecase {

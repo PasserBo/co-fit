@@ -5,8 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../auth/presentation/user_bootstrap_provider.dart';
 import '../../../firestore/ably_state_machine.dart';
-import '../data/room_event.dart';
-import '../data/room_presence_member.dart';
+import '../domain/entity/room_event.dart';
+import '../domain/entity/room_presence_member.dart';
 import 'join_room_provider.dart';
 import 'room_create_page.dart';
 import 'widgets/room_widgets.dart';

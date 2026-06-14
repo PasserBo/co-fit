@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../data/room_presence_member.dart';
+import '../../domain/entity/room_presence_member.dart';
 
 class RoomPresenceCard extends StatelessWidget {
   const RoomPresenceCard({

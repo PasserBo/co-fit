@@ -1,6 +1,6 @@
 import 'package:uuid/uuid.dart';
 
-import '../../room/data/room_event.dart';
+import '../../room/domain/entity/room_event.dart';
 import 'entity/action_template_card.dart';
 import '../data/action_template_event_repository.dart';
 import '../data/action_template_selection_repository.dart';

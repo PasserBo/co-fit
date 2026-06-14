@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import 'room_info_model.dart';
+import '../domain/entity/room_info_entity.dart';
 
 class FirebaseRoomRepository {
   FirebaseRoomRepository({FirebaseFirestore? firestore})
@@ -8,16 +8,16 @@ class FirebaseRoomRepository {
 
   final FirebaseFirestore _firestore;
 
-  Future<RoomInfoModel> createRoom({required RoomInfoModel room}) async {
+  Future<RoomInfoEntity> createRoom({required RoomInfoEntity room}) async {
     await _firestore
         .collection('rooms')
         .doc(room.roomId)
-        .set(room.toCreateMap());
+        .set(_toCreateMap(room));
     return room;
   }
 
-  Future<RoomInfoModel> createRoomWithMembership({
-    required RoomInfoModel room,
+  Future<RoomInfoEntity> createRoomWithMembership({
+    required RoomInfoEntity room,
   }) async {
     final trimmedRoomId = room.roomId.trim();
     final trimmedOwnerId = room.ownerId.trim();
@@ -34,7 +34,7 @@ class FirebaseRoomRepository {
 
     final batch = _firestore.batch();
     batch.set(roomRef, {
-      ...room.toCreateMap(),
+      ..._toCreateMap(room),
       'members': {
         trimmedOwnerId: {
           'userId': trimmedOwnerId,
@@ -143,5 +143,13 @@ class FirebaseRoomRepository {
         'updatedAt': FieldValue.serverTimestamp(),
       });
     });
+  }
+
+  Map<String, dynamic> _toCreateMap(RoomInfoEntity room) {
+    return {
+      ...room.toMap(),
+      'createdAt': FieldValue.serverTimestamp(),
+      'updatedAt': FieldValue.serverTimestamp(),
+    };
   }
 }

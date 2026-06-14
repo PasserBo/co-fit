@@ -1,4 +1,6 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
+
+part 'room_info_entity.freezed.dart';
 
 class RoomVisibility {
   static const String public = 'public';
@@ -6,42 +8,19 @@ class RoomVisibility {
   static const Set<String> allowed = {public, unlisted};
 }
 
-class RoomInfoModel {
-  RoomInfoModel({
-    required this.roomId,
-    required this.name,
-    required this.description,
-    required this.visibility,
-    required this.ownerId,
-    required this.shareLinkHash,
-    required this.shareSalt,
-    this.createdAt,
-    this.updatedAt,
-  });
-
-  final String roomId;
-  final String name;
-  final String description;
-  final String visibility;
-  final String ownerId;
-  final String shareLinkHash;
-  final String shareSalt;
-  final DateTime? createdAt;
-  final DateTime? updatedAt;
-
-  Map<String, dynamic> toCreateMap() {
-    return {
-      'roomId': roomId,
-      'name': name,
-      'description': description,
-      'visibility': visibility,
-      'ownerId': ownerId,
-      'shareLinkHash': shareLinkHash,
-      'shareSalt': shareSalt,
-      'createdAt': FieldValue.serverTimestamp(),
-      'updatedAt': FieldValue.serverTimestamp(),
-    };
-  }
+@freezed
+abstract class RoomInfoEntity with _$RoomInfoEntity {
+  const factory RoomInfoEntity({
+    required String roomId,
+    required String name,
+    required String description,
+    required String visibility,
+    required String ownerId,
+    required String shareLinkHash,
+    required String shareSalt,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) = _RoomInfoEntity;
 
   Map<String, dynamic> toMap() {
     return {
@@ -57,8 +36,8 @@ class RoomInfoModel {
     };
   }
 
-  factory RoomInfoModel.fromMap(Map<String, dynamic> source) {
-    return RoomInfoModel(
+  factory RoomInfoEntity.fromMap(Map<String, dynamic> source) {
+    return RoomInfoEntity(
       roomId: (source['roomId'] ?? '').toString(),
       name: (source['name'] ?? '').toString(),
       description: (source['description'] ?? '').toString(),
@@ -72,11 +51,18 @@ class RoomInfoModel {
   }
 
   static DateTime? _asDateTime(Object? value) {
-    if (value is Timestamp) {
-      return value.toDate().toLocal();
+    if (value == null) {
+      return null;
+    }
+    if (value is DateTime) {
+      return value.toLocal();
     }
     if (value is String) {
       return DateTime.tryParse(value)?.toLocal();
+    }
+    final dynamic maybeDate = (value as dynamic).toDate?.call();
+    if (maybeDate is DateTime) {
+      return maybeDate.toLocal();
     }
     return null;
   }

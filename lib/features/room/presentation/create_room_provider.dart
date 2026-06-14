@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../data/room_info_model.dart';
+import '../domain/entity/room_info_entity.dart';
 import '../data/room_repository_provider.dart';
 import '../usecase/create_room_usecase.dart';
 

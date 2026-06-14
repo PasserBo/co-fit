@@ -1,4 +1,4 @@
-import '../../room/data/room_event.dart';
+import '../../room/domain/entity/room_event.dart';
 import 'action_template_event_repository.dart';
 
 class AblyActionTemplateEventRepository implements ActionTemplateEventRepository {

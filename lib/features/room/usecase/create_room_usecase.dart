@@ -6,7 +6,7 @@ import 'package:crypto/crypto.dart';
 import 'package:uuid/uuid.dart';
 
 import '../data/firebase_room_repository.dart';
-import '../data/room_info_model.dart';
+import '../domain/entity/room_info_entity.dart';
 
 class CreateRoomUsecase {
   CreateRoomUsecase(this._repository, {Uuid? uuid, Random? random})
@@ -17,7 +17,7 @@ class CreateRoomUsecase {
   final Uuid _uuid;
   final Random _random;
 
-  Future<RoomInfoModel> execute({
+  Future<RoomInfoEntity> execute({
     required String name,
     required String description,
     required String visibility,
@@ -53,7 +53,7 @@ class CreateRoomUsecase {
       ownerId: trimmedOwnerId,
       shareSalt: shareSalt,
     );
-    final room = RoomInfoModel(
+    final room = RoomInfoEntity(
       roomId: roomId,
       name: trimmedName,
       description: trimmedDescription,

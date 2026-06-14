@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../data/room_event.dart';
+import '../../domain/entity/room_event.dart';
 
 class RoomEventTimelineCard extends StatelessWidget {
   const RoomEventTimelineCard({

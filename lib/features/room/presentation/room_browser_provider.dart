@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../firestore/ably_state_machine.dart';
-import '../data/room_event.dart';
-import '../data/room_presence_member.dart';
+import '../domain/entity/room_event.dart';
+import '../domain/entity/room_presence_member.dart';
 
 const _defaultEventBufferLimit = 50;
 

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../data/room_info_model.dart';
+import '../domain/entity/room_info_entity.dart';
 import 'create_room_provider.dart';
 
 class RoomCreatePage extends ConsumerWidget {

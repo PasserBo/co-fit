@@ -85,7 +85,7 @@ class AblyService {
     await channel.presence.leave();
   }
 
-  Stream<List<Map<String, String>>> watchPresence({
+  Stream<List<Map<String, dynamic>>> watchPresence({
     required String roomId,
   }) {
     final channel = _getRoomChannel(roomId);
@@ -98,21 +98,45 @@ class AblyService {
     })();
   }
 
-  Future<List<Map<String, String>>> _getPresenceMembers(String roomId) async {
+  Future<List<Map<String, dynamic>>> _getPresenceMembers(String roomId) async {
     final channel = _getRoomChannel(roomId);
     final members = await channel.presence.get();
-    return members.map<Map<String, String>>((member) {
+    return members.map<Map<String, dynamic>>((member) {
       final clientId = (member.clientId ?? '').toString();
-      final dynamic memberData = member.data;
+      final memberData = _normalizePresenceData(member.data);
       String userId = clientId;
-      if (memberData is Map && memberData['userId'] != null) {
+      if (memberData['userId'] != null) {
         userId = memberData['userId'].toString();
       }
       return {
         'clientId': clientId,
         'userId': userId,
+        'data': memberData,
       };
     }).toList(growable: false);
+  }
+
+  Map<String, dynamic> _normalizePresenceData(Object? rawData) {
+    if (rawData is Map<String, dynamic>) {
+      return rawData;
+    }
+    if (rawData is Map) {
+      return rawData.map((key, value) => MapEntry(key.toString(), value));
+    }
+    if (rawData is String) {
+      try {
+        final decoded = jsonDecode(rawData);
+        if (decoded is Map<String, dynamic>) {
+          return decoded;
+        }
+        if (decoded is Map) {
+          return decoded.map((key, value) => MapEntry(key.toString(), value));
+        }
+      } catch (_) {
+        return <String, dynamic>{};
+      }
+    }
+    return <String, dynamic>{};
   }
 
   ably.RealtimeChannel _getRoomChannel(String roomId) {

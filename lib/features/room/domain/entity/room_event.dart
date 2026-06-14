@@ -1,3 +1,7 @@
+import 'package:freezed_annotation/freezed_annotation.dart';
+
+part 'room_event.freezed.dart';
+
 class RoomEventType {
   static const String actionStarted = 'action_started';
   static const String actionPaused = 'action_paused';
@@ -5,15 +9,16 @@ class RoomEventType {
   static const String actionCompleted = 'action_completed';
 }
 
-class RoomEventPayload {
-  RoomEventPayload({
-    required this.schemaVersion,
-    required this.actionKey,
-    required this.durationSec,
-    required this.remainingSec,
-    required this.sessionId,
-    this.customData = const {},
-  });
+@freezed
+abstract class RoomEventPayload with _$RoomEventPayload {
+  const factory RoomEventPayload({
+    required int schemaVersion,
+    required String actionKey,
+    required int durationSec,
+    required int remainingSec,
+    required String sessionId,
+    @Default(<String, dynamic>{}) Map<String, dynamic> customData,
+  }) = _RoomEventPayload;
 
   factory RoomEventPayload.fromMap(Map<String, dynamic> source) {
     final knownKeys = {
@@ -35,13 +40,6 @@ class RoomEventPayload {
       customData: custom,
     );
   }
-
-  final int schemaVersion;
-  final String actionKey;
-  final int durationSec;
-  final int remainingSec;
-  final String sessionId;
-  final Map<String, dynamic> customData;
 
   Map<String, dynamic> toMap() {
     return {
@@ -65,22 +63,16 @@ class RoomEventPayload {
   }
 }
 
-class RoomEvent {
-  RoomEvent({
-    required this.eventId,
-    required this.roomId,
-    required this.userId,
-    required this.type,
-    required this.timestamp,
-    required this.payload,
-  });
-
-  final String eventId;
-  final String roomId;
-  final String userId;
-  final String type;
-  final DateTime timestamp;
-  final RoomEventPayload payload;
+@freezed
+abstract class RoomEvent with _$RoomEvent {
+  const factory RoomEvent({
+    required String eventId,
+    required String roomId,
+    required String userId,
+    required String type,
+    required DateTime timestamp,
+    required RoomEventPayload payload,
+  }) = _RoomEvent;
 
   Map<String, dynamic> toMap() {
     return {

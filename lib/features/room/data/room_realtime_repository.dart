@@ -1,6 +1,6 @@
 import '../../../firestore/ably_service.dart';
-import 'room_event.dart';
-import 'room_presence_member.dart';
+import '../domain/entity/room_event.dart';
+import '../domain/entity/room_presence_member.dart';
 
 class RoomRealtimeRepository {
   RoomRealtimeRepository(this._ablyService);
@@ -39,12 +39,7 @@ class RoomRealtimeRepository {
   }) {
     return _ablyService.watchPresence(roomId: roomId).map((rawMembers) {
       return rawMembers
-          .map(
-            (member) => RoomPresenceMember(
-              clientId: member['clientId'] ?? 'unknown',
-              userId: member['userId'] ?? member['clientId'] ?? 'unknown',
-            ),
-          )
+          .map(RoomPresenceMember.fromMap)
           .toList(growable: false);
     });
   }

@@ -4,8 +4,8 @@ import 'package:ably_flutter/ably_flutter.dart' as ably;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../features/room/data/room_event.dart';
-import '../features/room/data/room_presence_member.dart';
+import '../features/room/domain/entity/room_event.dart';
+import '../features/room/domain/entity/room_presence_member.dart';
 import '../features/room/data/room_realtime_repository.dart';
 import 'ably_service.dart';
 

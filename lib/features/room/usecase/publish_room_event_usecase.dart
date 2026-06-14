@@ -1,4 +1,4 @@
-import '../data/room_event.dart';
+import '../domain/entity/room_event.dart';
 import '../data/room_realtime_repository.dart';
 
 class PublishRoomEventUsecase {

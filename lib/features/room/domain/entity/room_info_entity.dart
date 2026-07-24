@@ -10,6 +10,8 @@ class RoomVisibility {
 
 @freezed
 abstract class RoomInfoEntity with _$RoomInfoEntity {
+  const RoomInfoEntity._();
+
   const factory RoomInfoEntity({
     required String roomId,
     required String name,

@@ -213,8 +213,8 @@ return $default(_that.roomId,_that.name,_that.description,_that.visibility,_that
 /// @nodoc
 
 
-class _RoomInfoEntity implements RoomInfoEntity {
-  const _RoomInfoEntity({required this.roomId, required this.name, required this.description, required this.visibility, required this.ownerId, required this.shareLinkHash, required this.shareSalt, this.createdAt, this.updatedAt});
+class _RoomInfoEntity extends RoomInfoEntity {
+  const _RoomInfoEntity({required this.roomId, required this.name, required this.description, required this.visibility, required this.ownerId, required this.shareLinkHash, required this.shareSalt, this.createdAt, this.updatedAt}): super._();
   
 
 @override final  String roomId;

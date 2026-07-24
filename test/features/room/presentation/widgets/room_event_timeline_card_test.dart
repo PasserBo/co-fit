@@ -1,4 +1,4 @@
-import 'package:cofit/features/room/data/room_event.dart';
+import 'package:cofit/features/room/domain/entity/room_event.dart';
 import 'package:cofit/features/room/presentation/widgets/room_event_timeline_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';

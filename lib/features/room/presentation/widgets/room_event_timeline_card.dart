@@ -57,14 +57,14 @@ class RoomEventTimelineCard extends StatelessWidget {
     if (templateName == null) {
       return '${event.userId} -> ${event.type}';
     }
-    return '${event.userId} -> ${event.type} (${templateName})';
+    return '${event.userId} -> ${event.type} ($templateName)';
   }
 
   String _buildSubtitle(RoomEvent event, {String? templateName}) {
     final payload = event.payload;
     final parts = <String>[
       event.timestamp.toIso8601String(),
-      if (templateName != null) 'template=${templateName}',
+      if (templateName != null) 'template=$templateName',
       'action=${payload.actionKey}',
       'duration=${payload.durationSec}',
       'remaining=${payload.remainingSec}',

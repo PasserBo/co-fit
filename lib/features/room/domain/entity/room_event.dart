@@ -11,6 +11,8 @@ class RoomEventType {
 
 @freezed
 abstract class RoomEventPayload with _$RoomEventPayload {
+  const RoomEventPayload._();
+
   const factory RoomEventPayload({
     required int schemaVersion,
     required String actionKey,
@@ -65,6 +67,8 @@ abstract class RoomEventPayload with _$RoomEventPayload {
 
 @freezed
 abstract class RoomEvent with _$RoomEvent {
+  const RoomEvent._();
+
   const factory RoomEvent({
     required String eventId,
     required String roomId,

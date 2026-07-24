@@ -210,8 +210,8 @@ return $default(_that.schemaVersion,_that.actionKey,_that.durationSec,_that.rema
 /// @nodoc
 
 
-class _RoomEventPayload implements RoomEventPayload {
-  const _RoomEventPayload({required this.schemaVersion, required this.actionKey, required this.durationSec, required this.remainingSec, required this.sessionId, final  Map<String, dynamic> customData = const <String, dynamic>{}}): _customData = customData;
+class _RoomEventPayload extends RoomEventPayload {
+  const _RoomEventPayload({required this.schemaVersion, required this.actionKey, required this.durationSec, required this.remainingSec, required this.sessionId, final  Map<String, dynamic> customData = const <String, dynamic>{}}): _customData = customData,super._();
   
 
 @override final  int schemaVersion;
@@ -497,8 +497,8 @@ return $default(_that.eventId,_that.roomId,_that.userId,_that.type,_that.timesta
 /// @nodoc
 
 
-class _RoomEvent implements RoomEvent {
-  const _RoomEvent({required this.eventId, required this.roomId, required this.userId, required this.type, required this.timestamp, required this.payload});
+class _RoomEvent extends RoomEvent {
+  const _RoomEvent({required this.eventId, required this.roomId, required this.userId, required this.type, required this.timestamp, required this.payload}): super._();
   
 
 @override final  String eventId;

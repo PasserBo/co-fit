@@ -7,6 +7,7 @@ import '../../auth/presentation/user_bootstrap_provider.dart';
 import '../../../firestore/ably_state_machine.dart';
 import '../domain/entity/room_event.dart';
 import '../domain/entity/room_presence_member.dart';
+import '../domain/entity/user_activity_status_entity.dart';
 import 'join_room_provider.dart';
 import 'room_create_page.dart';
 import 'widgets/room_widgets.dart';
@@ -224,7 +225,10 @@ class _RoomMainPageState extends ConsumerState<RoomMainPage> {
     });
   }
 
-  Future<void> _publishActionEvent(String type) async {
+  Future<void> _publishActionLifecycle({
+    required String eventType,
+    required UserActivityState activityState,
+  }) async {
     if (!_isJoined) {
       return;
     }
@@ -237,34 +241,49 @@ class _RoomMainPageState extends ConsumerState<RoomMainPage> {
     _lastPublishedAt = now;
 
     final roomId = _activeRoomId!;
+    final sessionId =
+        _activeSessionId ?? '${widget.userId}-${now.millisecondsSinceEpoch}';
     final event = RoomEvent(
       eventId: '${widget.userId}-${now.microsecondsSinceEpoch}',
       roomId: roomId,
       userId: widget.userId,
-      type: type,
+      type: eventType,
       timestamp: now,
       payload: RoomEventPayload(
         schemaVersion: 1,
         actionKey: _selectedAction,
         durationSec: _selectedDurationSec,
         remainingSec: _remainingSec,
-        sessionId:
-            _activeSessionId ??
-            '${widget.userId}-${now.millisecondsSinceEpoch}',
+        sessionId: sessionId,
         customData: const {},
       ),
     );
+    final activityStatus = UserActivityStatusEntity(
+      activityState: activityState,
+      actionKey: activityState == UserActivityState.idle ? null : _selectedAction,
+      durationSec:
+          activityState == UserActivityState.idle ? null : _selectedDurationSec,
+      remainingSec: activityState == UserActivityState.idle ? null : _remainingSec,
+      sessionId: activityState == UserActivityState.idle ? null : sessionId,
+      updatedAtEpochMs: now.millisecondsSinceEpoch,
+    );
+    final presenceData = <String, dynamic>{
+      'userId': widget.userId,
+      'activity': userActivityStatusEntityToMap(activityStatus),
+    };
 
     try {
-      await ref
-          .read(ablyRuntimeProvider.notifier)
-          .publishRoomEvent(event: event);
+      final notifier = ref.read(ablyRuntimeProvider.notifier);
+      await Future.wait([
+        notifier.publishRoomEvent(event: event),
+        notifier.updatePresenceData(roomId: roomId, data: presenceData),
+      ]);
     } catch (error) {
       if (!mounted) {
         return;
       }
       setState(() {
-        _errorMessage = 'Failed to publish event: $error';
+        _errorMessage = 'Failed to sync action lifecycle: $error';
       });
     }
   }
@@ -277,7 +296,10 @@ class _RoomMainPageState extends ConsumerState<RoomMainPage> {
       _isTimerRunning = true;
     });
     _startTimer();
-    await _publishActionEvent(RoomEventType.actionStarted);
+    await _publishActionLifecycle(
+      eventType: RoomEventType.actionStarted,
+      activityState: UserActivityState.active,
+    );
   }
 
   Future<void> _pauseAction() async {
@@ -285,7 +307,10 @@ class _RoomMainPageState extends ConsumerState<RoomMainPage> {
     setState(() {
       _isTimerRunning = false;
     });
-    await _publishActionEvent(RoomEventType.actionPaused);
+    await _publishActionLifecycle(
+      eventType: RoomEventType.actionPaused,
+      activityState: UserActivityState.paused,
+    );
   }
 
   Future<void> _resumeAction() async {
@@ -296,7 +321,10 @@ class _RoomMainPageState extends ConsumerState<RoomMainPage> {
       _isTimerRunning = true;
     });
     _startTimer();
-    await _publishActionEvent(RoomEventType.actionResumed);
+    await _publishActionLifecycle(
+      eventType: RoomEventType.actionResumed,
+      activityState: UserActivityState.active,
+    );
   }
 
   Future<void> _completeAction() async {
@@ -305,7 +333,10 @@ class _RoomMainPageState extends ConsumerState<RoomMainPage> {
       _isTimerRunning = false;
       _remainingSec = 0;
     });
-    await _publishActionEvent(RoomEventType.actionCompleted);
+    await _publishActionLifecycle(
+      eventType: RoomEventType.actionCompleted,
+      activityState: UserActivityState.idle,
+    );
     if (mounted) {
       setState(() {
         _activeSessionId = null;

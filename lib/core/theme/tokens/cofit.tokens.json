@@ -1,0 +1,139 @@
+{
+  "$description": "CoFit design tokens v1 (W3C DTCG). 设计事实源:先改这里,再同步 lib/core/theme/*.dart。带透明度的颜色以 $description 中的 alpha 百分比为准(Dart 用 withValues),hex8 为近似记录。出处标注:13a = design_reference.html#13a token 表;README = docs/README.md;seed v1 = 起始种子值,可调。",
+  "color": {
+    "$type": "color",
+    "$description": "palette 层 — 仅供 theme 文件内部引用,feature 代码禁止直接使用",
+    "lime": {
+      "200": { "$value": "#E4F9A3" },
+      "300": { "$value": "#D9F57E" },
+      "400": { "$value": "#C8F24B", "$description": "★ 品牌主色 (13a)" },
+      "500": { "$value": "#A9D32F" },
+      "900": { "$value": "#5A8A1E" }
+    },
+    "coral": {
+      "300": { "$value": "#FFA08A" },
+      "400": { "$value": "#FF7A59", "$description": "★ (13a)" },
+      "500": { "$value": "#E8705F" }
+    },
+    "amber": {
+      "300": { "$value": "#F7D580" },
+      "400": { "$value": "#F2C14B", "$description": "★ (13a)" }
+    },
+    "blue": {
+      "300": { "$value": "#8FBAFF", "$description": "★ (13a)" },
+      "400": { "$value": "#6EA8FF" }
+    },
+    "gray": {
+      "50": { "$value": "#F4F3EF" },
+      "500": { "$value": "#8B8F86" },
+      "850": { "$value": "#22252E" },
+      "900": { "$value": "#181B22" },
+      "950": { "$value": "#171A21" },
+      "1000": { "$value": "#14161C" }
+    },
+    "white": { "$value": "#FFFFFF" }
+  },
+  "primary": {
+    "$type": "color",
+    "main": { "$value": "{color.lime.400}" },
+    "on": { "$value": "{color.gray.950}", "$description": "主色底上的前景色" },
+    "subtle": { "$value": "#C8F24B29", "$description": "lime.400 @16% — 淡底徽章底色 (13a)" },
+    "border": { "$value": "#C8F24B66", "$description": "lime.400 @40% — 淡底徽章描边 (13a)" },
+    "pressed": { "$value": "{color.lime.500}" }
+  },
+  "bg": {
+    "$type": "color",
+    "app": { "$value": "{color.gray.900}", "$description": "App 全局底色 (13a)" },
+    "surface": { "$value": "{color.gray.850}", "$description": "卡片容器底色 (13a)" },
+    "overlay": { "$value": "#22252E9E", "$description": "gray.850 @62% — 悬浮层底色,需配合 blur.overlay (README)" },
+    "deep": { "$value": "{color.gray.1000}" }
+  },
+  "border": {
+    "$type": "color",
+    "subtle": { "$value": "#FFFFFF12", "$description": "white @7% — 卡片描边 (13a)" },
+    "strong": { "$value": "#FFFFFF17", "$description": "white @9% — 分隔线加强档 (13a)" },
+    "focus": { "$value": "{color.lime.400}", "$description": "选中/焦点描边,配合 opacity.glow 光晕 (README)" }
+  },
+  "text": {
+    "$type": "color",
+    "primary": { "$value": "{color.gray.50}" },
+    "secondary": { "$value": "#F4F3EFB3", "$description": "gray.50 @70% (13a)" },
+    "tertiary": { "$value": "#F4F3EF80", "$description": "gray.50 @50% (13a)" },
+    "disabled": { "$value": "#F4F3EF6B", "$description": "gray.50 @42% (13a)" }
+  },
+  "status": {
+    "$type": "color",
+    "active": { "$value": "{color.lime.400}", "$description": "运动中 — 小人光圈/呼吸动画 (README)" },
+    "paused": { "$value": "{color.amber.400}", "$description": "暂停 (README)" },
+    "idle": { "$value": "{color.gray.500}", "$description": "挂机 (README)" },
+    "danger": { "$value": "{color.coral.500}", "$description": "危险操作/移除角标/退出登录 (README)" },
+    "info": { "$value": "{color.blue.400}" }
+  },
+  "type": {
+    "$type": "color",
+    "$description": "动作卡类型色。⚠ cardio 与品牌色同为 lime.400,其选中态必须靠 ✓ 角标区分 (README)",
+    "strength": { "$value": "{color.coral.400}" },
+    "strengthSubtle": { "$value": "#FF7A5929", "$description": "coral.400 @16%" },
+    "cardio": { "$value": "{color.lime.400}" },
+    "cardioSubtle": { "$value": "#C8F24B29", "$description": "lime.400 @16%" },
+    "core": { "$value": "{color.amber.400}" },
+    "coreSubtle": { "$value": "#F2C14B29", "$description": "amber.400 @16%" },
+    "flexibility": { "$value": "{color.blue.300}" },
+    "flexibilitySubtle": { "$value": "#8FBAFF29", "$description": "blue.300 @16%" }
+  },
+  "opacity": {
+    "$type": "number",
+    "subtle": { "$value": 0.16, "$description": "淡底 = 主色 @16% (README alpha 规则)" },
+    "border": { "$value": 0.4, "$description": "淡描边 = 主色 @40% (README alpha 规则)" },
+    "glow": { "$value": 0.18, "$description": "选中光晕 lime@18% (README)" },
+    "overlay": { "$value": 0.62, "$description": "悬浮层底 (README)" }
+  },
+  "spacing": {
+    "$type": "dimension",
+    "$description": "间距刻度,4 基数 (seed v1) — 新间距先吸附到此刻度",
+    "xs": { "$value": { "value": 4, "unit": "px" } },
+    "sm": { "$value": { "value": 8, "unit": "px" } },
+    "md": { "$value": { "value": 12, "unit": "px" } },
+    "lg": { "$value": { "value": 16, "unit": "px" } },
+    "xl": { "$value": { "value": 20, "unit": "px" } },
+    "2xl": { "$value": { "value": 24, "unit": "px" } },
+    "3xl": { "$value": { "value": 32, "unit": "px" } }
+  },
+  "radius": {
+    "$type": "dimension",
+    "sm": { "$value": { "value": 8, "unit": "px" }, "$description": "卡片内图标块 (README)" },
+    "md": { "$value": { "value": 12, "unit": "px" }, "$description": "卡片容器下限 (README: 12–16)" },
+    "lg": { "$value": { "value": 16, "unit": "px" }, "$description": "卡片容器上限 / 悬浮 dock (README)" }
+  },
+  "borderWidth": {
+    "$type": "dimension",
+    "hairline": { "$value": { "value": 1, "unit": "px" } },
+    "focus": { "$value": { "value": 1.5, "unit": "px" }, "$description": "选中/焦点描边 (README)" }
+  },
+  "size": {
+    "$type": "dimension",
+    "cardTypeBar": { "$value": { "value": 4, "unit": "px" }, "$description": "动作卡顶部类型色条,README 允许 4–5,取 4" },
+    "cardIconBlock": { "$value": { "value": 26, "unit": "px" }, "$description": "动作卡图标块 (README)" },
+    "removeBadge": { "$value": { "value": 19, "unit": "px" }, "$description": "编辑态移除角标圆 (README)" },
+    "minTapTarget": { "$value": { "value": 44, "unit": "px" }, "$description": "可点击目标最小边长 (seed v1, iOS HIG)" }
+  },
+  "blur": {
+    "$type": "dimension",
+    "overlay": { "$value": { "value": 8, "unit": "px" }, "$description": "悬浮层 backdrop blur (README)" }
+  },
+  "typography": {
+    "fontFamily": {
+      "display": { "$type": "fontFamily", "$value": ["Space Grotesk"], "$description": "英文/数字;中文跟随系统字体 (README)" }
+    },
+    "fontWeight": {
+      "$type": "fontWeight",
+      "heading": { "$value": 700, "$description": "标题 (README)" },
+      "label": { "$value": 600, "$description": "标签 (README)" }
+    }
+  },
+  "motion": {
+    "bobOffset": { "$type": "dimension", "$value": { "value": 5, "unit": "px" }, "$description": "小人上下浮动幅度 (README)" },
+    "breatheScale": { "$type": "number", "$value": 1.055, "$description": "运动中光圈呼吸动画 scale 1→1.055 (README)" },
+    "dockAutoCollapse": { "$type": "duration", "$value": { "value": 5, "unit": "s" }, "$description": "dock 无操作自动收起 (README)" }
+  }
+}

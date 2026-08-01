@@ -58,6 +58,34 @@ CoFit 是一个「虚拟健身房」社交健身 App(Flutter + Firebase):好友�
 - dock: 点当前图标展开/收起,5s 自动收起;展开时各目的地固定槽位(肌肉记忆)。
 - 动画: 小人 bob(上下 5px 浮动)、运动中光圈 breathe(scale 1→1.055)。
 
+## 小人动作动画(Avatar Motion Set,参考稿 #14a)
+动画**只按 4 个卡牌类型走通用原型**,不细分具体动作;自建卡选类型即自动获得动画。差异化仅两个参数:节奏倍率(慢/标准/快 → 时长 ×1.3/×1/×0.75)和光圈类型色。
+
+**形体**(与房间形象一致): 白色 gray-50;圆头(带 2.5px 状态色头环)+ 胶囊躯干 + **短粗四肢、与躯干分离悬浮**(间隙 ~4px)。待机/暂停无手臂,运动时出现短臂。地面光圈 = 类型色 @16–28%。
+
+**状态机**: 待机 →(打出卡牌)→ 起手 0.4s ×1 → 运动 loop(按类型)⇄ 暂停 →(时长结束)→ 完成 1.1s ×1 → 待机。
+
+| 状态 | 关键帧(0% → 50% → 100%) | 时长/缓动 |
+|---|---|---|
+| 待机 idle | 整体 translateY 0 → −5px → 0 | 2.4s ease-in-out loop |
+| 起手 | 卡飞入 0.5s;整体 scale 1→1.16→1 回弹;光圈 burst scale .5→2 淡出 ×1 | 0.4s overshoot |
+| 力量·蹲起 | 上身 translateY 0→10px;腿 scaleY 1→.58(origin 脚底);臂 rotate 10°→75°(origin 肩) | 1.3s ease-in-out loop |
+| 有氧·原地跑(侧视) | 整体前倾 8° + hop −2.5px(2 倍频);腿 rotate −32°→+32°(origin 髋);臂 rotate +35°→−35°(origin 肩) | 0.6s ease-in-out loop |
+| 核心·支撑(侧视) | 静姿 + 整体 translateY 0→1.6px 微颤 | 0.9s ease-in-out loop |
+| 柔韧·伸展 | 上身 rotate 0→−16°(origin 髋),顶点停留 20%;单臂固定过头(−150° origin 肩) | 2.6s ease-in-out loop |
+| 暂停 | 整体 rotate ±5°(origin 脚底),透明度 75%,头环转 amber | 3s ease-in-out loop |
+| 完成 | 跳 −16px + 二段小跳;双臂 rotate 0→150°;光圈 burst ×2 | 1.1s overshoot ×1 |
+
+### ⚠ 关键帧同步规范(必读)
+房间内多个小人同屏,肢体相位极易漂移(hot reload / widget 重建 / 分别启动的动画时钟都会导致左右肢从「交替」变「同步」)。规则:
+
+1. **每个小人每个状态只用一个 AnimationController**(单一时钟)。所有部件(头/躯干/双臂/双腿)从同一个 `controller.value` 派生角度,禁止一肢一个 controller 或一肢一个 `AnimationController.repeat()`。
+2. **镜像肢体用数学取反,不用第二条动画**: `armLeftAngle = f(t)`, `armRightAngle = -f(t)`;`legLeft = g(t)`, `legRight = -g(t)`。相位关系由公式保证,与启动时刻无关。
+3. **相位由结构保证,不靠启动对齐**: 不要依赖"两条 animation 同时 start"来对齐相位——widget 重建后会各自重启导致漂移(我们在 HTML 原型里实际踩过这个坑,修法就是共用同一条 keyframe + 几何镜像)。
+4. **状态切换时 controller 从 0 重启**,起手/完成的 ×1 过渡动画天然掩盖跳变。
+5. **多个小人之间不需要互相同步**;建议每个小人加 `hash(userId) % loopDuration` 的固定相位偏移,避免全房间机器人式齐步。
+6. hop 等 2 倍频子运动用同一 controller 的 `Interval`/频率映射实现,不另开时钟。
+
 ## Design Tokens
 全部见 `cofit_colors.dart`(基础色板 `CoFitPalette` + 语义层 `CoFitColors.dark`)。Alpha 规则:淡底 = 主色 @16%,描边 = 主色 @40%,文字层级 = gray-50 @70/50/42%,分隔线 = white @7–9%。设计参考稿顶部 #13a 有可视化 token 表。
 

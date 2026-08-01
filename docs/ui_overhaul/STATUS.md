@@ -13,7 +13,7 @@ P0 主题基建 → P1 动作卡片组件 → P2 牌库主页 → P3 悬浮 dock
 | 屏幕/组件 | 设计锚点 | 状态 | 备注 |
 |---|---|---|---|
 | 主题注册(CoFitColors → MaterialApp) | #13a | ✅ 完成 | P0:cofit_theme.dart(深色 ThemeData + Space Grotesk via google_fonts)、cofit_dimens.dart、CoFitOpacities;main.dart 已接入 |
-| 动作卡片组件(全 App 复用) | #12b 卡片解剖 | ⬜ 未开始 | 依赖「来源」「类型枚举」两个数据缺口的决议 |
+| 动作卡片组件(全 App 复用) | #12b 卡片解剖 | ✅ 完成 | P1:`action/presentation/widget/action_card.dart`(selected/editing/onShare/onRemove 四态)+ `action_type_style.dart`(类型→文案/图标/色);G1/G2 已落地 entity + firebase repository;widget/单元测试已补 |
 | 房间主界面(漂浮气泡 + 扇形手牌) | #6b, #5d, #4a | ⬜ 未开始 | |
 | 悬浮 dock(全局导航) | #t9 / #12b 左上 | ⬜ 未开始 | |
 | 牌库主页(牌库/我的卡组 tab) | #12b | ⬜ 未开始 | 「我的卡组」依赖 deck stub |
@@ -43,3 +43,5 @@ P0 主题基建 → P1 动作卡片组件 → P2 牌库主页 → P3 悬浮 dock
 | 2026-08-01 | 阶段顺序 | 按 P0→P5 组件先行顺序推进 |
 | 2026-08-01 | G1 类型枚举 | domain 加枚举 + repository 映射,详见上表 |
 | 2026-08-01 | G2 来源字段 | entity 加 source 枚举字段,详见上表 |
+| 2026-08-01 | 卡片底行布局(README §4 与 #12b mock 冲突) | 按 #12b 定稿 mock:右上=来源徽章(官方灰/好友蓝,自建卡=分享↗),底行=时长(自建卡追加「· 自建」);README §4 的「底行 类型·来源」写法作废 |
+| 2026-08-01 | 事件 actionKey | entity.type 改枚举后,Ably 事件 actionKey 沿用 `rawType`(Firestore 原文),线上行为不变 |

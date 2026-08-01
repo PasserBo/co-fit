@@ -33,7 +33,7 @@ class ActionTemplateCardItem extends StatelessWidget {
                 children: [
                   Text(card.name, style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: 4),
-                  Text('类型: ${card.type} · 时长: $durationLabel'),
+                  Text('类型: ${card.rawType} · 时长: $durationLabel'),
                   if (card.intensityLabel.isNotEmpty)
                     Text('强度建议: ${card.intensityLabel}'),
                 ],

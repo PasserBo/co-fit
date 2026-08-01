@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../domain/entity/action_source.dart';
 import '../domain/entity/action_template_card.dart';
+import '../domain/entity/action_type.dart';
 import 'action_template_repository.dart';
 
 class FirebaseActionTemplateRepository implements ActionTemplateRepository {
@@ -24,11 +26,14 @@ class FirebaseActionTemplateRepository implements ActionTemplateRepository {
   ) {
     final data = doc.data();
     final defaultDurationSecValue = data['defaultDurationSec'];
+    final rawType = _readRequiredString(data, 'type', doc.id);
 
     return ActionTemplateCard(
       id: doc.id,
       name: _readRequiredString(data, 'name', doc.id),
-      type: _readRequiredString(data, 'type', doc.id),
+      type: ActionType.fromRaw(rawType),
+      rawType: rawType,
+      source: ActionSource.fromRaw(data['source'] as String?),
       ablyActionId: _readRequiredString(data, 'ablyActionId', doc.id),
       defaultDurationSec: _readRequiredInt(
         defaultDurationSecValue,

@@ -115,11 +115,15 @@
     "cardTypeBar": { "$value": { "value": 4, "unit": "px" }, "$description": "动作卡顶部类型色条,README 允许 4–5,取 4" },
     "cardIconBlock": { "$value": { "value": 26, "unit": "px" }, "$description": "动作卡图标块 (README)" },
     "removeBadge": { "$value": { "value": 19, "unit": "px" }, "$description": "编辑态移除角标圆 (README)" },
+    "removeBadgeOffset": { "$value": { "value": 6, "unit": "px" }, "$description": "移除角标右上悬浮偏移 (README: -6px)" },
+    "cardIcon": { "$value": { "value": 14, "unit": "px" }, "$description": "动作卡图标块内 glyph / 角标内图标 (seed v1)" },
+    "checkBadge": { "$value": { "value": 18, "unit": "px" }, "$description": "已入组 ✓ 角标圆 (seed v1)" },
     "minTapTarget": { "$value": { "value": 44, "unit": "px" }, "$description": "可点击目标最小边长 (seed v1, iOS HIG)" }
   },
   "blur": {
     "$type": "dimension",
-    "overlay": { "$value": { "value": 8, "unit": "px" }, "$description": "悬浮层 backdrop blur (README)" }
+    "overlay": { "$value": { "value": 8, "unit": "px" }, "$description": "悬浮层 backdrop blur (README)" },
+    "glow": { "$value": { "value": 10, "unit": "px" }, "$description": "选中光晕 BoxShadow blur 半径 (seed v1)" }
   },
   "typography": {
     "fontFamily": {

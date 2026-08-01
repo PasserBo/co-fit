@@ -85,7 +85,7 @@ class StartTemplateCardActionUsecase {
       timestamp: startedAt,
       payload: RoomEventPayload(
         schemaVersion: 1,
-        actionKey: card.type,
+        actionKey: card.rawType,
         durationSec: card.defaultDurationSec,
         remainingSec: card.defaultDurationSec,
         sessionId: sessionId,

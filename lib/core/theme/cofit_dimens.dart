@@ -26,10 +26,14 @@ abstract class CoFitDimens {
   static const sizeCardTypeBar = 4.0;
   static const sizeCardIconBlock = 26.0;
   static const sizeRemoveBadge = 19.0;
+  static const sizeRemoveBadgeOffset = 6.0;
+  static const sizeCardIcon = 14.0;
+  static const sizeCheckBadge = 18.0;
   static const sizeMinTapTarget = 44.0;
 
   // blur.*
   static const blurOverlay = 8.0;
+  static const blurGlow = 10.0;
 }
 
 /// motion.* — 动效 token

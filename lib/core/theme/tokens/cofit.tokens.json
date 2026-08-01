@@ -128,7 +128,8 @@
     "deckStackHeight": { "$value": { "value": 38, "unit": "px" }, "$description": "牌组行叠牌缩略整体高 (#11b)" },
     "deckStackCardWidth": { "$value": { "value": 22, "unit": "px" }, "$description": "叠牌缩略单张宽 (#11b)" },
     "deckStackCardHeight": { "$value": { "value": 30, "unit": "px" }, "$description": "叠牌缩略单张高 (#11b)" },
-    "deckCardThumb": { "$value": { "value": 52, "unit": "px" }, "$description": "牌组展开内嵌迷你卡宽度(高度随内容)(#11b)" }
+    "deckCardThumb": { "$value": { "value": 52, "unit": "px" }, "$description": "牌组展开内嵌迷你卡宽度(高度随内容)(#11b)" },
+    "dockItem": { "$value": { "value": 26, "unit": "px" }, "$description": "悬浮 dock 单个目的地圆形图标位 (#12b/#t9)" }
   },
   "decor": {
     "$type": "number",
@@ -156,6 +157,7 @@
   "motion": {
     "bobOffset": { "$type": "dimension", "$value": { "value": 5, "unit": "px" }, "$description": "小人上下浮动幅度 (README)" },
     "breatheScale": { "$type": "number", "$value": 1.055, "$description": "运动中光圈呼吸动画 scale 1→1.055 (README)" },
-    "dockAutoCollapse": { "$type": "duration", "$value": { "value": 5, "unit": "s" }, "$description": "dock 无操作自动收起 (README)" }
+    "dockAutoCollapse": { "$type": "duration", "$value": { "value": 5, "unit": "s" }, "$description": "dock 无操作自动收起 (README)" },
+    "dockExpand": { "$type": "duration", "$value": { "value": 220, "unit": "ms" }, "$description": "dock 展开/收起过渡 (#t9 mock transition .22s)" }
   }
 }

@@ -39,6 +39,7 @@ abstract class CoFitDimens {
   static const sizeDeckStackCardWidth = 22.0;
   static const sizeDeckStackCardHeight = 30.0;
   static const sizeDeckCardThumb = 52.0;
+  static const sizeDockItem = 26.0;
 
   // blur.*
   static const blurOverlay = 8.0;
@@ -55,6 +56,9 @@ abstract class CoFitMotion {
 
   /// dock 无操作自动收起
   static const dockAutoCollapse = Duration(seconds: 5);
+
+  /// dock 展开/收起过渡
+  static const dockExpand = Duration(milliseconds: 220);
 }
 
 /// decor.* — 装饰性绘制常量

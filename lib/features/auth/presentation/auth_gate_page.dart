@@ -4,13 +4,17 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/navigation/app_shell.dart';
+import '../../action/presentation/view/card_library_page.dart';
+import '../../room/presentation/room_browse_page.dart';
+import '../../room/presentation/room_community_page.dart';
 import '../data/firebase_auth_repository.dart';
 import '../usecase/register_usecase.dart';
 import '../usecase/sign_in_usecase.dart';
 import '../usecase/sign_out_usecase.dart';
 import '../usecase/watch_auth_state_usecase.dart';
 import 'auth_login_page.dart';
-import 'auth_home_page.dart';
+import 'auth_my_page.dart';
 import 'user_bootstrap_provider.dart';
 
 class AuthGatePage extends ConsumerStatefulWidget {
@@ -81,7 +85,15 @@ class _AuthGatePageState extends ConsumerState<AuthGatePage> {
           });
         }
 
-        return AuthHomePage(user: user, signOutUsecase: _signOutUsecase);
+        // 槽位顺序与 AppShell.destinations 一致:房间 / 牌库 / 浏览(临时)/ 我的
+        return AppShell(
+          pages: [
+            RoomCommunityPage(userId: user.uid),
+            const CardLibraryPage(),
+            RoomBrowsePage(userId: user.uid),
+            AuthMyPage(user: user, signOutUsecase: _signOutUsecase),
+          ],
+        );
       },
     );
   }

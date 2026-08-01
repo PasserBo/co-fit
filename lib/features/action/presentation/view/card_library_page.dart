@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/cofit_colors.dart';
 import '../../../../core/theme/cofit_dimens.dart';
+import '../../../../core/widget/floating_dock.dart';
 import '../../domain/entity/action_deck.dart';
 import '../../domain/entity/action_template_card.dart';
 import '../../provider/action_decks_provider.dart';
@@ -49,9 +50,14 @@ class _CardLibraryPageState extends ConsumerState<CardLibraryPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: CoFitDimens.spacingLg,
-                vertical: CoFitDimens.spacingSm,
+              // 左侧为悬浮 dock 让位(#12b mock 顶栏左缩进)
+              padding: const EdgeInsets.fromLTRB(
+                CoFitDimens.spacingLg +
+                    FloatingDock.collapsedWidth +
+                    CoFitDimens.spacingSm,
+                CoFitDimens.spacingSm,
+                CoFitDimens.spacingLg,
+                CoFitDimens.spacingSm,
               ),
               child: LibrarySegmentedControl(
                 labels: const ['牌库', '我的卡组'],

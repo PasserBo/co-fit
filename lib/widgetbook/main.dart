@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:widgetbook/widgetbook.dart';
 
+import '../core/navigation/app_shell.dart';
 import '../core/theme/cofit_theme.dart';
+import '../core/widget/floating_dock.dart';
 import '../features/action/domain/entity/action_deck.dart';
 import '../features/action/domain/entity/action_source.dart';
 import '../features/action/domain/entity/action_template_card.dart';
@@ -71,9 +73,59 @@ class CoFitWidgetbook extends StatelessWidget {
             ),
           ],
         ),
+        WidgetbookFolder(
+          name: 'core',
+          children: [
+            WidgetbookComponent(
+              name: 'FloatingDock',
+              useCases: [
+                WidgetbookUseCase(name: '点击展开/收起', builder: _dock),
+              ],
+            ),
+            WidgetbookComponent(
+              name: 'AppShell',
+              useCases: [
+                WidgetbookUseCase(name: '导航壳演示', builder: _appShell),
+              ],
+            ),
+          ],
+        ),
       ],
     );
   }
+}
+
+Widget _dock(BuildContext context) {
+  return Scaffold(
+    body: Padding(
+      padding: const EdgeInsets.all(24),
+      child: FloatingDock(
+        destinations: AppShell.destinations,
+        currentIndex: 1,
+        onSelect: (_) {},
+      ),
+    ),
+  );
+}
+
+Widget _appShell(BuildContext context) {
+  Widget page(String label) => Scaffold(
+        body: Center(child: Text(label)),
+      );
+  return ProviderScope(
+    overrides: [
+      templateCardsProvider.overrideWith((ref) async => _sampleLibrary()),
+    ],
+    child: AppShell(
+      initialIndex: 1,
+      pages: [
+        page('房间(P4 重做)'),
+        const CardLibraryPage(),
+        page('浏览房间(临时槽位)'),
+        page('我的(P5 重做)'),
+      ],
+    ),
+  );
 }
 
 List<ActionTemplateCard> _sampleLibrary() => [

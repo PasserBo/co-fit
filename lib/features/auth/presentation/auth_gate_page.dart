@@ -6,8 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/navigation/app_shell.dart';
 import '../../action/presentation/view/card_library_page.dart';
-import '../../room/presentation/room_browse_page.dart';
-import '../../room/presentation/room_community_page.dart';
+import '../../room/presentation/view/room_main_view.dart';
 import '../data/firebase_auth_repository.dart';
 import '../usecase/register_usecase.dart';
 import '../usecase/sign_in_usecase.dart';
@@ -85,12 +84,11 @@ class _AuthGatePageState extends ConsumerState<AuthGatePage> {
           });
         }
 
-        // 槽位顺序与 AppShell.destinations 一致:房间 / 牌库 / 浏览(临时)/ 我的
+        // 槽位顺序与 AppShell.destinations 一致:房间 / 牌库 / 我的
         return AppShell(
           pages: [
-            RoomCommunityPage(userId: user.uid),
+            RoomMainView(userId: user.uid),
             const CardLibraryPage(),
-            RoomBrowsePage(userId: user.uid),
             AuthMyPage(user: user, signOutUsecase: _signOutUsecase),
           ],
         );

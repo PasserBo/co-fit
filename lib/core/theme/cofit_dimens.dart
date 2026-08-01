@@ -40,6 +40,19 @@ abstract class CoFitDimens {
   static const sizeDeckStackCardHeight = 30.0;
   static const sizeDeckCardThumb = 52.0;
   static const sizeDockItem = 26.0;
+  static const sizeFigureFriend = 46.0;
+  static const sizeFigureSelf = 60.0;
+  static const sizeAuraFriend = 48.0;
+  static const sizeAuraSelf = 70.0;
+  static const sizeFanCardWidth = 70.0;
+  static const sizeFanCardHeight = 98.0;
+  static const sizeFanHeight = 214.0;
+  static const sizeFanPivotRadius = 320.0;
+  static const sizeDeckChipBottom = 178.0;
+  static const sizePopoverWidth = 196.0;
+  static const sizeHudRing = 34.0;
+  static const sizeRoomDot = 6.0;
+  static const sizeRoomDotActive = 20.0;
 
   // blur.*
   static const blurOverlay = 8.0;
@@ -59,6 +72,14 @@ abstract class CoFitMotion {
 
   /// dock 展开/收起过渡
   static const dockExpand = Duration(milliseconds: 220);
+
+  /// 小人上下浮动周期 / 光圈呼吸周期
+  static const bobPeriod = Duration(milliseconds: 2400);
+  static const breathePeriod = Duration(milliseconds: 1800);
+
+  /// 扇形聚焦/切牌过渡、打出飞卡
+  static const fanTransition = Duration(milliseconds: 280);
+  static const playFly = Duration(milliseconds: 420);
 }
 
 /// decor.* — 装饰性绘制常量
@@ -70,6 +91,13 @@ abstract class CoFitDecor {
   /// 虚线描边节奏
   static const dashLength = 6.0;
   static const dashGap = 4.0;
+
+  /// 扇形手牌几何(seed v1)
+  static const fanSpreadDeg = 12.0;
+  static const fanFocusScale = 1.5;
+  static const fanFocusLift = 120.0;
+  static const fanSideOpacity = 0.55;
+  static const playSwipeThreshold = 60.0;
 }
 
 /// typography.fontWeight.* — 字重 token(字体族见 CoFitTheme)

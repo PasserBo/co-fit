@@ -13,7 +13,6 @@ void main() {
           pages: const [
             Center(child: Text('房间页')),
             Center(child: Text('牌库页')),
-            Center(child: Text('浏览页')),
             Center(child: Text('我的页')),
           ],
         ),

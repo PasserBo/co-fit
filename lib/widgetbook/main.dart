@@ -13,8 +13,14 @@ import '../features/action/presentation/action_template_usecase_provider.dart';
 import '../features/action/presentation/view/card_library_page.dart';
 import '../features/action/presentation/widget/action_card.dart';
 import '../features/action/presentation/widget/action_type_style.dart';
+import '../features/action/presentation/widget/card_fan.dart';
 import '../features/action/presentation/widget/deck_list_body.dart';
+import '../features/action/presentation/widget/deck_switcher.dart';
 import '../features/action/presentation/widget/library_tab_body.dart';
+import '../features/room/domain/entity/room_presence_member.dart';
+import '../features/room/domain/entity/user_activity_status_entity.dart';
+import '../features/room/presentation/widget/room_scene.dart';
+import '../features/room/presentation/widget/room_top_bar.dart';
 
 /// CoFit 组件画廊(Widgetbook)。
 /// 独立入口,不初始化 Firebase/Ably:
@@ -74,6 +80,29 @@ class CoFitWidgetbook extends StatelessWidget {
           ],
         ),
         WidgetbookFolder(
+          name: 'room',
+          children: [
+            WidgetbookComponent(
+              name: 'RoomScene',
+              useCases: [
+                WidgetbookUseCase(name: '6 人房间', builder: _roomScene),
+              ],
+            ),
+            WidgetbookComponent(
+              name: 'CardFan',
+              useCases: [
+                WidgetbookUseCase(name: 'Playground', builder: _cardFan),
+              ],
+            ),
+            WidgetbookComponent(
+              name: 'RoomTopBar + DeckChip',
+              useCases: [
+                WidgetbookUseCase(name: '默认', builder: _roomChrome),
+              ],
+            ),
+          ],
+        ),
+        WidgetbookFolder(
           name: 'core',
           children: [
             WidgetbookComponent(
@@ -119,11 +148,96 @@ Widget _appShell(BuildContext context) {
     child: AppShell(
       initialIndex: 1,
       pages: [
-        page('房间(P4 重做)'),
+        page('房间(RoomMainView,需真实 presence)'),
         const CardLibraryPage(),
-        page('浏览房间(临时槽位)'),
         page('我的(P5 重做)'),
       ],
+    ),
+  );
+}
+
+List<RoomPresenceMember> _sampleMembers() {
+  RoomPresenceMember member(
+    String id,
+    UserActivityState state, {
+    String? action,
+    int? remaining,
+  }) {
+    return RoomPresenceMember(
+      clientId: id,
+      userId: id,
+      activityStatus: UserActivityStatusEntity(
+        activityState: state,
+        templateName: action,
+        remainingSec: remaining,
+        durationSec: remaining == null ? null : remaining * 2,
+      ),
+    );
+  }
+
+  return [
+    member('user_a', UserActivityState.active, action: '深蹲', remaining: 300),
+    member('user_b', UserActivityState.active, action: '开合跳', remaining: 120),
+    member('user_c', UserActivityState.paused, action: '平板支撑'),
+    member('user_d', UserActivityState.idle),
+    member('user_e', UserActivityState.active, action: '硬拉', remaining: 500),
+    member('me', UserActivityState.active, action: '波比跳', remaining: 90),
+  ];
+}
+
+Widget _roomScene(BuildContext context) {
+  return Scaffold(
+    body: SafeArea(
+      child: RoomScene(members: _sampleMembers(), selfUserId: 'me'),
+    ),
+  );
+}
+
+Widget _cardFan(BuildContext context) {
+  final focused = context.knobs.boolean(label: '聚焦模式');
+  final center = context.knobs.double
+      .slider(label: '中心卡下标', initialValue: 2, min: 0, max: 4)
+      .round();
+  final cards = _sampleLibrary().take(5).toList();
+  return Scaffold(
+    body: Stack(
+      children: [
+        Positioned(
+          left: 0,
+          right: 0,
+          bottom: 0,
+          child: CardFan(
+            cards: cards,
+            focused: focused,
+            centerIndex: center,
+            onPlay: (_) {},
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+Widget _roomChrome(BuildContext context) {
+  return Scaffold(
+    body: SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const RoomTopBar(
+              roomName: '考研自习室',
+              memberCount: 6,
+              activeCount: 4,
+              roomIndex: 3,
+              roomTotal: 3,
+            ),
+            const Spacer(),
+            DeckChip(deckName: '考研自习室', open: false, onTap: () {}),
+          ],
+        ),
+      ),
     ),
   );
 }

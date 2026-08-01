@@ -129,7 +129,20 @@
     "deckStackCardWidth": { "$value": { "value": 22, "unit": "px" }, "$description": "叠牌缩略单张宽 (#11b)" },
     "deckStackCardHeight": { "$value": { "value": 30, "unit": "px" }, "$description": "叠牌缩略单张高 (#11b)" },
     "deckCardThumb": { "$value": { "value": 52, "unit": "px" }, "$description": "牌组展开内嵌迷你卡宽度(高度随内容)(#11b)" },
-    "dockItem": { "$value": { "value": 26, "unit": "px" }, "$description": "悬浮 dock 单个目的地圆形图标位 (#12b/#t9)" }
+    "dockItem": { "$value": { "value": 26, "unit": "px" }, "$description": "悬浮 dock 单个目的地圆形图标位 (#12b/#t9)" },
+    "figureFriend": { "$value": { "value": 46, "unit": "px" }, "$description": "好友小人总高(头/身/腿按比例推导)(#6b)" },
+    "figureSelf": { "$value": { "value": 60, "unit": "px" }, "$description": "自己小人总高 (#6b)" },
+    "auraFriend": { "$value": { "value": 48, "unit": "px" }, "$description": "好友状态光圈直径 (#6b)" },
+    "auraSelf": { "$value": { "value": 70, "unit": "px" }, "$description": "自己状态光圈直径 (#6b)" },
+    "fanCardWidth": { "$value": { "value": 70, "unit": "px" }, "$description": "扇形手牌单张宽 (#6b/#5d)" },
+    "fanCardHeight": { "$value": { "value": 98, "unit": "px" }, "$description": "扇形手牌单张高 (#6b/#5d)" },
+    "fanHeight": { "$value": { "value": 214, "unit": "px" }, "$description": "扇形手牌区域高 (#6b)" },
+    "fanPivotRadius": { "$value": { "value": 320, "unit": "px" }, "$description": "扇形旋转轴心距卡片顶部距离 (#6b transform-origin)" },
+    "deckChipBottom": { "$value": { "value": 178, "unit": "px" }, "$description": "收起态牌组 chip 距底部偏移 (#6b)" },
+    "popoverWidth": { "$value": { "value": 196, "unit": "px" }, "$description": "牌组下拉悬浮层宽 (#6b/#4a)" },
+    "hudRing": { "$value": { "value": 34, "unit": "px" }, "$description": "HUD 当前动作倒计时环直径 (#6b)" },
+    "roomDot": { "$value": { "value": 6, "unit": "px" }, "$description": "房间指示点(非当前)(#6b)" },
+    "roomDotActive": { "$value": { "value": 20, "unit": "px" }, "$description": "房间指示点(当前,长条)宽 (#6b)" }
   },
   "decor": {
     "$type": "number",
@@ -137,7 +150,12 @@
     "deckStackTiltBackDeg": { "$value": -10, "$description": "叠牌缩略最底张倾角(度)(#11b)" },
     "deckStackTiltMidDeg": { "$value": 4, "$description": "叠牌缩略中间张倾角(度)(#11b)" },
     "dashLength": { "$value": 6, "$description": "虚线描边线段长 px" },
-    "dashGap": { "$value": 4, "$description": "虚线描边间隔 px" }
+    "dashGap": { "$value": 4, "$description": "虚线描边间隔 px" },
+    "fanSpreadDeg": { "$value": 12, "$description": "扇形手牌相邻卡夹角(度)(seed v1)" },
+    "fanFocusScale": { "$value": 1.5, "$description": "聚焦模式整体放大倍数 (seed v1)" },
+    "fanFocusLift": { "$value": 120, "$description": "聚焦模式整体上浮 px (seed v1)" },
+    "fanSideOpacity": { "$value": 0.55, "$description": "聚焦模式侧牌透明度 (seed v1)" },
+    "playSwipeThreshold": { "$value": 60, "$description": "上滑打出的位移阈值 px (seed v1)" }
   },
   "blur": {
     "$type": "dimension",
@@ -158,6 +176,10 @@
     "bobOffset": { "$type": "dimension", "$value": { "value": 5, "unit": "px" }, "$description": "小人上下浮动幅度 (README)" },
     "breatheScale": { "$type": "number", "$value": 1.055, "$description": "运动中光圈呼吸动画 scale 1→1.055 (README)" },
     "dockAutoCollapse": { "$type": "duration", "$value": { "value": 5, "unit": "s" }, "$description": "dock 无操作自动收起 (README)" },
-    "dockExpand": { "$type": "duration", "$value": { "value": 220, "unit": "ms" }, "$description": "dock 展开/收起过渡 (#t9 mock transition .22s)" }
+    "dockExpand": { "$type": "duration", "$value": { "value": 220, "unit": "ms" }, "$description": "dock 展开/收起过渡 (#t9 mock transition .22s)" },
+    "bobPeriod": { "$type": "duration", "$value": { "value": 2400, "unit": "ms" }, "$description": "小人上下浮动周期 (seed v1)" },
+    "breathePeriod": { "$type": "duration", "$value": { "value": 1800, "unit": "ms" }, "$description": "运动中光圈呼吸周期 (seed v1)" },
+    "fanTransition": { "$type": "duration", "$value": { "value": 280, "unit": "ms" }, "$description": "扇形聚焦/切牌过渡 (#6b mock .28s)" },
+    "playFly": { "$type": "duration", "$value": { "value": 420, "unit": "ms" }, "$description": "打出卡牌飞出动画 (#6b mock .42s)" }
   }
 }

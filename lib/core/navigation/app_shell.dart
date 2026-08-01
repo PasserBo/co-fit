@@ -6,8 +6,8 @@ import '../widget/floating_dock.dart';
 /// 全局导航壳(P3):IndexedStack 承载各目的地 + 左上悬浮 dock(README §2)。
 /// 无底部 nav;工具页下钻用 Navigator.push + 明确返回。
 ///
-/// 槽位固定(肌肉记忆):房间 / 牌库 / 浏览(临时) / 我的。
-/// 「浏览」是过渡槽位 —— P4 房间主界面做左右滑切换房间后回收,见 STATUS.md。
+/// 槽位固定(肌肉记忆):房间 / 牌库 / 我的。
+/// 浏览/加入房间是下钻工具页,从房间主界面右上「+」压栈进入(README §2)。
 class AppShell extends StatefulWidget {
   const AppShell({required this.pages, this.initialIndex = 0, super.key})
       : assert(pages.length == destinations.length);
@@ -15,7 +15,6 @@ class AppShell extends StatefulWidget {
   static const destinations = [
     DockDestination(icon: Icons.home_rounded, label: '房间'),
     DockDestination(icon: Icons.style_rounded, label: '牌库'),
-    DockDestination(icon: Icons.travel_explore_rounded, label: '浏览房间'),
     DockDestination(icon: Icons.person_rounded, label: '我的'),
   ];
 

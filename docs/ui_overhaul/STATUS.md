@@ -14,7 +14,7 @@ P0 主题基建 → P1 动作卡片组件 → P2 牌库主页 → P3 悬浮 dock
 |---|---|---|---|
 | 主题注册(CoFitColors → MaterialApp) | #13a | ✅ 完成 | P0:cofit_theme.dart(深色 ThemeData + Space Grotesk via google_fonts)、cofit_dimens.dart、CoFitOpacities;main.dart 已接入 |
 | 动作卡片组件(全 App 复用) | #12b 卡片解剖 | ✅ 完成 | P1:`action/presentation/widget/action_card.dart`(selected/editing/onShare/onRemove 四态)+ `action_type_style.dart`(类型→文案/图标/色);G1/G2 已落地 entity + firebase repository;widget/单元测试已补 |
-| 房间主界面(漂浮气泡 + 扇形手牌) | #6b, #5d, #4a | ⬜ 未开始 | |
+| 房间主界面(漂浮气泡 + 扇形手牌) | #6b, #5d, #4a | ✅ 完成 | P4:`room/presentation/view/room_main_view.dart` + `widget/room_scene.dart`/`avatar_bubble.dart`/`room_top_bar.dart` + `action/presentation/widget/card_fan.dart`/`deck_switcher.dart`;PageView 左右滑切房间(复用 roomBrowserProvider 多房间流);dock「浏览」槽位已回收,浏览房间从右上「+」压栈进入。**未做的润色**:能量爆发粒子、打出飞卡动画、HUD 倒计时本地滴答 |
 | 悬浮 dock(全局导航) | #t9 / #12b 左上 | ✅ 完成 | P3:`core/widget/floating_dock.dart`(9a 固定槽位 + 5s 自动收起)+ `core/navigation/app_shell.dart`;登录后 AuthGatePage → AppShell,旧 `AuthHomePage`(Material 底部导航)已删除;牌库页已接入真实导航 |
 | 牌库主页(牌库/我的卡组 tab) | #12b | ✅ 完成 | P2:`action/presentation/view/card_library_page.dart` + `widget/library_tab_body.dart`/`deck_list_body.dart`/`library_segmented_control.dart`;**导航入口待 P3 dock 接线**;创建/详情/分享/加卡为 stub |
 | 「我的」/个人设置 | #t10 | ⬜ 未开始 | ⚠ 10a/10b 均未定稿,实现前必须先问用户选哪版 |
@@ -29,6 +29,7 @@ P0 主题基建 → P1 动作卡片组件 → P2 牌库主页 → P3 悬浮 dock
 | G2 | 卡片来源 | 无字段 | 官方/自建/好友分享 徽章 | ✅ entity 加 `ActionSource` 枚举字段(official/custom/friendShared),Firestore 无值默认 official(2026-08-01) |
 | G3 | 牌组(deck) | 无 entity | 牌库页「我的卡组」tab、扇形手牌的「当前卡组」 | ✅ DRAFT `ActionDeck{id, name, cardIds}`(有序、允许重复,张数/时长/配色现算)+ repository 层 `activeDeckId`;in-memory stub 用真实卡 id 播种(2026-08-01) |
 | G4 | 好友/分享 | `social` feature 为空目录 | 卡片分享给好友、好友分享来源 | 🟡 UI 侧按 stub 处理(分享 → SnackBar);真实分享流程与 social 数据模型仍待定 |
+| G5 | 成员昵称/头像 | presence 只有 userId/clientId,库中无昵称字段 | 气泡下方显示昵称(如「小李」) | 🟡 截断 userId 前 6 位占位(自己显示「你」),见 `RoomScene.displayName`;真实昵称等 profile/social 功能时补(2026-08-01) |
 
 ## Stub 登记表(预估数据模型的临时实现)
 
@@ -38,6 +39,8 @@ P0 主题基建 → P1 动作卡片组件 → P2 牌库主页 → P3 悬浮 dock
 | action(创建卡片) | — | — | 牌库页横幅 → SnackBar | 12a 创建表单(名称/类型/时长/图标)设计定稿后实现 |
 | action(卡片详情/加入卡组) | — | — | 点卡 → SnackBar | 详情/加组弹层设计未出 |
 | action(分享给好友) | — | — | 自建卡 ↗ → SnackBar | 依赖 social feature(G4) |
+| room(成员昵称) | — | — | 气泡昵称 = userId 前 6 位 | G5:等 profile/social 的昵称数据 |
+| room(小人形象) | — | — | `avatar_bubble.dart` 占位几何小人 | 范围外决议:接 Rive 动画时替换 `_PlaceholderFigure` |
 
 ## 决议记录
 
@@ -50,4 +53,6 @@ P0 主题基建 → P1 动作卡片组件 → P2 牌库主页 → P3 悬浮 dock
 | 2026-08-01 | 事件 actionKey | entity.type 改枚举后,Ably 事件 actionKey 沿用 `rawType`(Firestore 原文),线上行为不变 |
 | 2026-08-01 | G3 deck 模型 | entity 只存最小事实 `{id, name, cardIds}`(有序 List、允许重复);张数/总时长/缩略配色由关联卡现算;`activeDeckId` 是用户级偏好,放 repository 接口不放 entity;不加 userId(归属由存储路径表达)、暂缓 createdAt/lastUsedAt |
 | 2026-08-01 | 「我的卡组」tab 视觉 | #12b 定稿未画该 tab,按 README §3 描述 + #11b 过程稿实现(行式总览 + 就地展开);若后续出定稿再校 |
-| 2026-08-01 | dock 临时第 4 槽位 | 设计目的地只有 房间/牌库/我的,但现有 RoomBrowsePage(加入/浏览房间)不能断——dock 临时加「浏览房间」槽位,**P4 做房间左右滑切换后回收**(浏览改为下钻工具页) |
+| 2026-08-01 | dock 临时第 4 槽位 | ~~临时加「浏览房间」槽位~~ → **P4 已回收**:dock 恢复 房间/牌库/我的 三槽位,浏览房间从房间主界面右上「+」压栈(带返回 AppBar) |
+| 2026-08-01 | 大位移 Transform 与命中测试 | Container/Transform 的 transform 只影响绘制不影响 hit-test 盒——扇形手牌几何改为真实坐标定位(sin/cos 弧线)+ 仅绕卡片自心的小角度旋转;后续做飞卡/爆发动画时同理 |
+| 2026-08-01 | 旧页面弃用 | `AuthHomePage`(P3 已删)、`RoomCommunityPage`/`RoomMainPage`(P4 起不再被引用)→ P5 统一清理 |

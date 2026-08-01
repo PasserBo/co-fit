@@ -71,6 +71,20 @@ class FirebaseRoomRepository {
     return roomIds;
   }
 
+  /// 按 id 读取房间信息;不存在的房间返回 null(成员可能持有已删除房间的 membership)。
+  Future<RoomInfoEntity?> fetchRoomInfo({required String roomId}) async {
+    final trimmed = roomId.trim();
+    if (trimmed.isEmpty) {
+      return null;
+    }
+    final snapshot = await _firestore.collection('rooms').doc(trimmed).get();
+    final data = snapshot.data();
+    if (!snapshot.exists || data == null) {
+      return null;
+    }
+    return RoomInfoEntity.fromMap({...data, 'roomId': trimmed});
+  }
+
   Future<void> joinRoom({
     required String roomId,
     required String userId,

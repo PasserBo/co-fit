@@ -105,7 +105,8 @@
     "xs": { "$value": { "value": 4, "unit": "px" }, "$description": "小徽点/glyph/叠牌缩略,mock 3–6 吸附 (seed v1)" },
     "sm": { "$value": { "value": 8, "unit": "px" }, "$description": "卡片内图标块 (README)" },
     "md": { "$value": { "value": 12, "unit": "px" }, "$description": "卡片容器下限 (README: 12–16)" },
-    "lg": { "$value": { "value": 16, "unit": "px" }, "$description": "卡片容器上限 / 悬浮 dock (README)" }
+    "lg": { "$value": { "value": 16, "unit": "px" }, "$description": "卡片容器上限 / 悬浮 dock (README)" },
+    "xl": { "$value": { "value": 20, "unit": "px" }, "$description": "我的页英雄区大卡 (#10a)" }
   },
   "borderWidth": {
     "$type": "dimension",
@@ -142,7 +143,9 @@
     "popoverWidth": { "$value": { "value": 196, "unit": "px" }, "$description": "牌组下拉悬浮层宽 (#6b/#4a)" },
     "hudRing": { "$value": { "value": 34, "unit": "px" }, "$description": "HUD 当前动作倒计时环直径 (#6b)" },
     "roomDot": { "$value": { "value": 6, "unit": "px" }, "$description": "房间指示点(非当前)(#6b)" },
-    "roomDotActive": { "$value": { "value": 20, "unit": "px" }, "$description": "房间指示点(当前,长条)宽 (#6b)" }
+    "roomDotActive": { "$value": { "value": 20, "unit": "px" }, "$description": "房间指示点(当前,长条)宽 (#6b)" },
+    "figureHero": { "$value": { "value": 78, "unit": "px" }, "$description": "我的页英雄区小人总高 (#10a)" },
+    "heroGlow": { "$value": { "value": 128, "unit": "px" }, "$description": "英雄区顶部光晕直径 (#10a)" }
   },
   "decor": {
     "$type": "number",

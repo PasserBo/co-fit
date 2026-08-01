@@ -18,6 +18,7 @@ abstract class CoFitDimens {
   static const radiusSm = 8.0;
   static const radiusMd = 12.0;
   static const radiusLg = 16.0;
+  static const radiusXl = 20.0;
 
   // borderWidth.*
   static const borderWidthHairline = 1.0;
@@ -53,6 +54,8 @@ abstract class CoFitDimens {
   static const sizeHudRing = 34.0;
   static const sizeRoomDot = 6.0;
   static const sizeRoomDotActive = 20.0;
+  static const sizeFigureHero = 78.0;
+  static const sizeHeroGlow = 128.0;
 
   // blur.*
   static const blurOverlay = 8.0;

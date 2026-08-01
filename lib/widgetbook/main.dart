@@ -17,6 +17,7 @@ import '../features/action/presentation/widget/card_fan.dart';
 import '../features/action/presentation/widget/deck_list_body.dart';
 import '../features/action/presentation/widget/deck_switcher.dart';
 import '../features/action/presentation/widget/library_tab_body.dart';
+import '../features/auth/presentation/widget/my_page_body.dart';
 import '../features/room/domain/entity/room_presence_member.dart';
 import '../features/room/domain/entity/user_activity_status_entity.dart';
 import '../features/room/presentation/widget/room_scene.dart';
@@ -103,6 +104,17 @@ class CoFitWidgetbook extends StatelessWidget {
           ],
         ),
         WidgetbookFolder(
+          name: 'auth',
+          children: [
+            WidgetbookComponent(
+              name: 'MyPageBody',
+              useCases: [
+                WidgetbookUseCase(name: '我的页(10a)', builder: _myPage),
+              ],
+            ),
+          ],
+        ),
+        WidgetbookFolder(
           name: 'core',
           children: [
             WidgetbookComponent(
@@ -122,6 +134,23 @@ class CoFitWidgetbook extends StatelessWidget {
       ],
     );
   }
+}
+
+Widget _myPage(BuildContext context) {
+  return Scaffold(
+    body: SafeArea(
+      child: MyPageBody(
+        displayName: 'xiaoman',
+        handle: 'a1b2c3',
+        email: 'xiaoman@example.com',
+        roomCount: 3,
+        deckCount: 3,
+        cardCount: 8,
+        onEditAvatar: () {},
+        onSignOut: () {},
+      ),
+    ),
+  );
 }
 
 Widget _dock(BuildContext context) {

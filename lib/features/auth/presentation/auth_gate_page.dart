@@ -13,8 +13,8 @@ import '../usecase/sign_in_usecase.dart';
 import '../usecase/sign_out_usecase.dart';
 import '../usecase/watch_auth_state_usecase.dart';
 import 'auth_login_page.dart';
-import 'auth_my_page.dart';
 import 'user_bootstrap_provider.dart';
+import 'view/my_page_view.dart';
 
 class AuthGatePage extends ConsumerStatefulWidget {
   const AuthGatePage({super.key});
@@ -89,7 +89,7 @@ class _AuthGatePageState extends ConsumerState<AuthGatePage> {
           pages: [
             RoomMainView(userId: user.uid),
             const CardLibraryPage(),
-            AuthMyPage(user: user, signOutUsecase: _signOutUsecase),
+            MyPageView(user: user, signOutUsecase: _signOutUsecase),
           ],
         );
       },

@@ -5,7 +5,7 @@
 
 ## 阶段计划(2026-08-01 与用户确认)
 
-P0 主题基建 → P1 动作卡片组件 → P2 牌库主页 → P3 悬浮 dock + 导航骨架 → P4 房间主界面 → P5 「我的」页 + 收尾。
+P0 主题基建 → P1 动作卡片组件 → P2 牌库主页 → P3 悬浮 dock + 导航骨架 → P4 房间主界面 → P5 「我的」页 + 收尾。**全部完成(2026-08-01)**,剩余润色/转正项见各行备注与 Stub 登记表。
 范围外:Rive 动画引擎(小人用占位形象)、Firestore 结构大改、Live Activities、好友系统真实后端。
 
 ## 屏幕进度
@@ -17,7 +17,7 @@ P0 主题基建 → P1 动作卡片组件 → P2 牌库主页 → P3 悬浮 dock
 | 房间主界面(漂浮气泡 + 扇形手牌) | #6b, #5d, #4a | ✅ 完成 | P4:`room/presentation/view/room_main_view.dart` + `widget/room_scene.dart`/`avatar_bubble.dart`/`room_top_bar.dart` + `action/presentation/widget/card_fan.dart`/`deck_switcher.dart`;PageView 左右滑切房间(复用 roomBrowserProvider 多房间流);dock「浏览」槽位已回收,浏览房间从右上「+」压栈进入。**未做的润色**:能量爆发粒子、打出飞卡动画、HUD 倒计时本地滴答 |
 | 悬浮 dock(全局导航) | #t9 / #12b 左上 | ✅ 完成 | P3:`core/widget/floating_dock.dart`(9a 固定槽位 + 5s 自动收起)+ `core/navigation/app_shell.dart`;登录后 AuthGatePage → AppShell,旧 `AuthHomePage`(Material 底部导航)已删除;牌库页已接入真实导航 |
 | 牌库主页(牌库/我的卡组 tab) | #12b | ✅ 完成 | P2:`action/presentation/view/card_library_page.dart` + `widget/library_tab_body.dart`/`deck_list_body.dart`/`library_segmented_control.dart`;**导航入口待 P3 dock 接线**;创建/详情/分享/加卡为 stub |
-| 「我的」/个人设置 | #t10 | ⬜ 未开始 | ⚠ 10a/10b 均未定稿,实现前必须先问用户选哪版 |
+| 「我的」/个人设置 | #t10 → 10a | ✅ 完成 | P5:用户选定 10a(形象优先),内容收敛到已实现功能(hero + 房间/牌组/卡牌统计 + 邮箱 + 退出登录);10a 的 累计时长/打卡/通知隐私开关 未做(功能不存在);`auth/presentation/view/my_page_view.dart` + `widget/my_page_body.dart` |
 
 状态图例:⬜ 未开始 / 🟡 进行中 / ✅ 完成 / ⏸ 等决议
 
@@ -41,6 +41,7 @@ P0 主题基建 → P1 动作卡片组件 → P2 牌库主页 → P3 悬浮 dock
 | action(分享给好友) | — | — | 自建卡 ↗ → SnackBar | 依赖 social feature(G4) |
 | room(成员昵称) | — | — | 气泡昵称 = userId 前 6 位 | G5:等 profile/social 的昵称数据 |
 | room(小人形象) | — | — | `avatar_bubble.dart` 占位几何小人 | 范围外决议:接 Rive 动画时替换 `_PlaceholderFigure` |
+| avatar(编辑形象) | — | — | 我的页「编辑形象」→ SnackBar | avatar feature 为空目录,换肤功能未设计 |
 
 ## 决议记录
 
@@ -55,4 +56,6 @@ P0 主题基建 → P1 动作卡片组件 → P2 牌库主页 → P3 悬浮 dock
 | 2026-08-01 | 「我的卡组」tab 视觉 | #12b 定稿未画该 tab,按 README §3 描述 + #11b 过程稿实现(行式总览 + 就地展开);若后续出定稿再校 |
 | 2026-08-01 | dock 临时第 4 槽位 | ~~临时加「浏览房间」槽位~~ → **P4 已回收**:dock 恢复 房间/牌库/我的 三槽位,浏览房间从房间主界面右上「+」压栈(带返回 AppBar) |
 | 2026-08-01 | 大位移 Transform 与命中测试 | Container/Transform 的 transform 只影响绘制不影响 hit-test 盒——扇形手牌几何改为真实坐标定位(sin/cos 弧线)+ 仅绕卡片自心的小角度旋转;后续做飞卡/爆发动画时同理 |
-| 2026-08-01 | 旧页面弃用 | `AuthHomePage`(P3 已删)、`RoomCommunityPage`/`RoomMainPage`(P4 起不再被引用)→ P5 统一清理 |
+| 2026-08-01 | 旧页面弃用 | P5 已清理:删除 `auth_my_page.dart`、`room_main_page.dart`、`room_action_controls_card.dart`;**保留** `RoomCommunityPage`(仍是浏览页的「加入/创建房间」工具页入口)与 `room_browse_page` 相关旧组件——功能可用但视觉未重做,待房间浏览流程有定稿设计再翻新 |
+| 2026-08-01 | 我的页取版 | 用户选定 10a(形象优先),且内容收敛到已实现功能;10a 其余项(累计时长/打卡/通知隐私)等对应功能落地时再补 |
+| 2026-08-01 | 字体打包 | google_fonts 目前运行时拉取 Space Grotesk(有缓存);**上线前**把字体文件打进 assets 并关闭 runtime fetching |

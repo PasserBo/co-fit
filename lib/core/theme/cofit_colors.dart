@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 /// CoFit Color Tokens v1 — 深色主题
 /// 两层结构:CoFitPalette(基础色板,私有使用)→ CoFitColors(语义 token,组件只引用这层)。
-/// 用法: Theme.of(context).extension<CoFitColors>()!
+/// 用法: `Theme.of(context).extension<CoFitColors>()!`
 abstract class CoFitPalette {
   // Lime · 品牌
   static const lime200 = Color(0xFFE4F9A3);
@@ -27,6 +27,15 @@ abstract class CoFitPalette {
   static const gray900 = Color(0xFF181B22);
   static const gray950 = Color(0xFF171A21);
   static const gray1000 = Color(0xFF14161C);
+}
+
+/// opacity.* — 淡色 alpha 规则(与 tokens JSON 对应)。
+/// 语义色已在 CoFitColors 中预混;此处仅供 theme 层派生新淡色(如选中光晕)使用。
+abstract class CoFitOpacities {
+  static const subtle = 0.16; // 淡底 = 主色 @16%
+  static const border = 0.40; // 淡描边 = 主色 @40%
+  static const glow = 0.18; // 选中光晕 lime @18%
+  static const overlay = 0.62; // 悬浮层底 gray-850 @62%
 }
 
 @immutable

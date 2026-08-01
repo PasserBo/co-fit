@@ -35,10 +35,53 @@ class RoomMainView extends ConsumerStatefulWidget {
 
 class _RoomMainViewState extends ConsumerState<RoomMainView> {
   PageController? _pageController;
+  Timer? _ticker;
   bool _fanFocused = false;
   int _fanCenterIndex = 0;
   bool _popoverOpen = false;
   bool _isPlaying = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // 会话剩余时间/到点回待机是随 now 的派生值(ActionSession 设计),
+    // 有会话在进行时每秒重建一次以驱动倒计时与过期判定。
+    _ticker = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (!mounted) {
+        return;
+      }
+      final hasSessions = ref
+          .read(roomBrowserProvider)
+          .activityByRoom
+          .values
+          .any((snapshot) => !snapshot.isEmpty);
+      if (hasSessions) {
+        setState(() {});
+      }
+    });
+  }
+
+  /// presence 成员 + 事件流会话 合并:有会话者用会话状态覆盖,
+  /// 否则保留 presence 自带快照(两条通道输出同一形状)。
+  List<RoomPresenceMember> _mergedMembers(
+    RoomBrowserState browser,
+    String roomId,
+    DateTime now,
+  ) {
+    final members =
+        browser.presenceByRoom[roomId] ?? const <RoomPresenceMember>[];
+    final snapshot = browser.activityByRoom[roomId];
+    if (snapshot == null || snapshot.isEmpty) {
+      return members;
+    }
+    return [
+      for (final member in members)
+        switch (snapshot.activityStatusOf(member.userId, now)) {
+          null => member,
+          final status => member.copyWith(activityStatus: status),
+        },
+    ];
+  }
 
   /// 顶栏/内容给悬浮 dock 让出的左侧空间(与牌库页一致)。
   static const _dockInset = CoFitDimens.spacingLg +
@@ -126,6 +169,7 @@ class _RoomMainViewState extends ConsumerState<RoomMainView> {
 
   @override
   void dispose() {
+    _ticker?.cancel();
     _pageController?.dispose();
     super.dispose();
   }
@@ -145,8 +189,8 @@ class _RoomMainViewState extends ConsumerState<RoomMainView> {
         (joinedRoomIds.indexOf(focusedRoomId)).clamp(0, joinedRoomIds.length - 1);
     _pageController ??= PageController(initialPage: roomIndex);
 
-    final members =
-        browser.presenceByRoom[focusedRoomId] ?? const <RoomPresenceMember>[];
+    final now = DateTime.now();
+    final members = _mergedMembers(browser, focusedRoomId, now);
     final activeCount = members
         .where((m) => m.activityStatus.activityState == UserActivityState.active)
         .length;
@@ -202,8 +246,7 @@ class _RoomMainViewState extends ConsumerState<RoomMainView> {
                     bottom: CoFitDimens.sizeFanHeight,
                   ),
                   child: RoomScene(
-                    members: browser.presenceByRoom[roomId] ??
-                        const <RoomPresenceMember>[],
+                    members: _mergedMembers(browser, roomId, now),
                     selfUserId: widget.userId,
                   ),
                 );

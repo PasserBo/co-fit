@@ -59,3 +59,4 @@ P0 主题基建 → P1 动作卡片组件 → P2 牌库主页 → P3 悬浮 dock
 | 2026-08-01 | 旧页面弃用 | P5 已清理:删除 `auth_my_page.dart`、`room_main_page.dart`、`room_action_controls_card.dart`;**保留** `RoomCommunityPage`(仍是浏览页的「加入/创建房间」工具页入口)与 `room_browse_page` 相关旧组件——功能可用但视觉未重做,待房间浏览流程有定稿设计再翻新 |
 | 2026-08-01 | 我的页取版 | 用户选定 10a(形象优先),且内容收敛到已实现功能;10a 其余项(累计时长/打卡/通知隐私)等对应功能落地时再补 |
 | 2026-08-01 | 字体打包 | google_fonts 目前运行时拉取 Space Grotesk(有缓存);**上线前**把字体文件打进 assets 并关闭 runtime fetching |
+| 2026-08-02 | 事件流 → 房间状态(实测问题 2) | 新增 domain 折叠:`ActionSession`(时间点建模:active 存 endsAt、paused 冻结剩余,剩余/过期是随 now 的派生规则)+ `RoomActivitySnapshot.apply/sweep`(乱序忽略、一人一会话、未知会话从 payload 自举、completed/过期会话保留 5s 后清扫)。接线:`roomBrowserProvider.activityByRoom` 折叠入库,`RoomMainView` 合并 presence+会话渲染,1s ticker 驱动倒计时/到点回待机。**presence 写入侧(实测问题 1)仍未做**:打出后 presence.activity 依旧为空,晚进房者看不到进行中的动作;且无人发 completed(靠本地过期兜底) |

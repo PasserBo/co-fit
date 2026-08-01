@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../firestore/ably_state_machine.dart';
+import '../domain/entity/room_activity_snapshot.dart';
 import '../domain/entity/room_event.dart';
 import '../domain/entity/room_presence_member.dart';
 
@@ -14,6 +15,7 @@ class RoomBrowserState {
     this.focusedRoomId,
     this.eventsByRoom = const <String, List<RoomEvent>>{},
     this.presenceByRoom = const <String, List<RoomPresenceMember>>{},
+    this.activityByRoom = const <String, RoomActivitySnapshot>{},
     this.isReady = false,
     this.error,
   });
@@ -24,6 +26,9 @@ class RoomBrowserState {
   final String? focusedRoomId;
   final Map<String, List<RoomEvent>> eventsByRoom;
   final Map<String, List<RoomPresenceMember>> presenceByRoom;
+
+  /// 事件流折叠出的房间活动状态(每用户当前会话),见 RoomActivitySnapshot。
+  final Map<String, RoomActivitySnapshot> activityByRoom;
   final bool isReady;
   final String? error;
 
@@ -33,6 +38,7 @@ class RoomBrowserState {
     bool clearFocusedRoomId = false,
     Map<String, List<RoomEvent>>? eventsByRoom,
     Map<String, List<RoomPresenceMember>>? presenceByRoom,
+    Map<String, RoomActivitySnapshot>? activityByRoom,
     bool? isReady,
     String? error,
     bool clearError = false,
@@ -44,6 +50,7 @@ class RoomBrowserState {
           : (focusedRoomId ?? this.focusedRoomId),
       eventsByRoom: eventsByRoom ?? this.eventsByRoom,
       presenceByRoom: presenceByRoom ?? this.presenceByRoom,
+      activityByRoom: activityByRoom ?? this.activityByRoom,
       isReady: isReady ?? this.isReady,
       error: clearError ? null : (error ?? this.error),
     );
@@ -133,7 +140,19 @@ class RoomBrowserNotifier extends Notifier<RoomBrowserState> {
       ...state.eventsByRoom,
       trimmedRoomId: nextEvents,
     };
-    state = state.copyWith(eventsByRoom: nextEventsByRoom);
+
+    // 折叠:事件 → 每用户当前会话(顺手清扫过期/完成的会话)
+    final currentSnapshot = state.activityByRoom[trimmedRoomId] ??
+        RoomActivitySnapshot(roomId: trimmedRoomId);
+    final nextSnapshot =
+        currentSnapshot.apply(event).sweep(DateTime.now());
+
+    state = state.copyWith(
+      eventsByRoom: nextEventsByRoom,
+      activityByRoom: identical(nextSnapshot, currentSnapshot)
+          ? null
+          : {...state.activityByRoom, trimmedRoomId: nextSnapshot},
+    );
   }
 
   void ingestPresence({
@@ -217,9 +236,13 @@ class RoomBrowserNotifier extends Notifier<RoomBrowserState> {
     final nextPresenceByRoom =
         Map<String, List<RoomPresenceMember>>.from(state.presenceByRoom)
           ..remove(roomId);
+    final nextActivityByRoom =
+        Map<String, RoomActivitySnapshot>.from(state.activityByRoom)
+          ..remove(roomId);
     state = state.copyWith(
       eventsByRoom: nextEventsByRoom,
       presenceByRoom: nextPresenceByRoom,
+      activityByRoom: nextActivityByRoom,
     );
   }
 
@@ -305,5 +328,12 @@ final roomPresenceByIdProvider =
         roomBrowserProvider.select(
           (state) => state.presenceByRoom[roomId] ?? const <RoomPresenceMember>[],
         ),
+      );
+    });
+
+final roomActivityByIdProvider =
+    Provider.family<RoomActivitySnapshot?, String>((ref, roomId) {
+      return ref.watch(
+        roomBrowserProvider.select((state) => state.activityByRoom[roomId]),
       );
     });

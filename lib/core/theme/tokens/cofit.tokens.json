@@ -86,6 +86,7 @@
     "subtle": { "$value": 0.16, "$description": "淡底 = 主色 @16% (README alpha 规则)" },
     "border": { "$value": 0.4, "$description": "淡描边 = 主色 @40% (README alpha 规则)" },
     "glow": { "$value": 0.18, "$description": "选中光晕 lime@18% (README)" },
+    "faint": { "$value": 0.09, "$description": "更淡的底(创建横幅 lime@9%)(#12b mock)" },
     "overlay": { "$value": 0.62, "$description": "悬浮层底 (README)" }
   },
   "spacing": {
@@ -101,6 +102,7 @@
   },
   "radius": {
     "$type": "dimension",
+    "xs": { "$value": { "value": 4, "unit": "px" }, "$description": "小徽点/glyph/叠牌缩略,mock 3–6 吸附 (seed v1)" },
     "sm": { "$value": { "value": 8, "unit": "px" }, "$description": "卡片内图标块 (README)" },
     "md": { "$value": { "value": 12, "unit": "px" }, "$description": "卡片容器下限 (README: 12–16)" },
     "lg": { "$value": { "value": 16, "unit": "px" }, "$description": "卡片容器上限 / 悬浮 dock (README)" }
@@ -118,7 +120,23 @@
     "removeBadgeOffset": { "$value": { "value": 6, "unit": "px" }, "$description": "移除角标右上悬浮偏移 (README: -6px)" },
     "cardIcon": { "$value": { "value": 14, "unit": "px" }, "$description": "动作卡图标块内 glyph / 角标内图标 (seed v1)" },
     "checkBadge": { "$value": { "value": 18, "unit": "px" }, "$description": "已入组 ✓ 角标圆 (seed v1)" },
-    "minTapTarget": { "$value": { "value": 44, "unit": "px" }, "$description": "可点击目标最小边长 (seed v1, iOS HIG)" }
+    "minTapTarget": { "$value": { "value": 44, "unit": "px" }, "$description": "可点击目标最小边长 (seed v1, iOS HIG)" },
+    "libraryCardItem": { "$value": { "value": 112, "unit": "px" }, "$description": "牌库横滑列子项宽度(mock 80/280 宽度比 ≈ 0.29 × 390)(#12b)" },
+    "sectionDot": { "$value": { "value": 9, "unit": "px" }, "$description": "牌库分区标题徽点 (#12b)" },
+    "bannerIcon": { "$value": { "value": 30, "unit": "px" }, "$description": "创建横幅 + 图标块 (#12b)" },
+    "deckStackWidth": { "$value": { "value": 34, "unit": "px" }, "$description": "牌组行叠牌缩略整体宽 (#11b)" },
+    "deckStackHeight": { "$value": { "value": 38, "unit": "px" }, "$description": "牌组行叠牌缩略整体高 (#11b)" },
+    "deckStackCardWidth": { "$value": { "value": 22, "unit": "px" }, "$description": "叠牌缩略单张宽 (#11b)" },
+    "deckStackCardHeight": { "$value": { "value": 30, "unit": "px" }, "$description": "叠牌缩略单张高 (#11b)" },
+    "deckCardThumb": { "$value": { "value": 52, "unit": "px" }, "$description": "牌组展开内嵌迷你卡宽度(高度随内容)(#11b)" }
+  },
+  "decor": {
+    "$type": "number",
+    "$description": "装饰性绘制常量 (seed v1)",
+    "deckStackTiltBackDeg": { "$value": -10, "$description": "叠牌缩略最底张倾角(度)(#11b)" },
+    "deckStackTiltMidDeg": { "$value": 4, "$description": "叠牌缩略中间张倾角(度)(#11b)" },
+    "dashLength": { "$value": 6, "$description": "虚线描边线段长 px" },
+    "dashGap": { "$value": 4, "$description": "虚线描边间隔 px" }
   },
   "blur": {
     "$type": "dimension",

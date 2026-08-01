@@ -13,6 +13,14 @@ extension ActionTypeStyle on ActionType {
         ActionType.flexibility => '柔韧',
       };
 
+  /// 牌库分区标题(#12b mock:力量训练/有氧训练/核心)
+  String get sectionTitle => switch (this) {
+        ActionType.strength => '力量训练',
+        ActionType.cardio => '有氧训练',
+        ActionType.core => '核心',
+        ActionType.flexibility => '柔韧',
+      };
+
   IconData get icon => switch (this) {
         ActionType.strength => Icons.fitness_center,
         ActionType.cardio => Icons.directions_run,

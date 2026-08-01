@@ -35,6 +35,7 @@ abstract class CoFitOpacities {
   static const subtle = 0.16; // 淡底 = 主色 @16%
   static const border = 0.40; // 淡描边 = 主色 @40%
   static const glow = 0.18; // 选中光晕 lime @18%
+  static const faint = 0.09; // 更淡的底(创建横幅 lime @9%)
   static const overlay = 0.62; // 悬浮层底 gray-850 @62%
 }
 

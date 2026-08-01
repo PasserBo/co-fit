@@ -14,6 +14,7 @@ abstract class CoFitDimens {
   static const spacing3xl = 32.0;
 
   // radius.*
+  static const radiusXs = 4.0;
   static const radiusSm = 8.0;
   static const radiusMd = 12.0;
   static const radiusLg = 16.0;
@@ -30,6 +31,14 @@ abstract class CoFitDimens {
   static const sizeCardIcon = 14.0;
   static const sizeCheckBadge = 18.0;
   static const sizeMinTapTarget = 44.0;
+  static const sizeLibraryCardItem = 112.0;
+  static const sizeSectionDot = 9.0;
+  static const sizeBannerIcon = 30.0;
+  static const sizeDeckStackWidth = 34.0;
+  static const sizeDeckStackHeight = 38.0;
+  static const sizeDeckStackCardWidth = 22.0;
+  static const sizeDeckStackCardHeight = 30.0;
+  static const sizeDeckCardThumb = 52.0;
 
   // blur.*
   static const blurOverlay = 8.0;
@@ -46,6 +55,17 @@ abstract class CoFitMotion {
 
   /// dock 无操作自动收起
   static const dockAutoCollapse = Duration(seconds: 5);
+}
+
+/// decor.* — 装饰性绘制常量
+abstract class CoFitDecor {
+  /// 叠牌缩略最底张/中间张倾角(度)
+  static const deckStackTiltBackDeg = -10.0;
+  static const deckStackTiltMidDeg = 4.0;
+
+  /// 虚线描边节奏
+  static const dashLength = 6.0;
+  static const dashGap = 4.0;
 }
 
 /// typography.fontWeight.* — 字重 token(字体族见 CoFitTheme)

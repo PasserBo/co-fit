@@ -1,12 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:widgetbook/widgetbook.dart';
 
 import '../core/theme/cofit_theme.dart';
+import '../features/action/domain/entity/action_deck.dart';
 import '../features/action/domain/entity/action_source.dart';
 import '../features/action/domain/entity/action_template_card.dart';
 import '../features/action/domain/entity/action_type.dart';
+import '../features/action/presentation/action_template_usecase_provider.dart';
+import '../features/action/presentation/view/card_library_page.dart';
 import '../features/action/presentation/widget/action_card.dart';
 import '../features/action/presentation/widget/action_type_style.dart';
+import '../features/action/presentation/widget/deck_list_body.dart';
+import '../features/action/presentation/widget/library_tab_body.dart';
 
 /// CoFit 组件画廊(Widgetbook)。
 /// 独立入口,不初始化 Firebase/Ably:
@@ -45,11 +51,87 @@ class CoFitWidgetbook extends StatelessWidget {
                 WidgetbookUseCase(name: '全部状态一览', builder: _allStates),
               ],
             ),
+            WidgetbookComponent(
+              name: 'LibraryTabBody',
+              useCases: [
+                WidgetbookUseCase(name: '牌库 tab', builder: _libraryTab),
+              ],
+            ),
+            WidgetbookComponent(
+              name: 'DeckListBody',
+              useCases: [
+                WidgetbookUseCase(name: '我的卡组 tab', builder: _deckList),
+              ],
+            ),
+            WidgetbookComponent(
+              name: 'CardLibraryPage(完整页)',
+              useCases: [
+                WidgetbookUseCase(name: '默认', builder: _cardLibraryPage),
+              ],
+            ),
           ],
         ),
       ],
     );
   }
+}
+
+List<ActionTemplateCard> _sampleLibrary() => [
+      _sample(),
+      _sample(
+        type: ActionType.strength,
+        source: ActionSource.custom,
+        name: '壶铃摆荡',
+        durationSec: 480,
+      ),
+      _sample(type: ActionType.strength, name: '硬拉', durationSec: 720),
+      _sample(type: ActionType.cardio, durationSec: 300),
+      _sample(
+        type: ActionType.cardio,
+        source: ActionSource.friendShared,
+        name: '高抬腿',
+        durationSec: 240,
+      ),
+      _sample(type: ActionType.core, durationSec: 180),
+      _sample(type: ActionType.core, name: '卷腹', durationSec: 360),
+      _sample(type: ActionType.flexibility, durationSec: 300),
+    ];
+
+Widget _libraryTab(BuildContext context) {
+  return Scaffold(body: LibraryTabBody(cards: _sampleLibrary()));
+}
+
+Widget _deckList(BuildContext context) {
+  final cards = _sampleLibrary();
+  final decks = [
+    ActionDeck(
+      id: 'deck_1',
+      name: '考研自习室',
+      cardIds: cards.take(5).map((c) => c.id).toList(),
+    ),
+    ActionDeck(
+      id: 'deck_2',
+      name: '晨间唤醒',
+      cardIds: cards.skip(3).take(4).map((c) => c.id).toList(),
+    ),
+  ];
+  return Scaffold(
+    body: DeckListBody(
+      decks: decks,
+      cardsById: {for (final c in cards) c.id: c},
+      expandedDeckId: 'deck_1',
+      onAddCard: (_) {},
+    ),
+  );
+}
+
+Widget _cardLibraryPage(BuildContext context) {
+  return ProviderScope(
+    overrides: [
+      templateCardsProvider.overrideWith((ref) async => _sampleLibrary()),
+    ],
+    child: const CardLibraryPage(),
+  );
 }
 
 ActionTemplateCard _sample({
@@ -65,7 +147,7 @@ ActionTemplateCard _sample({
     ActionType.flexibility: '肩颈拉伸',
   };
   return ActionTemplateCard(
-    id: 'preview_${type.name}',
+    id: 'preview_${type.name}_${name ?? names[type]!}',
     name: name ?? names[type]!,
     type: type,
     rawType: type.name,

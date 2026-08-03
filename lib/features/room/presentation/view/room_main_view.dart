@@ -13,6 +13,8 @@ import '../../../action/presentation/widget/card_fan.dart';
 import '../../../action/presentation/widget/deck_switcher.dart';
 import '../../../action/provider/action_deck_repository_provider.dart';
 import '../../../action/provider/action_decks_provider.dart';
+import '../../../action/provider/own_action_session_notifier.dart';
+import '../../../avatar/provider/avatar_renderer_provider.dart';
 import '../../domain/entity/room_presence_member.dart';
 import '../../domain/entity/user_activity_status_entity.dart';
 import '../../provider/room_info_provider.dart';
@@ -129,12 +131,11 @@ class _RoomMainViewState extends ConsumerState<RoomMainView> {
     }
     setState(() => _isPlaying = true);
     try {
-      await ref
-          .read(selectTemplateCardUsecaseProvider)
-          .execute(templateId: card.id);
-      await ref
-          .read(startTemplateCardActionUsecaseProvider)
-          .execute(roomId: roomId, userId: widget.userId);
+      await ref.read(ownActionSessionProvider.notifier).play(
+            card: card,
+            roomId: roomId,
+            userId: widget.userId,
+          );
       if (!mounted) {
         return;
       }
@@ -248,6 +249,7 @@ class _RoomMainViewState extends ConsumerState<RoomMainView> {
                   child: RoomScene(
                     members: _mergedMembers(browser, roomId, now),
                     selfUserId: widget.userId,
+                    renderer: ref.watch(avatarRendererProvider),
                   ),
                 );
               },

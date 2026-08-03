@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:widgetbook/widgetbook.dart';
 
 import '../core/navigation/app_shell.dart';
+import '../core/theme/cofit_colors.dart';
 import '../core/theme/cofit_theme.dart';
 import '../core/widget/floating_dock.dart';
 import '../features/action/domain/entity/action_deck.dart';
@@ -18,6 +19,9 @@ import '../features/action/presentation/widget/deck_list_body.dart';
 import '../features/action/presentation/widget/deck_switcher.dart';
 import '../features/action/presentation/widget/library_tab_body.dart';
 import '../features/auth/presentation/widget/my_page_body.dart';
+import '../features/avatar/domain/entity/avatar_motion.dart';
+import '../features/avatar/presentation/renderer/avatar_renderer.dart';
+import '../features/avatar/presentation/renderer/vector_avatar_renderer.dart';
 import '../features/room/domain/entity/room_presence_member.dart';
 import '../features/room/domain/entity/user_activity_status_entity.dart';
 import '../features/room/presentation/widget/room_scene.dart';
@@ -104,6 +108,18 @@ class CoFitWidgetbook extends StatelessWidget {
           ],
         ),
         WidgetbookFolder(
+          name: 'avatar',
+          children: [
+            WidgetbookComponent(
+              name: 'AvatarMotion(动作集 #14a)',
+              useCases: [
+                WidgetbookUseCase(name: 'Playground', builder: _avatarPlayground),
+                WidgetbookUseCase(name: '全状态一览', builder: _avatarGallery),
+              ],
+            ),
+          ],
+        ),
+        WidgetbookFolder(
           name: 'auth',
           children: [
             WidgetbookComponent(
@@ -134,6 +150,132 @@ class CoFitWidgetbook extends StatelessWidget {
       ],
     );
   }
+}
+
+Widget _avatarPlayground(BuildContext context) {
+  final state = context.knobs.object.dropdown(
+    label: '动画状态',
+    options: AvatarMotionState.values,
+    labelBuilder: (s) => s.name,
+    initialOption: AvatarMotionState.exercise,
+  );
+  final type = context.knobs.object.dropdown(
+    label: '动作类型',
+    options: ActionType.values,
+    labelBuilder: (t) => t.label,
+  );
+  final tempo = context.knobs.object.dropdown(
+    label: '节奏',
+    options: AvatarTempo.values,
+    labelBuilder: (t) => t.name,
+  );
+  final isSelf = context.knobs.boolean(label: '自己(白身+lime 环)');
+
+  return Scaffold(
+    body: Center(
+      child: Builder(builder: (context) {
+        final colors = Theme.of(context).extension<CoFitColors>()!;
+        return const VectorAvatarRenderer().build(
+          motion: AvatarMotion(
+            state: state,
+            actionType: type,
+            tempo: tempo,
+          ),
+          appearance: AvatarAppearance(
+            body: isSelf ? colors.textPrimary : colors.statusActive,
+            aura: type.mainOf(colors),
+            auraOpacity: CoFitOpacities.auraActive,
+            headRing: isSelf
+                ? colors.primaryMain.withValues(alpha: CoFitOpacities.strong)
+                : null,
+          ),
+          height: 200,
+        );
+      }),
+    ),
+  );
+}
+
+Widget _avatarGallery(BuildContext context) {
+  final colors = Theme.of(context).extension<CoFitColors>()!;
+
+  Widget cell(String caption, AvatarMotion motion, {Color? aura}) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const VectorAvatarRenderer().build(
+          motion: motion,
+          appearance: AvatarAppearance(
+            body: colors.textPrimary,
+            aura: aura ?? colors.primaryMain,
+            auraOpacity: CoFitOpacities.auraActive,
+            headRing:
+                colors.primaryMain.withValues(alpha: CoFitOpacities.strong),
+          ),
+          height: 120,
+        ),
+        const SizedBox(height: 8),
+        Text(caption, style: Theme.of(context).textTheme.labelSmall),
+      ],
+    );
+  }
+
+  return Scaffold(
+    body: Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: Wrap(
+          spacing: 24,
+          runSpacing: 24,
+          alignment: WrapAlignment.center,
+          children: [
+            cell('待机', AvatarMotion.idle()),
+            cell('起手 ×1',
+                const AvatarMotion(state: AvatarMotionState.windup)),
+            cell(
+              '力量·蹲起',
+              const AvatarMotion(
+                state: AvatarMotionState.exercise,
+                actionType: ActionType.strength,
+              ),
+              aura: colors.typeStrength,
+            ),
+            cell(
+              '有氧·原地跑',
+              const AvatarMotion(
+                state: AvatarMotionState.exercise,
+                actionType: ActionType.cardio,
+              ),
+              aura: colors.typeCardio,
+            ),
+            cell(
+              '核心·支撑',
+              const AvatarMotion(
+                state: AvatarMotionState.exercise,
+                actionType: ActionType.core,
+              ),
+              aura: colors.typeCore,
+            ),
+            cell(
+              '柔韧·伸展',
+              const AvatarMotion(
+                state: AvatarMotionState.exercise,
+                actionType: ActionType.flexibility,
+              ),
+              aura: colors.typeFlexibility,
+            ),
+            cell(
+              '暂停',
+              const AvatarMotion(state: AvatarMotionState.paused),
+              aura: colors.statusPaused,
+            ),
+            cell('完成 ×1',
+                const AvatarMotion(state: AvatarMotionState.finish)),
+          ],
+        ),
+      ),
+    ),
+  );
 }
 
 Widget _myPage(BuildContext context) {
@@ -217,7 +359,11 @@ List<RoomPresenceMember> _sampleMembers() {
 Widget _roomScene(BuildContext context) {
   return Scaffold(
     body: SafeArea(
-      child: RoomScene(members: _sampleMembers(), selfUserId: 'me'),
+      child: RoomScene(
+        members: _sampleMembers(),
+        selfUserId: 'me',
+        renderer: const VectorAvatarRenderer(),
+      ),
     ),
   );
 }

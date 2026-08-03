@@ -167,7 +167,25 @@ class RoomBrowserNotifier extends Notifier<RoomBrowserState> {
       ...state.presenceByRoom,
       trimmedRoomId: List<RoomPresenceMember>.unmodifiable(members),
     };
-    state = state.copyWith(presenceByRoom: nextPresenceByRoom);
+
+    // presence.activity 快照反哺折叠(晚进房者的唯一来源);
+    // 时序上比事件旧的快照会被 applyPresenceStatus 忽略。
+    var snapshot = state.activityByRoom[trimmedRoomId] ??
+        RoomActivitySnapshot(roomId: trimmedRoomId);
+    for (final member in members) {
+      snapshot = snapshot.applyPresenceStatus(
+        userId: member.userId,
+        status: member.activityStatus,
+      );
+    }
+
+    state = state.copyWith(
+      presenceByRoom: nextPresenceByRoom,
+      activityByRoom:
+          identical(snapshot, state.activityByRoom[trimmedRoomId])
+              ? null
+              : {...state.activityByRoom, trimmedRoomId: snapshot},
+    );
   }
 
   Future<void> clear() async {

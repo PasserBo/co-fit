@@ -36,6 +36,11 @@ abstract class CoFitOpacities {
   static const border = 0.40; // 淡描边 = 主色 @40%
   static const glow = 0.18; // 选中光晕 lime @18%
   static const faint = 0.09; // 更淡的底(创建横幅 lime @9%)
+  static const strong = 0.9; // 自己小人常亮头环 lime @90% (#6b)
+  static const auraActive = 0.28; // 运动中地面光圈 (#14a)
+  static const auraPaused = 0.25; // 暂停地面光圈 (#14a)
+  static const farLimb = 0.8; // 侧视远侧肢体 = 主体色 @80% (#14a)
+  static const pausedFigure = 0.75; // 暂停态小人整体透明度 (#14a)
   static const overlay = 0.62; // 悬浮层底 gray-850 @62%
 }
 

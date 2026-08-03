@@ -6,6 +6,7 @@ import '../data/action_template_event_repository.dart';
 import '../data/action_template_repository_provider.dart';
 import '../data/action_template_selection_repository.dart';
 import '../data/in_memory_action_template_selection_repository.dart';
+import '../domain/complete_template_card_action_usecase.dart';
 import '../domain/entity/action_template_card.dart';
 import '../domain/get_template_cards_usecase.dart';
 import '../domain/select_template_card_usecase.dart';
@@ -42,6 +43,13 @@ final startTemplateCardActionUsecaseProvider =
     Provider<StartTemplateCardActionUsecase>((ref) {
       return StartTemplateCardActionUsecase(
         ref.watch(actionTemplateSelectionRepositoryProvider),
+        ref.watch(actionTemplateEventRepositoryProvider),
+      );
+    });
+
+final completeTemplateCardActionUsecaseProvider =
+    Provider<CompleteTemplateCardActionUsecase>((ref) {
+      return CompleteTemplateCardActionUsecase(
         ref.watch(actionTemplateEventRepositoryProvider),
       );
     });

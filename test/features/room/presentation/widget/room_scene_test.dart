@@ -1,4 +1,5 @@
 import 'package:cofit/core/theme/cofit_colors.dart';
+import 'package:cofit/features/avatar/presentation/renderer/vector_avatar_renderer.dart';
 import 'package:cofit/features/room/domain/entity/room_presence_member.dart';
 import 'package:cofit/features/room/domain/entity/user_activity_status_entity.dart';
 import 'package:cofit/features/room/presentation/widget/room_scene.dart';
@@ -38,6 +39,7 @@ void main() {
     await _pump(
       tester,
       RoomScene(
+        renderer: const VectorAvatarRenderer(),
         members: [
           _member('friend_alpha', UserActivityState.active,
               action: '深蹲', remaining: 300),
@@ -58,6 +60,7 @@ void main() {
     await _pump(
       tester,
       RoomScene(
+        renderer: const VectorAvatarRenderer(),
         members: [
           _member('friend_alpha', UserActivityState.active,
               action: '深蹲', remaining: 300),
@@ -74,6 +77,7 @@ void main() {
     await _pump(
       tester,
       RoomScene(
+        renderer: const VectorAvatarRenderer(),
         members: [_member('friend_alpha', UserActivityState.idle)],
         selfUserId: 'me',
       ),

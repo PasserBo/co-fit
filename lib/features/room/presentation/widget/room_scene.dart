@@ -1,19 +1,23 @@
 import 'package:flutter/material.dart';
 
+import '../../../action/domain/entity/action_type.dart';
+import '../../../avatar/presentation/renderer/avatar_renderer.dart';
 import '../../domain/entity/room_presence_member.dart';
 import 'avatar_bubble.dart';
 
 /// 漂浮气泡空间(#6b):好友小人散布在场景锚点上,自己固定在中下方。
-/// 纯展示:presence 列表由外部注入。
+/// 纯展示:presence 列表与动画渲染器由外部注入。
 class RoomScene extends StatelessWidget {
   const RoomScene({
     required this.members,
     required this.selfUserId,
+    required this.renderer,
     super.key,
   });
 
   final List<RoomPresenceMember> members;
   final String selfUserId;
+  final AvatarRenderer renderer;
 
   /// 好友锚点(FractionalOffset,取自 #6b/#t9 mock 的小人位置);
   /// 超出锚点数量的成员从头复用并轻微偏移。
@@ -50,6 +54,17 @@ class RoomScene extends StatelessWidget {
     return '$name ${minutes}min';
   }
 
+  /// 运动中的动作类型:actionKey = 卡片 rawType,经 fromRaw 归类。
+  ActionType? _actionType(RoomPresenceMember member) {
+    final key = member.activityStatus.actionKey;
+    return key == null ? null : ActionType.fromRaw(key);
+  }
+
+  /// 固定相位偏移(README 帧同步规范第 5 条):hash(userId) 派生,
+  /// 与启动时刻无关,避免全房间齐步走。
+  static double phaseSeedOf(String userId) =>
+      (userId.hashCode.abs() % 997) / 997;
+
   @override
   Widget build(BuildContext context) {
     final friends =
@@ -69,13 +84,15 @@ class RoomScene extends StatelessWidget {
           children: [
             for (var i = 0; i < friends.length; i++)
               Align(
-                // 复用锚点时按轮次向中心收缩,避免完全重叠
                 alignment: _shiftedAnchor(i),
                 child: AvatarBubble(
                   key: ValueKey(friends[i].clientId),
                   name: displayName(friends[i]),
                   state: friends[i].activityStatus.activityState,
+                  actionType: _actionType(friends[i]),
                   chipText: _chipText(friends[i]),
+                  renderer: renderer,
+                  phaseSeed: phaseSeedOf(friends[i].userId),
                 ),
               ),
             if (self != null)
@@ -85,8 +102,11 @@ class RoomScene extends StatelessWidget {
                   key: const ValueKey('self'),
                   name: '你',
                   state: self.activityStatus.activityState,
+                  actionType: _actionType(self),
                   chipText: _chipText(self),
                   isSelf: true,
+                  renderer: renderer,
+                  phaseSeed: phaseSeedOf(self.userId),
                 ),
               ),
           ],

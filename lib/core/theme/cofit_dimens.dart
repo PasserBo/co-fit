@@ -83,6 +83,15 @@ abstract class CoFitMotion {
   /// 扇形聚焦/切牌过渡、打出飞卡
   static const fanTransition = Duration(milliseconds: 280);
   static const playFly = Duration(milliseconds: 420);
+
+  /// 小人动作动画(README §小人动作动画 关键帧表)
+  static const avatarWindup = Duration(milliseconds: 400);
+  static const avatarFinish = Duration(milliseconds: 1100);
+  static const avatarLoopStrength = Duration(milliseconds: 1300);
+  static const avatarLoopCardio = Duration(milliseconds: 600);
+  static const avatarLoopCore = Duration(milliseconds: 900);
+  static const avatarLoopFlexibility = Duration(milliseconds: 2600);
+  static const avatarLoopPaused = Duration(milliseconds: 3000);
 }
 
 /// decor.* — 装饰性绘制常量
@@ -101,6 +110,10 @@ abstract class CoFitDecor {
   static const fanFocusLift = 120.0;
   static const fanSideOpacity = 0.55;
   static const playSwipeThreshold = 60.0;
+
+  /// 动画节奏倍率(README §动画:慢/标准/快 → 时长 ×1.3/×1/×0.75)
+  static const tempoSlow = 1.3;
+  static const tempoFast = 0.75;
 }
 
 /// typography.fontWeight.* — 字重 token(字体族见 CoFitTheme)

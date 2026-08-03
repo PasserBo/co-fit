@@ -87,6 +87,11 @@
     "border": { "$value": 0.4, "$description": "淡描边 = 主色 @40% (README alpha 规则)" },
     "glow": { "$value": 0.18, "$description": "选中光晕 lime@18% (README)" },
     "faint": { "$value": 0.09, "$description": "更淡的底(创建横幅 lime@9%)(#12b mock)" },
+    "strong": { "$value": 0.9, "$description": "自己小人常亮头环 lime@90% (#6b)" },
+    "auraActive": { "$value": 0.28, "$description": "运动中地面光圈 (#14a)" },
+    "auraPaused": { "$value": 0.25, "$description": "暂停地面光圈 (#14a)" },
+    "farLimb": { "$value": 0.8, "$description": "侧视远侧肢体 = 主体色 @80%(#14a #cfcec8 的派生规则)" },
+    "pausedFigure": { "$value": 0.75, "$description": "暂停态小人整体透明度 (#14a/README)" },
     "overlay": { "$value": 0.62, "$description": "悬浮层底 (README)" }
   },
   "spacing": {
@@ -158,7 +163,9 @@
     "fanFocusScale": { "$value": 1.5, "$description": "聚焦模式整体放大倍数 (seed v1)" },
     "fanFocusLift": { "$value": 120, "$description": "聚焦模式整体上浮 px (seed v1)" },
     "fanSideOpacity": { "$value": 0.55, "$description": "聚焦模式侧牌透明度 (seed v1)" },
-    "playSwipeThreshold": { "$value": 60, "$description": "上滑打出的位移阈值 px (seed v1)" }
+    "playSwipeThreshold": { "$value": 60, "$description": "上滑打出的位移阈值 px (seed v1)" },
+    "tempoSlow": { "$value": 1.3, "$description": "动画节奏倍率·慢 (README §动画)" },
+    "tempoFast": { "$value": 0.75, "$description": "动画节奏倍率·快 (README §动画)" }
   },
   "blur": {
     "$type": "dimension",
@@ -183,6 +190,13 @@
     "bobPeriod": { "$type": "duration", "$value": { "value": 2400, "unit": "ms" }, "$description": "小人上下浮动周期 (seed v1)" },
     "breathePeriod": { "$type": "duration", "$value": { "value": 1800, "unit": "ms" }, "$description": "运动中光圈呼吸周期 (seed v1)" },
     "fanTransition": { "$type": "duration", "$value": { "value": 280, "unit": "ms" }, "$description": "扇形聚焦/切牌过渡 (#6b mock .28s)" },
-    "playFly": { "$type": "duration", "$value": { "value": 420, "unit": "ms" }, "$description": "打出卡牌飞出动画 (#6b mock .42s)" }
+    "playFly": { "$type": "duration", "$value": { "value": 420, "unit": "ms" }, "$description": "打出卡牌飞出动画 (#6b mock .42s)" },
+    "avatarWindup": { "$type": "duration", "$value": { "value": 400, "unit": "ms" }, "$description": "小人起手 ×1 (README §动画)" },
+    "avatarFinish": { "$type": "duration", "$value": { "value": 1100, "unit": "ms" }, "$description": "小人完成 ×1 (README §动画)" },
+    "avatarLoopStrength": { "$type": "duration", "$value": { "value": 1300, "unit": "ms" }, "$description": "力量·蹲起 loop (README §动画)" },
+    "avatarLoopCardio": { "$type": "duration", "$value": { "value": 600, "unit": "ms" }, "$description": "有氧·原地跑 loop (README §动画)" },
+    "avatarLoopCore": { "$type": "duration", "$value": { "value": 900, "unit": "ms" }, "$description": "核心·支撑 loop (README §动画)" },
+    "avatarLoopFlexibility": { "$type": "duration", "$value": { "value": 2600, "unit": "ms" }, "$description": "柔韧·伸展 loop (README §动画)" },
+    "avatarLoopPaused": { "$type": "duration", "$value": { "value": 3000, "unit": "ms" }, "$description": "暂停摇摆 loop (README §动画)" }
   }
 }

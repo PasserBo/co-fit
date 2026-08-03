@@ -79,6 +79,61 @@ abstract class RoomActivitySnapshot with _$RoomActivitySnapshot {
     return sessionsByUser[userId]?.toActivityStatus(now);
   }
 
+  /// 用 presence 快照自举/校正会话(晚进房者收不到历史事件,
+  /// presence.activity 是他们唯一的「进行中动作」来源)。
+  /// 只有当快照带 sessionId + updatedAtEpochMs 且比现有会话新时才生效;
+  /// idle 快照(比现有会话新)会清除该用户的会话。
+  RoomActivitySnapshot applyPresenceStatus({
+    required String userId,
+    required UserActivityStatusEntity status,
+  }) {
+    final updatedAtMs = status.updatedAtEpochMs;
+    if (updatedAtMs == null) {
+      return this;
+    }
+    final at = DateTime.fromMillisecondsSinceEpoch(updatedAtMs);
+    final current = sessionsByUser[userId];
+    if (current != null && !at.isAfter(current.lastEventAt)) {
+      return this;
+    }
+
+    switch (status.activityState) {
+      case UserActivityState.idle:
+        if (current == null) {
+          return this;
+        }
+        final next = {...sessionsByUser}..remove(userId);
+        return copyWith(sessionsByUser: next);
+
+      case UserActivityState.active:
+      case UserActivityState.paused:
+        final sessionId = status.sessionId;
+        if (sessionId == null) {
+          return this;
+        }
+        final remaining = status.remainingSec ?? status.durationSec ?? 0;
+        final paused = status.activityState == UserActivityState.paused;
+        final session = ActionSession(
+          sessionId: sessionId,
+          roomId: roomId,
+          userId: userId,
+          actionKey: status.actionKey ?? '',
+          templateId: status.templateId,
+          templateName: status.templateName,
+          durationSec: status.durationSec ?? remaining,
+          startedAt: at,
+          status:
+              paused ? ActionSessionStatus.paused : ActionSessionStatus.active,
+          endsAt: paused ? null : at.add(Duration(seconds: remaining)),
+          pausedRemainingSec: paused ? remaining : null,
+          lastEventAt: at,
+        );
+        return copyWith(
+          sessionsByUser: {...sessionsByUser, userId: session},
+        );
+    }
+  }
+
   bool get isEmpty => sessionsByUser.isEmpty;
 
   static bool _isActionEvent(String type) {

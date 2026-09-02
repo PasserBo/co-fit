@@ -1,20 +1,23 @@
 import 'package:cofit/core/navigation/app_shell.dart';
 import 'package:cofit/core/theme/cofit_colors.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('dock switches the visible page', (tester) async {
     await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData(brightness: Brightness.dark)
-            .copyWith(extensions: [CoFitColors.dark]),
-        home: AppShell(
-          pages: const [
-            Center(child: Text('房间页')),
-            Center(child: Text('牌库页')),
-            Center(child: Text('我的页')),
-          ],
+      ProviderScope(
+        child: MaterialApp(
+          theme: ThemeData(brightness: Brightness.dark)
+              .copyWith(extensions: [CoFitColors.dark]),
+          home: AppShell(
+            pages: const [
+              Center(child: Text('房间页')),
+              Center(child: Text('牌库页')),
+              Center(child: Text('我的页')),
+            ],
+          ),
         ),
       ),
     );

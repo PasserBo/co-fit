@@ -9,7 +9,7 @@ import '../../action/presentation/action_template_usecase_provider.dart';
 import '../../action/presentation/widgets/action_template_launch_browser.dart';
 import '../../auth/presentation/user_bootstrap_provider.dart';
 import 'join_room_provider.dart';
-import 'room_create_page.dart';
+import 'view/room_create_sheet_view.dart';
 
 class RoomCommunityPage extends ConsumerStatefulWidget {
   const RoomCommunityPage({
@@ -84,11 +84,7 @@ class _RoomCommunityPageState extends ConsumerState<RoomCommunityPage> {
   }
 
   Future<void> _openCreateRoom() async {
-    await Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (_) => RoomCreatePage(userId: widget.userId),
-      ),
-    );
+    await RoomCreateSheetView.show(context, userId: widget.userId);
     if (!mounted) {
       return;
     }

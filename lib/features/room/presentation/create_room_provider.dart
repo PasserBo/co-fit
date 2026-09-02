@@ -125,6 +125,11 @@ class CreateRoomNotifier extends Notifier<CreateRoomState> {
     }
   }
 
+  /// 建房 sheet 每次打开时复位表单(Notifier 是 app 级单例,状态会跨次残留)。
+  void reset() {
+    state = CreateRoomState.initial();
+  }
+
   void clearError() {
     state = state.copyWith(clearErrorMessage: true);
   }

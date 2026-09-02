@@ -1,0 +1,255 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:share_plus/share_plus.dart';
+
+import '../../../../core/theme/cofit_colors.dart';
+import '../../../../core/theme/cofit_dimens.dart';
+import '../../../invite/domain/invite_link_format.dart';
+import '../../domain/entity/room_info_entity.dart';
+import '../create_room_provider.dart';
+
+/// 建房 sheet(stub 协议:无定稿设计,功能优先;替代旧 RoomCreatePage 整页)。
+/// 表单(名称/可见性/描述)→ 成功态切换为分享卡片:
+/// 主 CTA「分享邀请链接」+ 次 CTA 复制——创建和邀请是同一个动作。
+class RoomCreateSheetView extends ConsumerStatefulWidget {
+  const RoomCreateSheetView({required this.userId, super.key});
+
+  final String userId;
+
+  /// 统一入口:打开建房 sheet(每次打开先复位表单状态)。
+  static Future<void> show(BuildContext context, {required String userId}) {
+    return showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Theme.of(context).extension<CoFitColors>()!.bgSurface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(CoFitDimens.radiusLg),
+        ),
+      ),
+      builder: (_) => RoomCreateSheetView(userId: userId),
+    );
+  }
+
+  @override
+  ConsumerState<RoomCreateSheetView> createState() =>
+      _RoomCreateSheetViewState();
+}
+
+class _RoomCreateSheetViewState extends ConsumerState<RoomCreateSheetView> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        ref.read(createRoomProvider.notifier).reset();
+      }
+    });
+  }
+
+  Uri _inviteLink(String roomId, String hash) {
+    return InviteLinkFormat.build(roomId: roomId, hash: hash);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<CoFitColors>()!;
+    final textTheme = Theme.of(context).textTheme;
+    final state = ref.watch(createRoomProvider);
+    final notifier = ref.read(createRoomProvider.notifier);
+    final created =
+        state.createdRoomId != null && state.createdShareLinkHash != null;
+
+    return SafeArea(
+      child: Padding(
+        // 键盘弹起时表单上移
+        padding: EdgeInsets.only(
+          left: CoFitDimens.spacingXl,
+          right: CoFitDimens.spacingXl,
+          top: CoFitDimens.spacingXl,
+          bottom:
+              CoFitDimens.spacingXl + MediaQuery.viewInsetsOf(context).bottom,
+        ),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                created ? '房间已创建' : '创建房间',
+                textAlign: TextAlign.center,
+                style: textTheme.titleMedium?.copyWith(
+                  fontWeight: CoFitFontWeights.heading,
+                ),
+              ),
+              const SizedBox(height: CoFitDimens.spacingXl),
+              if (created)
+                _ShareCard(
+                  roomName: state.name,
+                  link: _inviteLink(
+                    state.createdRoomId!,
+                    state.createdShareLinkHash!,
+                  ),
+                )
+              else
+                _buildForm(state, notifier, colors),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildForm(
+    CreateRoomState state,
+    CreateRoomNotifier notifier,
+    CoFitColors colors,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        TextField(
+          enabled: !state.isSubmitting,
+          onChanged: notifier.updateName,
+          decoration: const InputDecoration(
+            labelText: '房间名(必填)',
+            border: OutlineInputBorder(),
+          ),
+        ),
+        const SizedBox(height: CoFitDimens.spacingMd),
+        DropdownButtonFormField<String>(
+          initialValue: state.visibility,
+          items: RoomVisibility.allowed
+              .map(
+                (value) => DropdownMenuItem(
+                  value: value,
+                  child: Text(value == RoomVisibility.public ? '公开' : '仅邀请'),
+                ),
+              )
+              .toList(growable: false),
+          onChanged: state.isSubmitting
+              ? null
+              : (value) {
+                  if (value != null) {
+                    notifier.updateVisibility(value);
+                  }
+                },
+          decoration: const InputDecoration(
+            labelText: '可见性',
+            border: OutlineInputBorder(),
+          ),
+        ),
+        const SizedBox(height: CoFitDimens.spacingMd),
+        TextField(
+          enabled: !state.isSubmitting,
+          onChanged: notifier.updateDescription,
+          minLines: 2,
+          maxLines: 4,
+          decoration: const InputDecoration(
+            labelText: '描述',
+            border: OutlineInputBorder(),
+          ),
+        ),
+        const SizedBox(height: CoFitDimens.spacingLg),
+        SizedBox(
+          height: CoFitDimens.sizeMinTapTarget,
+          child: FilledButton(
+            onPressed: state.isSubmitting || state.name.trim().isEmpty
+                ? null
+                : () => notifier.submit(ownerId: widget.userId),
+            child: state.isSubmitting
+                ? SizedBox(
+                    width: CoFitDimens.spacingLg,
+                    height: CoFitDimens.spacingLg,
+                    child: CircularProgressIndicator(
+                      strokeWidth: CoFitDimens.borderWidthFocus,
+                      color: colors.primaryOn,
+                    ),
+                  )
+                : const Text('创建房间'),
+          ),
+        ),
+        if (state.errorMessage != null) ...[
+          const SizedBox(height: CoFitDimens.spacingMd),
+          Text(
+            state.errorMessage!,
+            textAlign: TextAlign.center,
+            style: TextStyle(color: colors.statusDanger),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+/// 建房成功态:邀请链接 + 分享/复制 CTA(纯展示 + 系统分享面板)。
+class _ShareCard extends StatelessWidget {
+  const _ShareCard({required this.roomName, required this.link});
+
+  final String roomName;
+  final Uri link;
+
+  String get _shareText => '来 CoFit 一起运动!加入我的房间「$roomName」:$link';
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<CoFitColors>()!;
+    final textTheme = Theme.of(context).textTheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(CoFitDimens.spacingMd),
+          decoration: BoxDecoration(
+            color: colors.primarySubtle,
+            borderRadius: BorderRadius.circular(CoFitDimens.radiusMd),
+            border: Border.all(
+              color: colors.primaryBorder,
+              width: CoFitDimens.borderWidthHairline,
+            ),
+          ),
+          child: SelectableText(
+            '$link',
+            textAlign: TextAlign.center,
+            style: textTheme.bodySmall?.copyWith(color: colors.textSecondary),
+          ),
+        ),
+        const SizedBox(height: CoFitDimens.spacingSm),
+        Text(
+          '朋友装了 CoFit 后点开即可加入(链接暂不支持网页打开)',
+          textAlign: TextAlign.center,
+          style: textTheme.bodySmall?.copyWith(color: colors.textTertiary),
+        ),
+        const SizedBox(height: CoFitDimens.spacingLg),
+        SizedBox(
+          height: CoFitDimens.sizeMinTapTarget,
+          child: FilledButton.icon(
+            onPressed: () {
+              SharePlus.instance.share(ShareParams(text: _shareText));
+            },
+            icon: const Icon(Icons.ios_share_rounded),
+            label: const Text('分享邀请链接'),
+          ),
+        ),
+        const SizedBox(height: CoFitDimens.spacingSm),
+        SizedBox(
+          height: CoFitDimens.sizeMinTapTarget,
+          child: OutlinedButton.icon(
+            onPressed: () async {
+              await Clipboard.setData(ClipboardData(text: '$link'));
+              if (context.mounted) {
+                ScaffoldMessenger.of(context)
+                  ..hideCurrentSnackBar()
+                  ..showSnackBar(const SnackBar(content: Text('链接已复制')));
+              }
+            },
+            icon: const Icon(Icons.copy_rounded),
+            label: const Text('复制链接'),
+          ),
+        ),
+      ],
+    );
+  }
+}

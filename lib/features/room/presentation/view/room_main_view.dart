@@ -14,12 +14,16 @@ import '../../../action/presentation/widget/deck_switcher.dart';
 import '../../../action/provider/action_deck_repository_provider.dart';
 import '../../../action/provider/action_decks_provider.dart';
 import '../../../action/provider/own_action_session_notifier.dart';
+import '../../../auth/presentation/user_bootstrap_provider.dart';
 import '../../../avatar/provider/avatar_renderer_provider.dart';
+import '../../../../firestore/ably_state_machine.dart';
 import '../../domain/entity/room_presence_member.dart';
 import '../../domain/entity/user_activity_status_entity.dart';
 import '../../provider/room_info_provider.dart';
+import '../join_room_provider.dart';
 import '../room_browse_page.dart';
 import '../room_browser_provider.dart';
+import '../widget/room_actions_sheet.dart';
 import '../widget/room_scene.dart';
 import '../widget/room_top_bar.dart';
 
@@ -168,6 +172,77 @@ class _RoomMainViewState extends ConsumerState<RoomMainView> {
     );
   }
 
+  Future<void> _openRoomActions({
+    required String roomId,
+    required String roomName,
+    required bool isOwner,
+  }) async {
+    final action = await showModalBottomSheet<RoomSheetAction>(
+      context: context,
+      backgroundColor: Theme.of(context).extension<CoFitColors>()!.bgSurface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(CoFitDimens.radiusLg),
+        ),
+      ),
+      builder: (context) =>
+          RoomActionsSheet(roomName: roomName, isOwner: isOwner),
+    );
+    if (action == RoomSheetAction.leave && mounted) {
+      await _confirmAndLeaveRoom(roomId: roomId, roomName: roomName);
+    }
+  }
+
+  Future<void> _confirmAndLeaveRoom({
+    required String roomId,
+    required String roomName,
+  }) async {
+    final colors = Theme.of(context).extension<CoFitColors>()!;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('退出房间?'),
+        content: Text('退出「$roomName」后,需要重新受邀或输入房间 ID 才能回来。'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('取消'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text('退出', style: TextStyle(color: colors.statusDanger)),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) {
+      return;
+    }
+
+    try {
+      // 顺序:Firestore 退出 → Ably presence 退出 → 刷新已加入列表
+      // (roomBrowserProvider 会随之取消该房间的订阅)。
+      await ref
+          .read(leaveRoomUsecaseProvider)
+          .execute(roomId: roomId, userId: widget.userId);
+      await ref.read(ablyRuntimeProvider.notifier).leaveRoom(roomId: roomId);
+      await ref.read(userBootstrapProvider.notifier).refreshJoinedRooms();
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text('已退出「$roomName」')));
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text('退出失败:$error')));
+    }
+  }
+
   @override
   void dispose() {
     _ticker?.cancel();
@@ -189,6 +264,29 @@ class _RoomMainViewState extends ConsumerState<RoomMainView> {
     final roomIndex =
         (joinedRoomIds.indexOf(focusedRoomId)).clamp(0, joinedRoomIds.length - 1);
     _pageController ??= PageController(initialPage: roomIndex);
+
+    // 外部聚焦变更(邀请加入后跳转)→ PageView 跟随;
+    // 用户自己滑动产生的变更被 currentPage 相等分支吸收。
+    ref.listen<String?>(
+      roomBrowserProvider.select((s) => s.focusedRoomId),
+      (_, next) {
+        final controller = _pageController;
+        if (next == null || controller == null || !controller.hasClients) {
+          return;
+        }
+        final targetIndex = ref.read(roomBrowserProvider).joinedRoomIds.indexOf(next);
+        if (targetIndex < 0 ||
+            (controller.page?.round() ?? controller.initialPage) ==
+                targetIndex) {
+          return;
+        }
+        controller.animateToPage(
+          targetIndex,
+          duration: CoFitMotion.fanTransition,
+          curve: Curves.easeOut,
+        );
+      },
+    );
 
     final now = DateTime.now();
     final members = _mergedMembers(browser, focusedRoomId, now);
@@ -270,6 +368,13 @@ class _RoomMainViewState extends ConsumerState<RoomMainView> {
               roomIndex: roomIndex + 1,
               roomTotal: joinedRoomIds.length,
               onBrowseRooms: _openBrowse,
+              onRoomActions: () => _openRoomActions(
+                roomId: focusedRoomId,
+                roomName: roomInfo?.name.isNotEmpty == true
+                    ? roomInfo!.name
+                    : focusedRoomId,
+                isOwner: roomInfo?.ownerId == widget.userId,
+              ),
             ),
           ),
 

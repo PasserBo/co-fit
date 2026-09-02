@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'core/navigation/app_navigator.dart';
 import 'core/theme/cofit_theme.dart';
 import 'features/auth/presentation/auth_gate_page.dart';
 import 'firestore/ably_state_machine.dart';
@@ -21,6 +22,7 @@ class CoFitApp extends StatelessWidget {
       child: MaterialApp(
         title: 'CoFit',
         theme: CoFitTheme.dark,
+        navigatorKey: appNavigatorKey,
         home: const AuthGatePage(),
       ),
     );

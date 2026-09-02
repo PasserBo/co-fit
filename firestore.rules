@@ -160,9 +160,79 @@ service cloud.firestore {
           request.resource.data.members[request.auth.uid].userId == request.auth.uid &&
           request.resource.data.members[request.auth.uid].role == 'member' &&
           request.resource.data.members[request.auth.uid].joinedAt is timestamp
+        ) || (
+          // 第三分支:成员退出房间——只允许精确移除自己的 members 条目。
+          // owner 不允许退出(防房间失主);其余字段必须逐字节不变。
+          isSignedIn() &&
+          hasValidRoomShape(request.resource.data) &&
+          hasMembersIfPresent(request.resource.data) &&
+          request.resource.data.roomId == resource.data.roomId &&
+          request.resource.data.ownerId == resource.data.ownerId &&
+          request.resource.data.createdAt == resource.data.createdAt &&
+          request.resource.data.name == resource.data.name &&
+          request.resource.data.description == resource.data.description &&
+          request.resource.data.visibility == resource.data.visibility &&
+          request.resource.data.shareLinkHash == resource.data.shareLinkHash &&
+          request.resource.data.shareSalt == resource.data.shareSalt &&
+          resource.data.diff(request.resource.data).affectedKeys().hasOnly(['members', 'updatedAt']) &&
+          resource.data.members is map &&
+          resource.data.members.diff(request.resource.data.members).affectedKeys().hasOnly([request.auth.uid]) &&
+          !request.resource.data.members.keys().hasAny([request.auth.uid]) &&
+          resource.data.members[request.auth.uid] is map &&
+          resource.data.members[request.auth.uid].role == 'member' &&
+          resource.data.ownerId != request.auth.uid
         );
 
       allow delete: if isOwner(resource.data);
+    }
+
+    // users/{uid} 用户资料。read 放开给所有登录用户:
+    // 昵称需要被同房间成员/邀请预览读取(M1-2/M2)。
+    // activeDeckId 为 A2(牌组云端化)预留的可选键。
+    function hasValidProfileShape(data) {
+      return data.keys().hasAll([
+          'uid',
+          'nickname',
+          'avatarConfig',
+          'createdAt',
+          'updatedAt',
+        ]) &&
+        data.keys().hasOnly([
+          'uid',
+          'nickname',
+          'avatarConfig',
+          'activeDeckId',
+          'createdAt',
+          'updatedAt',
+        ]);
+    }
+
+    function hasValidProfileValues(data, userId) {
+      return data.uid == userId &&
+        isNonEmptyString(data.nickname) &&
+        data.nickname.size() <= 20 &&
+        data.avatarConfig is map &&
+        (!data.keys().hasAny(['activeDeckId']) || data.activeDeckId is string);
+    }
+
+    match /users/{userId} {
+      allow read: if isSignedIn();
+
+      allow create: if isSignedIn() &&
+        request.auth.uid == userId &&
+        hasValidProfileShape(request.resource.data) &&
+        hasValidProfileValues(request.resource.data, userId) &&
+        request.resource.data.createdAt is timestamp &&
+        request.resource.data.updatedAt is timestamp;
+
+      allow update: if isSignedIn() &&
+        request.auth.uid == userId &&
+        hasValidProfileShape(request.resource.data) &&
+        hasValidProfileValues(request.resource.data, userId) &&
+        request.resource.data.uid == resource.data.uid &&
+        request.resource.data.createdAt == resource.data.createdAt;
+
+      allow delete: if false;
     }
 
     match /users/{userId}/memberships/{roomId} {
@@ -192,6 +262,92 @@ service cloud.firestore {
         );
 
       allow delete: if isSignedIn() && request.auth.uid == userId;
+    }
+
+    // users/{uid}/decks 牌组(A2 云端化):仅本人读写。
+    function hasValidDeckShape(data) {
+      return data.keys().hasAll([
+          'deckId',
+          'name',
+          'cardTemplateIds',
+          'createdAt',
+          'updatedAt',
+        ]) &&
+        data.keys().hasOnly([
+          'deckId',
+          'name',
+          'cardTemplateIds',
+          'createdAt',
+          'updatedAt',
+        ]);
+    }
+
+    match /users/{userId}/decks/{deckId} {
+      allow read: if isSignedIn() && request.auth.uid == userId;
+
+      allow create: if isSignedIn() &&
+        request.auth.uid == userId &&
+        hasValidDeckShape(request.resource.data) &&
+        request.resource.data.deckId == deckId &&
+        isNonEmptyString(request.resource.data.name) &&
+        request.resource.data.cardTemplateIds is list;
+
+      allow update: if isSignedIn() &&
+        request.auth.uid == userId &&
+        hasValidDeckShape(request.resource.data) &&
+        request.resource.data.deckId == resource.data.deckId &&
+        request.resource.data.createdAt == resource.data.createdAt &&
+        isNonEmptyString(request.resource.data.name) &&
+        request.resource.data.cardTemplateIds is list;
+
+      allow delete: if isSignedIn() && request.auth.uid == userId;
+    }
+
+    // users/{uid}/sessions 运动打卡日志:只追加(不可改不可删),仅本人读写。
+    function hasValidSessionShape(data) {
+      return data.keys().hasAll([
+          'sessionId',
+          'roomId',
+          'userId',
+          'templateId',
+          'templateName',
+          'actionKey',
+          'durationSec',
+          'startedAt',
+          'completedAt',
+          'status',
+        ]) &&
+        data.keys().hasOnly([
+          'sessionId',
+          'roomId',
+          'userId',
+          'templateId',
+          'templateName',
+          'actionKey',
+          'durationSec',
+          'startedAt',
+          'completedAt',
+          'status',
+        ]);
+    }
+
+    match /users/{userId}/sessions/{sessionId} {
+      allow read: if isSignedIn() && request.auth.uid == userId;
+
+      allow create: if isSignedIn() &&
+        request.auth.uid == userId &&
+        hasValidSessionShape(request.resource.data) &&
+        request.resource.data.sessionId == sessionId &&
+        request.resource.data.userId == userId &&
+        isNonEmptyString(request.resource.data.roomId) &&
+        isNonEmptyString(request.resource.data.templateId) &&
+        request.resource.data.durationSec is int &&
+        request.resource.data.durationSec > 0 &&
+        request.resource.data.startedAt is timestamp &&
+        request.resource.data.completedAt is timestamp &&
+        request.resource.data.status == 'completed';
+
+      allow update, delete: if false;
     }
 
     match /card_templates/{templateId} {

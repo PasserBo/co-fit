@@ -1,12 +1,16 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../firestore/ably_state_machine.dart';
 import '../../room/domain/entity/user_activity_status_entity.dart';
+import '../../room/provider/own_activity_status_provider.dart';
+import '../../room/provider/own_nickname_provider.dart';
 import '../domain/entity/action_template_card.dart';
 import '../domain/entity/template_card_session.dart';
 import '../presentation/action_template_usecase_provider.dart';
+import 'action_session_history_providers.dart';
 
 /// 自己的运动会话生命周期(实测问题 1 的修复):
 /// play → 发布 started 事件 + **写 presence.activity(active)**(晚进房者的快照来源)
@@ -75,6 +79,17 @@ class OwnActionSessionNotifier extends Notifier<TemplateCardSession?> {
     await ref
         .read(completeTemplateCardActionUsecaseProvider)
         .execute(session: session, card: card);
+    // 打卡记录落库:fire-and-forget,失败不阻塞事件/presence 流。
+    // 已知限制:app 在会话中被杀则本记录丢失(远端视图靠 endsAt sweep 兜底)。
+    unawaited(
+      ref
+          .read(recordCompletedSessionUsecaseProvider)
+          .execute(session: session, card: card)
+          .then((_) => ref.invalidate(recentSessionsProvider))
+          .catchError((Object error) {
+        debugPrint('recordCompletedSession failed: $error');
+      }),
+    );
     await _updatePresence(
       roomId: session.roomId,
       userId: session.userId,
@@ -90,10 +105,16 @@ class OwnActionSessionNotifier extends Notifier<TemplateCardSession?> {
     required String userId,
     required UserActivityStatusEntity status,
   }) {
+    // 同步单一事实源:重连重申/进新房间时由 AblyRuntimeNotifier 读取。
+    ref.read(ownActivityStatusProvider.notifier).set(
+          status.activityState == UserActivityState.idle ? null : status,
+        );
+    final nickname = ref.read(ownNicknameProvider);
     return ref.read(ablyRuntimeProvider.notifier).updatePresenceData(
       roomId: roomId,
       data: {
         'userId': userId,
+        'nickname': ?nickname,
         'activity': userActivityStatusEntityToMap(status),
       },
     );

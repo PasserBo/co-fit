@@ -6,7 +6,7 @@ import '../domain/entity/action_template_card.dart';
 /// 用真实模板卡的 id 播种示例牌组,保证 UI 能关联出卡片;无卡时返回空列表。
 class InMemoryActionDeckRepository implements ActionDeckRepository {
   InMemoryActionDeckRepository({List<ActionTemplateCard> seedCards = const []})
-      : _decks = _seedDecks(seedCards) {
+      : _decks = List.of(_seedDecks(seedCards)) {
     _activeDeckId = _decks.isEmpty ? null : _decks.first.id;
   }
 
@@ -37,10 +37,38 @@ class InMemoryActionDeckRepository implements ActionDeckRepository {
   Future<List<ActionDeck>> getDecks() async => List.unmodifiable(_decks);
 
   @override
+  Future<void> createDeck(ActionDeck deck) async {
+    _decks.removeWhere((existing) => existing.id == deck.id);
+    _decks.add(deck);
+    _activeDeckId ??= deck.id;
+  }
+
+  @override
+  Future<void> updateDeck(ActionDeck deck) async {
+    final index = _decks.indexWhere((existing) => existing.id == deck.id);
+    if (index < 0) {
+      throw StateError('Deck not found: ${deck.id}');
+    }
+    _decks[index] = deck;
+  }
+
+  @override
+  Future<void> deleteDeck(String deckId) async {
+    _decks.removeWhere((existing) => existing.id == deckId);
+    if (_activeDeckId == deckId) {
+      _activeDeckId = null;
+    }
+  }
+
+  @override
   Future<String?> getActiveDeckId() async => _activeDeckId;
 
   @override
-  Future<void> setActiveDeckId(String deckId) async {
+  Future<void> setActiveDeckId(String? deckId) async {
+    if (deckId == null) {
+      _activeDeckId = null;
+      return;
+    }
     if (_decks.any((deck) => deck.id == deckId)) {
       _activeDeckId = deckId;
     }

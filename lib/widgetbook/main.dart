@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:widgetbook/widgetbook.dart';
 
 import '../core/navigation/app_shell.dart';
+import '../core/navigation/app_shell_index_provider.dart';
 import '../core/theme/cofit_colors.dart';
 import '../core/theme/cofit_theme.dart';
 import '../core/widget/floating_dock.dart';
@@ -18,11 +19,13 @@ import '../features/action/presentation/widget/card_fan.dart';
 import '../features/action/presentation/widget/deck_list_body.dart';
 import '../features/action/presentation/widget/deck_switcher.dart';
 import '../features/action/presentation/widget/library_tab_body.dart';
+import '../features/auth/presentation/widget/auth_provider_button.dart';
 import '../features/auth/presentation/widget/my_page_body.dart';
 import '../features/avatar/domain/entity/avatar_motion.dart';
 import '../features/avatar/presentation/renderer/avatar_renderer.dart';
 import '../features/avatar/presentation/renderer/vector_avatar_renderer.dart';
 import '../features/room/domain/entity/room_presence_member.dart';
+import '../features/room/presentation/widget/room_actions_sheet.dart';
 import '../features/room/domain/entity/user_activity_status_entity.dart';
 import '../features/room/presentation/widget/room_scene.dart';
 import '../features/room/presentation/widget/room_top_bar.dart';
@@ -105,6 +108,13 @@ class CoFitWidgetbook extends StatelessWidget {
                 WidgetbookUseCase(name: '默认', builder: _roomChrome),
               ],
             ),
+            WidgetbookComponent(
+              name: 'RoomActionsSheet',
+              useCases: [
+                WidgetbookUseCase(name: '成员(可退出)', builder: _roomActionsMember),
+                WidgetbookUseCase(name: '房主(不可退出)', builder: _roomActionsOwner),
+              ],
+            ),
           ],
         ),
         WidgetbookFolder(
@@ -126,6 +136,12 @@ class CoFitWidgetbook extends StatelessWidget {
               name: 'MyPageBody',
               useCases: [
                 WidgetbookUseCase(name: '我的页(10a)', builder: _myPage),
+              ],
+            ),
+            WidgetbookComponent(
+              name: 'AuthProviderButton',
+              useCases: [
+                WidgetbookUseCase(name: '默认/加载中', builder: _authProviderButton),
               ],
             ),
           ],
@@ -295,6 +311,55 @@ Widget _myPage(BuildContext context) {
   );
 }
 
+/// widgetbook 演示用:壳初始停在牌库 tab。
+class _ShellIndexAtLibrary extends AppShellIndexNotifier {
+  @override
+  int build() => 1;
+}
+
+Widget _roomActionsMember(BuildContext context) {
+  return const Scaffold(
+    body: Center(
+      child: RoomActionsSheet(roomName: '考研自习室', isOwner: false),
+    ),
+  );
+}
+
+Widget _roomActionsOwner(BuildContext context) {
+  return const Scaffold(
+    body: Center(
+      child: RoomActionsSheet(roomName: '考研自习室', isOwner: true),
+    ),
+  );
+}
+
+Widget _authProviderButton(BuildContext context) {
+  return Scaffold(
+    body: Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            AuthProviderButton(
+              icon: const Icon(Icons.g_mobiledata_rounded),
+              label: '使用 Google 登录',
+              onPressed: () {},
+            ),
+            const SizedBox(height: 16),
+            const AuthProviderButton(
+              icon: Icon(Icons.g_mobiledata_rounded),
+              label: '使用 Google 登录',
+              isLoading: true,
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
 Widget _dock(BuildContext context) {
   return Scaffold(
     body: Padding(
@@ -315,9 +380,9 @@ Widget _appShell(BuildContext context) {
   return ProviderScope(
     overrides: [
       templateCardsProvider.overrideWith((ref) async => _sampleLibrary()),
+      appShellIndexProvider.overrideWith(_ShellIndexAtLibrary.new),
     ],
     child: AppShell(
-      initialIndex: 1,
       pages: [
         page('房间(RoomMainView,需真实 presence)'),
         const CardLibraryPage(),

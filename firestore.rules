@@ -264,6 +264,57 @@ service cloud.firestore {
       allow delete: if isSignedIn() && request.auth.uid == userId;
     }
 
+    // users/{uid}/cards 自建卡(DRAFT,12a 设计定稿前数据层先行):仅本人读写。
+    function hasValidCustomCardShape(data) {
+      return data.keys().hasAll([
+          'cardId',
+          'name',
+          'type',
+          'ablyActionId',
+          'defaultDurationSec',
+          'intensityBaseline',
+          'createdAt',
+          'updatedAt',
+        ]) &&
+        data.keys().hasOnly([
+          'cardId',
+          'name',
+          'type',
+          'ablyActionId',
+          'defaultDurationSec',
+          'intensityBaseline',
+          'createdAt',
+          'updatedAt',
+        ]);
+    }
+
+    function hasValidCustomCardValues(data, cardId) {
+      return data.cardId == cardId &&
+        isNonEmptyString(data.name) &&
+        isNonEmptyString(data.type) &&
+        isNonEmptyString(data.ablyActionId) &&
+        data.defaultDurationSec is int &&
+        data.defaultDurationSec > 0 &&
+        data.intensityBaseline is map;
+    }
+
+    match /users/{userId}/cards/{cardId} {
+      allow read: if isSignedIn() && request.auth.uid == userId;
+
+      allow create: if isSignedIn() &&
+        request.auth.uid == userId &&
+        hasValidCustomCardShape(request.resource.data) &&
+        hasValidCustomCardValues(request.resource.data, cardId);
+
+      allow update: if isSignedIn() &&
+        request.auth.uid == userId &&
+        hasValidCustomCardShape(request.resource.data) &&
+        hasValidCustomCardValues(request.resource.data, cardId) &&
+        request.resource.data.createdAt == resource.data.createdAt;
+
+      allow delete: if isSignedIn() && request.auth.uid == userId;
+    }
+
     // users/{uid}/decks 牌组(A2 云端化):仅本人读写。
     function hasValidDeckShape(data) {
       return data.keys().hasAll([

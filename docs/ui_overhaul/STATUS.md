@@ -29,19 +29,24 @@ P0 主题基建 → P1 动作卡片组件 → P2 牌库主页 → P3 悬浮 dock
 | G2 | 卡片来源 | 无字段 | 官方/自建/好友分享 徽章 | ✅ entity 加 `ActionSource` 枚举字段(official/custom/friendShared),Firestore 无值默认 official(2026-08-01) |
 | G3 | 牌组(deck) | 无 entity | 牌库页「我的卡组」tab、扇形手牌的「当前卡组」 | ✅ DRAFT `ActionDeck{id, name, cardIds}`(有序、允许重复,张数/时长/配色现算)+ repository 层 `activeDeckId`;in-memory stub 用真实卡 id 播种(2026-08-01) |
 | G4 | 好友/分享 | `social` feature 为空目录 | 卡片分享给好友、好友分享来源 | 🟡 UI 侧按 stub 处理(分享 → SnackBar);真实分享流程与 social 数据模型仍待定 |
-| G5 | 成员昵称/头像 | presence 只有 userId/clientId,库中无昵称字段 | 气泡下方显示昵称(如「小李」) | 🟡 截断 userId 前 6 位占位(自己显示「你」),见 `RoomScene.displayName`;真实昵称等 profile/social 功能时补(2026-08-01) |
+| G5 | 成员昵称/头像 | presence 只有 userId/clientId,库中无昵称字段 | 气泡下方显示昵称(如「小李」) | ✅ **已接线**(2026-08-10):决议=昵称随 presence data 下发(零额外读库);`RoomPresenceMember.nickname` + `RoomScene.displayName` 优先昵称,无昵称(旧客户端/未加载)回退 uid 前 6 位。头像仍占位 |
 
 ## Stub 登记表(预估数据模型的临时实现)
 
 | feature | draft entity | in-memory repo | 页面 | 转正待办 |
 |---|---|---|---|---|
-| action(牌组) | `domain/entity/action_deck.dart` | `data/in_memory_action_deck_repository.dart`(用已加载模板卡播种 3 套示例) | 牌库页「我的卡组」tab | 接 Firestore `users/{uid}/decks` + `activeDeckId`;牌组增删改/排序 |
-| action(创建卡片) | — | — | 牌库页横幅 → SnackBar | 12a 创建表单(名称/类型/时长/图标)设计定稿后实现 |
+| action(牌组) | `domain/entity/action_deck.dart` | ~~in-memory~~ → **已转正**(2026-08-10 A2):`data/firebase_action_deck_repository.dart`(`users/{uid}/decks` + profile.activeDeckId,首启幂等播种 3 套种子);in-memory 保留给测试/widgetbook | 牌库页「我的卡组」tab | 牌组增删改/排序 UI 仍未做 |
+| action(创建卡片) | `domain/custom_card_repository.dart`(DRAFT,数据层已先行 2026-08-10) | `data/in_memory_custom_card_repository.dart`(测试/未登录兜底;线上走 `firebase_custom_card_repository.dart` → `users/{uid}/cards`) | 牌库页横幅 → SnackBar | **仅剩 UI**:12a 创建表单设计定稿后接 `createCustomCardUsecaseProvider`;字段有出入以届时决议为准 |
 | action(卡片详情/加入卡组) | — | — | 点卡 → SnackBar | 详情/加组弹层设计未出 |
 | action(分享给好友) | — | — | 自建卡 ↗ → SnackBar | 依赖 social feature(G4) |
 | room(成员昵称) | — | — | 气泡昵称 = userId 前 6 位 | G5:等 profile/social 的昵称数据 |
 | room(小人形象) | — | — | `avatar_bubble.dart` 占位几何小人 | 范围外决议:接 Rive 动画时替换 `_PlaceholderFigure` |
 | avatar(编辑形象) | — | — | 我的页「编辑形象」→ SnackBar | avatar feature 为空目录,换肤功能未设计 |
+| auth(登录页) | — | — | `auth/presentation/view/login_page_view.dart`(Google + 邮箱折叠表单 + 忘记密码) | 无定稿设计,功能优先;Apple 按钮预留首位,待 E1-Apple(付费开发者账号就绪)落地 |
+| profile(onboarding) | `profile/domain/entity/user_profile_entity.dart`(DRAFT) | —(直连 Firestore `users/{uid}`) | `profile/presentation/view/onboarding_page_view.dart`(昵称 + 占位头像) | 无定稿设计;形象定制区为占位圆,等 avatar 功能;`avatarConfig` 字段结构待 avatar 定稿 |
+| room(房间操作 sheet) | — | — | `room/presentation/widget/room_actions_sheet.dart`(顶栏 ⋯ 进入;退出房间,owner 隐藏) | 无定稿设计;踢人/改名/解散未做;owner 退出/移交待产品决议 |
+| invite(邀请预览) | `invite/domain/entity/invite_link_entity.dart`(DRAFT) | — | `invite/presentation/view/invite_preview_sheet_view.dart`(房名/描述 + 加入 CTA) | 无定稿设计;成员头像预览未做(entity 无 members);Universal Links 未做(仅 cofit:// scheme) |
+| room(建房 sheet) | — | — | `room/presentation/view/room_create_sheet_view.dart`(表单 → 成功态=分享链接卡片) | 无定稿设计;替代旧 RoomCreatePage(已删) |
 
 ## 决议记录
 
@@ -59,4 +64,13 @@ P0 主题基建 → P1 动作卡片组件 → P2 牌库主页 → P3 悬浮 dock
 | 2026-08-01 | 旧页面弃用 | P5 已清理:删除 `auth_my_page.dart`、`room_main_page.dart`、`room_action_controls_card.dart`;**保留** `RoomCommunityPage`(仍是浏览页的「加入/创建房间」工具页入口)与 `room_browse_page` 相关旧组件——功能可用但视觉未重做,待房间浏览流程有定稿设计再翻新 |
 | 2026-08-01 | 我的页取版 | 用户选定 10a(形象优先),且内容收敛到已实现功能;10a 其余项(累计时长/打卡/通知隐私)等对应功能落地时再补 |
 | 2026-08-01 | 字体打包 | google_fonts 目前运行时拉取 Space Grotesk(有缓存);**上线前**把字体文件打进 assets 并关闭 runtime fetching |
-| 2026-08-02 | 事件流 → 房间状态(实测问题 2) | 新增 domain 折叠:`ActionSession`(时间点建模:active 存 endsAt、paused 冻结剩余,剩余/过期是随 now 的派生规则)+ `RoomActivitySnapshot.apply/sweep`(乱序忽略、一人一会话、未知会话从 payload 自举、completed/过期会话保留 5s 后清扫)。接线:`roomBrowserProvider.activityByRoom` 折叠入库,`RoomMainView` 合并 presence+会话渲染,1s ticker 驱动倒计时/到点回待机。**presence 写入侧(实测问题 1)仍未做**:打出后 presence.activity 依旧为空,晚进房者看不到进行中的动作;且无人发 completed(靠本地过期兜底) |
+| 2026-08-02 | 事件流 → 房间状态(实测问题 2) | 新增 domain 折叠:`ActionSession`(时间点建模:active 存 endsAt、paused 冻结剩余,剩余/过期是随 now 的派生规则)+ `RoomActivitySnapshot.apply/sweep`(乱序忽略、一人一会话、未知会话从 payload 自举、completed/过期会话保留 5s 后清扫)。接线:`roomBrowserProvider.activityByRoom` 折叠入库,`RoomMainView` 合并 presence+会话渲染,1s ticker 驱动倒计时/到点回待机。~~presence 写入侧(实测问题 1)仍未做~~ → **2026-08-10 阶段二已修**,见下行 |
+| 2026-08-10 | 阶段二 M1:presence 写侧修复(实测问题 1 收尾) | ① `enterPresence` 支持携带 activity(运动中进新房间不再被抹成 idle);② `onAppResumed` 对所有已订阅房间重申 presence(重申必须刷新 `updatedAtEpochMs`,否则接收端 `applyPresenceStatus` 严格更新检查会静默丢弃;到点改发 idle);③ 自己 activity 的单一事实源 `room/provider/own_activity_status_provider.dart`(放 room 不放 action,避免 firestore↔action 循环依赖);④ 登出走 `AblyRuntimeNotifier.shutdown()`:逐房间 presence leave + 释放连接 |
+| 2026-08-10 | 阶段二 M1:Auth 重构 + Google 登录 | `AuthRepository` 接口进 domain,全部 usecase/页面改 Riverpod 注入(AuthGate 不再手工 new);Google 登录用 google_sign_in **v7 API**(`GoogleSignIn.instance`+`authenticate()`,idToken-only);补密码重置;旧 `auth_login_page.dart` 删除,死目录 `features/authentication/` 删除。**Sign in with Apple 延后**:免费开发者账号无此 capability,等用户付费账号升级后走 E1-Apple 轨道(上架前必须完成,App Store 规则) |
+| 2026-08-10 | 阶段二 M1:profile 特性 + onboarding 门控 | `users/{uid}` 文档 `{uid, nickname(≤20), avatarConfig, createdAt, updatedAt}`(rules:read 所有登录用户——昵称要被房间成员/邀请预览读;写仅本人;可选键 `activeDeckId` 为 A2 预留);AuthGate 三态门控:authState loading→splash / 无 user→登录页 / profile loading→splash(防闪) / 无 profile→onboarding / 有→AppShell;我的页昵称行(可编辑)接 profile |
+| 2026-08-10 | 阶段二 M1:退出房间 | rules `rooms` update 加第三分支:仅允许成员精确移除自己的 `members[uid]`(其余字段逐字节不变,owner 禁退防失主);`FirebaseRoomRepository.leaveRoom` 事务:移除 members 条目 + 删 membership(房间已删除时仍清理残留 membership);旧 `leave_room_usecase`(Ably 语义)重命名为 `unsubscribe_room_realtime_usecase`,新 `leave_room_usecase` 为 Firestore 语义;入口=房间顶栏 ⋯ → RoomActionsSheet → 确认对话框 |
+| 2026-08-10 | 新 token | `size.authFormMaxWidth = 360`(登录/onboarding 表单大屏最大宽度,seed v1) |
+| 2026-08-10 | 阶段二收尾批次:非 UI 数据/服务层 | ① **牌组 CRUD 补全**:`ActionDeckRepository` + updateDeck/deleteDeck,`setActiveDeckId` 可传 null 清除;create/update/delete 三个 usecase(名称 1..20 校验;删当前使用中的组时 active 顺移到剩余第一组);② **自建卡数据层(DRAFT)**:`users/{uid}/cards` + rules,`templateCardsProvider` 合并 官方+自建(自建读取失败不阻塞官方),删卡时自动从所有牌组摘除引用;③ **房间管理(无争议部分)**:owner 改名/描述/可见性(`updateRoomInfoUsecase`)+ 解散(`dissolveRoomUsecase`,删房+own membership,成员侧靠懒清理);**踢人/owner 移交仍待产品决议**;④ **G5 昵称接线**(见 G5 行)。全部无 UI,入口仍是 stub |
+| 2026-08-10 | 阶段二 M3:会话历史持久化 | `users/{uid}/sessions/{sessionId}` 只追加打卡日志(rules:仅本人读写,update/delete 禁止,status 只收 'completed');挂钩点 `own_action_session_notifier.complete()` 发布 completed 事件后 fire-and-forget 落库(失败仅 debugPrint,不阻塞 UI/presence);我的页新增「运动」分组(累计时长/完成次数,客户端聚合最近 100 条)。**已知限制**:会话中 app 被杀 → 该次记录丢失(远端视图靠 endsAt sweep 兜底),STATUS 立此为据 |
+| 2026-08-10 | 阶段二 A2:牌组云端化 | `users/{uid}/decks/{deckId}` `{deckId, name, cardTemplateIds, createdAt, updatedAt}`;activeDeckId 存 profile 文档可选键(跨设备同步,弃 shared_preferences);首启 `SeedDefaultDecksUsecase` 幂等播种(固定 id deck_1..3,与旧 stub 同款种子);repository provider 按登录态换绑(未登录 → 空 in-memory,widgetbook/测试不受影响) |
+| 2026-08-10 | 阶段二 M2:邀请深链 | 链接格式 `cofit://room/<roomId>?h=<shareLinkHash>`(拼装/解析单一事实源 `invite/domain/invite_link_format.dart`;h 是社交礼仪门槛非安全边界)。pending-link 模式:`pendingInviteProvider` 启动即订阅 app_links(冷启动 getInitialLink + 热启动流),登录前到达的链接滞留,`InviteLinkGate`(包在 AppShell 外)消费并弹预览 sheet。导航接线:MaterialApp 挂全局 `appNavigatorKey`;`AppShell._index` 提升为 `appShellIndexProvider`(深链可驱动切 tab);RoomMainView `ref.listen` focusedRoomId 跟随跳房。建房改 sheet(`room_create_sheet_view.dart`),成功态主 CTA=分享邀请链接(share_plus),旧 `room_create_page.dart` 删除——创建和邀请是同一个动作。`shareLinkHash` 至此有了消费方 |

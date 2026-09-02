@@ -33,7 +33,9 @@ void main() {
   testWidgets('renders hero identity, stats and email', (tester) async {
     await _pump(tester);
 
-    expect(find.text('xiaoman'), findsOneWidget);
+    // hero 区 + 账号分组「昵称」行各出现一次
+    expect(find.text('xiaoman'), findsNWidgets(2));
+    expect(find.text('昵称'), findsOneWidget);
     expect(find.text('@a1b2c3'), findsOneWidget);
     expect(find.text('编辑形象'), findsOneWidget);
     expect(find.text('3'), findsOneWidget);

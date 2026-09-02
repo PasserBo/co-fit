@@ -9,6 +9,10 @@ abstract class RoomPresenceMember with _$RoomPresenceMember {
   const factory RoomPresenceMember({
     required String clientId,
     required String userId,
+
+    /// 随 presence data 下发的昵称(G5);无 profile 或旧客户端时为 null,
+    /// 展示层回退 uid 截断。
+    String? nickname,
     @Default(
       UserActivityStatusEntity(activityState: UserActivityState.idle),
     )
@@ -21,10 +25,12 @@ abstract class RoomPresenceMember with _$RoomPresenceMember {
     final memberData = map['data'];
 
     Object? activityPayload;
-    if (memberData is Map<String, dynamic>) {
+    String? nickname;
+    if (memberData is Map) {
       activityPayload = memberData['activity'] ?? memberData;
-    } else if (memberData is Map) {
-      activityPayload = memberData['activity'] ?? memberData;
+      final rawNickname = memberData['nickname']?.toString().trim();
+      nickname =
+          (rawNickname == null || rawNickname.isEmpty) ? null : rawNickname;
     } else if (map['activity'] != null) {
       activityPayload = map['activity'];
     }
@@ -32,6 +38,7 @@ abstract class RoomPresenceMember with _$RoomPresenceMember {
     return RoomPresenceMember(
       clientId: clientId,
       userId: userId,
+      nickname: nickname,
       activityStatus: UserActivityStatusEntity.fromRawPayload(activityPayload),
     );
   }

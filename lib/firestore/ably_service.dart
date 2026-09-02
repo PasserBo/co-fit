@@ -70,12 +70,23 @@ class AblyService {
     }).where((event) => event.isNotEmpty);
   }
 
+  /// 进入房间 presence。[activity] 为当前运动状态快照
+  /// (UserActivityStatusEntity 的 map);不传则以 idle 形态进入。
+  /// [nickname] 随 presence 下发(G5:成员昵称不额外读库)。
+  /// 注意:enter 会整包写 data,若用户运动中途进入新房间必须带上 activity,
+  /// 否则晚进房者看不到进行中的动作。
   Future<void> enterPresence({
     required String roomId,
     required String userId,
+    String? nickname,
+    Map<String, dynamic>? activity,
   }) async {
     final channel = _getRoomChannel(roomId);
-    await channel.presence.enter({'userId': userId});
+    await channel.presence.enter({
+      'userId': userId,
+      'nickname': ?nickname,
+      'activity': ?activity,
+    });
   }
 
   Future<void> leavePresence({
@@ -85,6 +96,8 @@ class AblyService {
     await channel.presence.leave();
   }
 
+  /// **整包替换** presence data(Ably update 语义,无 merge)。
+  /// 调用方必须始终带上 `userId` 键,否则读侧会退化用 clientId 当 userId。
   Future<void> updatePresenceData({
     required String roomId,
     required Map<String, dynamic> data,

@@ -14,6 +14,7 @@ class RoomTopBar extends StatelessWidget {
     required this.roomIndex,
     required this.roomTotal,
     this.onBrowseRooms,
+    this.onRoomActions,
     super.key,
   });
 
@@ -25,6 +26,9 @@ class RoomTopBar extends StatelessWidget {
   final int roomIndex;
   final int roomTotal;
   final VoidCallback? onBrowseRooms;
+
+  /// 打开当前房间的操作 sheet(退出房间等)。
+  final VoidCallback? onRoomActions;
 
   @override
   Widget build(BuildContext context) {
@@ -90,6 +94,19 @@ class RoomTopBar extends StatelessWidget {
                     ),
                   ),
                 ),
+                if (onRoomActions != null)
+                  GestureDetector(
+                    onTap: onRoomActions,
+                    behavior: HitTestBehavior.opaque,
+                    child: Padding(
+                      padding: const EdgeInsets.all(CoFitDimens.spacingXs),
+                      child: Icon(
+                        Icons.more_horiz_rounded,
+                        size: CoFitDimens.sizeCardIcon + CoFitDimens.spacingXs,
+                        color: colors.textTertiary,
+                      ),
+                    ),
+                  ),
               ],
             ),
             const SizedBox(height: CoFitDimens.spacingXs),

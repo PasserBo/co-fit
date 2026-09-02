@@ -159,6 +159,88 @@ class FirebaseRoomRepository {
     });
   }
 
+  /// 退出房间:移除 rooms.members 里自己的条目 + 删除自己的 membership。
+  /// 房主不允许退出(防房间失主,rules 同步禁止);
+  /// 房间已被删除时仍清理残留 membership。
+  Future<void> leaveRoom({
+    required String roomId,
+    required String userId,
+  }) async {
+    final trimmedRoomId = roomId.trim();
+    final trimmedUserId = userId.trim();
+    if (trimmedRoomId.isEmpty || trimmedUserId.isEmpty) {
+      throw ArgumentError('roomId and userId must not be empty.');
+    }
+
+    final roomRef = _firestore.collection('rooms').doc(trimmedRoomId);
+    final membershipRef = _firestore
+        .collection('users')
+        .doc(trimmedUserId)
+        .collection('memberships')
+        .doc(trimmedRoomId);
+
+    await _firestore.runTransaction((transaction) async {
+      final roomSnapshot = await transaction.get(roomRef);
+      if (roomSnapshot.exists) {
+        final roomData = roomSnapshot.data() ?? const <String, dynamic>{};
+        final ownerId = (roomData['ownerId'] ?? '').toString().trim();
+        if (ownerId == trimmedUserId) {
+          throw StateError('Room owner cannot leave the room: $trimmedRoomId');
+        }
+        transaction.update(roomRef, {
+          'members.$trimmedUserId': FieldValue.delete(),
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
+      }
+      transaction.delete(membershipRef);
+    });
+  }
+
+  /// 房主更新房间信息(name/description/visibility;rules owner 全量编辑分支)。
+  Future<void> updateRoomInfo({
+    required String roomId,
+    required String name,
+    required String description,
+    required String visibility,
+  }) async {
+    final trimmedRoomId = roomId.trim();
+    if (trimmedRoomId.isEmpty) {
+      throw ArgumentError('roomId must not be empty.');
+    }
+    await _firestore.collection('rooms').doc(trimmedRoomId).update({
+      'name': name,
+      'description': description,
+      'visibility': visibility,
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+  }
+
+  /// 房主解散房间:删除 rooms/{id} + 自己的 membership。
+  /// 其他成员的 membership 无法由房主删除(rules 限本人),
+  /// 靠成员侧懒清理:fetchRoomInfo 返回 null / leaveRoom 容忍房间不存在。
+  Future<void> dissolveRoom({
+    required String roomId,
+    required String ownerId,
+  }) async {
+    final trimmedRoomId = roomId.trim();
+    final trimmedOwnerId = ownerId.trim();
+    if (trimmedRoomId.isEmpty || trimmedOwnerId.isEmpty) {
+      throw ArgumentError('roomId and ownerId must not be empty.');
+    }
+
+    final roomRef = _firestore.collection('rooms').doc(trimmedRoomId);
+    final membershipRef = _firestore
+        .collection('users')
+        .doc(trimmedOwnerId)
+        .collection('memberships')
+        .doc(trimmedRoomId);
+
+    final batch = _firestore.batch();
+    batch.delete(roomRef);
+    batch.delete(membershipRef);
+    await batch.commit();
+  }
+
   Map<String, dynamic> _toCreateMap(RoomInfoEntity room) {
     return {
       ...room.toMap(),

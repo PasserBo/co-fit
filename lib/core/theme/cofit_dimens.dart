@@ -56,6 +56,7 @@ abstract class CoFitDimens {
   static const sizeRoomDotActive = 20.0;
   static const sizeFigureHero = 78.0;
   static const sizeHeroGlow = 128.0;
+  static const sizeAuthFormMaxWidth = 360.0;
 
   // blur.*
   static const blurOverlay = 8.0;

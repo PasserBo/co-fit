@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../room/data/room_repository_provider.dart';
 import '../../room/presentation/room_browser_provider.dart';
+import '../../room/provider/own_activity_status_provider.dart';
 import '../../../firestore/ably_state_machine.dart';
 
 class UserBootstrapState {
@@ -123,6 +124,9 @@ class UserBootstrapNotifier extends Notifier<UserBootstrapState> {
     _lastBootstrappedUserId = null;
     _runningBootstrapFuture = null;
     _runningBootstrapUserId = null;
+    // 登出:退出所有房间 presence 并释放 Ably 连接,清空自己的 activity 快照。
+    ref.read(ownActivityStatusProvider.notifier).set(null);
+    unawaited(ref.read(ablyRuntimeProvider.notifier).shutdown());
     unawaited(ref.read(roomBrowserProvider.notifier).clear());
     state = UserBootstrapState.initial();
   }

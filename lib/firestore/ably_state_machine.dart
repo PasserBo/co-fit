@@ -6,7 +6,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../features/room/domain/entity/room_event.dart';
 import '../features/room/domain/entity/room_presence_member.dart';
+import '../features/room/domain/entity/user_activity_status_entity.dart';
 import '../features/room/data/room_realtime_repository.dart';
+import '../features/room/provider/own_activity_status_provider.dart';
+import '../features/room/provider/own_nickname_provider.dart';
 import 'ably_service.dart';
 
 enum AblyRuntimePhase {
@@ -136,7 +139,26 @@ class AblyRuntimeNotifier extends Notifier<AblyRuntimeState> {
     }
 
     await _ensureRoomChannelWatched(roomId);
-    await _repository!.subscribeRoom(roomId: roomId, userId: userId);
+    // 运动中途进入新房间时带上 activity(enter 整包写 data,不带会显示 idle)。
+    await _repository!.subscribeRoom(
+      roomId: roomId,
+      userId: userId,
+      nickname: ref.read(ownNicknameProvider),
+      activity: _currentActivityMap(),
+    );
+  }
+
+  /// 当前自己的 activity 快照(重申到 now);idle 时返回 null。
+  Map<String, dynamic>? _currentActivityMap() {
+    final status = ref.read(ownActivityStatusProvider);
+    if (status == null) {
+      return null;
+    }
+    final refreshed = reassertActivityStatusAt(status, DateTime.now());
+    if (refreshed.activityState == UserActivityState.idle) {
+      return null;
+    }
+    return userActivityStatusEntityToMap(refreshed);
   }
 
   Future<void> leaveRoom({
@@ -196,6 +218,54 @@ class AblyRuntimeNotifier extends Notifier<AblyRuntimeState> {
         current != ably.ConnectionState.connecting) {
       await _repository!.connect();
     }
+    await _reassertPresence();
+  }
+
+  /// 回前台后对所有已订阅房间重申 presence:
+  /// - 运动中:activity 刷新 updatedAtEpochMs(接收端严格更新检查,旧时间戳会被丢弃);
+  ///   已到点则重申 idle(本地计时器随后会补发 completed 事件)。
+  /// - idle:重申 `{userId, activity: idle}`,清掉后台期间可能残留的旧 active 快照。
+  Future<void> _reassertPresence() async {
+    final repository = _repository;
+    final userId = _boundUserId;
+    if (repository == null || userId == null) {
+      return;
+    }
+    final status = ref.read(ownActivityStatusProvider);
+    final now = DateTime.now();
+    final refreshed = reassertActivityStatusAt(
+      status ?? UserActivityStatusEntity.idle(),
+      now,
+    );
+    final nickname = ref.read(ownNicknameProvider);
+    final data = <String, dynamic>{
+      'userId': userId,
+      'nickname': ?nickname,
+      'activity': userActivityStatusEntityToMap(refreshed),
+    };
+    for (final roomId in _channelSubscriptions.keys.toList()) {
+      try {
+        await repository.updatePresenceData(roomId: roomId, data: data);
+      } catch (_) {
+        // 单房间重申失败不阻塞其余房间;连接层错误由 connectionState 呈现。
+      }
+    }
+  }
+
+  /// 登出时调用:逐房间退出 presence 后释放连接,并复位状态。
+  Future<void> shutdown() async {
+    final repository = _repository;
+    if (repository != null) {
+      for (final roomId in _channelSubscriptions.keys.toList()) {
+        try {
+          await repository.leaveRoom(roomId: roomId);
+        } catch (_) {
+          // 尽力而为:离线时 leave 失败靠 Ably presence 超时兜底。
+        }
+      }
+    }
+    await _disposeInternals();
+    state = AblyRuntimeState.initial();
   }
 
   Future<void> _ensureRoomChannelWatched(String roomId) async {

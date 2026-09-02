@@ -34,8 +34,12 @@ class RoomScene extends StatelessWidget {
 
   static const _selfAnchor = FractionalOffset(0.5, 0.55);
 
-  /// 昵称占位(G5 决议 2026-08-01):无昵称数据,截断 userId 前 6 位。
+  /// 优先 presence 昵称(G5 已接线 2026-08-10);无昵称回退 uid 前 6 位。
   static String displayName(RoomPresenceMember member) {
+    final nickname = member.nickname?.trim();
+    if (nickname != null && nickname.isNotEmpty) {
+      return nickname;
+    }
     final id = member.userId.trim();
     return id.length <= 6 ? id : id.substring(0, 6);
   }

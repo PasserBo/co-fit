@@ -24,8 +24,15 @@ class RoomRealtimeRepository {
   Future<void> subscribeRoom({
     required String roomId,
     required String userId,
+    String? nickname,
+    Map<String, dynamic>? activity,
   }) {
-    return _ablyService.enterPresence(roomId: roomId, userId: userId);
+    return _ablyService.enterPresence(
+      roomId: roomId,
+      userId: userId,
+      nickname: nickname,
+      activity: activity,
+    );
   }
 
   Future<void> leaveRoom({

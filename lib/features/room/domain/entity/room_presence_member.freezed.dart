@@ -14,7 +14,9 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$RoomPresenceMember {
 
- String get clientId; String get userId; UserActivityStatusEntity get activityStatus;
+ String get clientId; String get userId;/// 随 presence data 下发的昵称(G5);无 profile 或旧客户端时为 null,
+/// 展示层回退 uid 截断。
+ String? get nickname; UserActivityStatusEntity get activityStatus;
 /// Create a copy of RoomPresenceMember
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +27,16 @@ $RoomPresenceMemberCopyWith<RoomPresenceMember> get copyWith => _$RoomPresenceMe
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is RoomPresenceMember&&(identical(other.clientId, clientId) || other.clientId == clientId)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.activityStatus, activityStatus) || other.activityStatus == activityStatus));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RoomPresenceMember&&(identical(other.clientId, clientId) || other.clientId == clientId)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.nickname, nickname) || other.nickname == nickname)&&(identical(other.activityStatus, activityStatus) || other.activityStatus == activityStatus));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,clientId,userId,activityStatus);
+int get hashCode => Object.hash(runtimeType,clientId,userId,nickname,activityStatus);
 
 @override
 String toString() {
-  return 'RoomPresenceMember(clientId: $clientId, userId: $userId, activityStatus: $activityStatus)';
+  return 'RoomPresenceMember(clientId: $clientId, userId: $userId, nickname: $nickname, activityStatus: $activityStatus)';
 }
 
 
@@ -45,7 +47,7 @@ abstract mixin class $RoomPresenceMemberCopyWith<$Res>  {
   factory $RoomPresenceMemberCopyWith(RoomPresenceMember value, $Res Function(RoomPresenceMember) _then) = _$RoomPresenceMemberCopyWithImpl;
 @useResult
 $Res call({
- String clientId, String userId, UserActivityStatusEntity activityStatus
+ String clientId, String userId, String? nickname, UserActivityStatusEntity activityStatus
 });
 
 
@@ -62,11 +64,12 @@ class _$RoomPresenceMemberCopyWithImpl<$Res>
 
 /// Create a copy of RoomPresenceMember
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? clientId = null,Object? userId = null,Object? activityStatus = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? clientId = null,Object? userId = null,Object? nickname = freezed,Object? activityStatus = null,}) {
   return _then(_self.copyWith(
 clientId: null == clientId ? _self.clientId : clientId // ignore: cast_nullable_to_non_nullable
 as String,userId: null == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
-as String,activityStatus: null == activityStatus ? _self.activityStatus : activityStatus // ignore: cast_nullable_to_non_nullable
+as String,nickname: freezed == nickname ? _self.nickname : nickname // ignore: cast_nullable_to_non_nullable
+as String?,activityStatus: null == activityStatus ? _self.activityStatus : activityStatus // ignore: cast_nullable_to_non_nullable
 as UserActivityStatusEntity,
   ));
 }
@@ -161,10 +164,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String clientId,  String userId,  UserActivityStatusEntity activityStatus)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String clientId,  String userId,  String? nickname,  UserActivityStatusEntity activityStatus)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _RoomPresenceMember() when $default != null:
-return $default(_that.clientId,_that.userId,_that.activityStatus);case _:
+return $default(_that.clientId,_that.userId,_that.nickname,_that.activityStatus);case _:
   return orElse();
 
 }
@@ -182,10 +185,10 @@ return $default(_that.clientId,_that.userId,_that.activityStatus);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String clientId,  String userId,  UserActivityStatusEntity activityStatus)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String clientId,  String userId,  String? nickname,  UserActivityStatusEntity activityStatus)  $default,) {final _that = this;
 switch (_that) {
 case _RoomPresenceMember():
-return $default(_that.clientId,_that.userId,_that.activityStatus);case _:
+return $default(_that.clientId,_that.userId,_that.nickname,_that.activityStatus);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -202,10 +205,10 @@ return $default(_that.clientId,_that.userId,_that.activityStatus);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String clientId,  String userId,  UserActivityStatusEntity activityStatus)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String clientId,  String userId,  String? nickname,  UserActivityStatusEntity activityStatus)?  $default,) {final _that = this;
 switch (_that) {
 case _RoomPresenceMember() when $default != null:
-return $default(_that.clientId,_that.userId,_that.activityStatus);case _:
+return $default(_that.clientId,_that.userId,_that.nickname,_that.activityStatus);case _:
   return null;
 
 }
@@ -217,11 +220,14 @@ return $default(_that.clientId,_that.userId,_that.activityStatus);case _:
 
 
 class _RoomPresenceMember implements RoomPresenceMember {
-  const _RoomPresenceMember({required this.clientId, required this.userId, this.activityStatus = const UserActivityStatusEntity(activityState: UserActivityState.idle)});
+  const _RoomPresenceMember({required this.clientId, required this.userId, this.nickname, this.activityStatus = const UserActivityStatusEntity(activityState: UserActivityState.idle)});
   
 
 @override final  String clientId;
 @override final  String userId;
+/// 随 presence data 下发的昵称(G5);无 profile 或旧客户端时为 null,
+/// 展示层回退 uid 截断。
+@override final  String? nickname;
 @override@JsonKey() final  UserActivityStatusEntity activityStatus;
 
 /// Create a copy of RoomPresenceMember
@@ -234,16 +240,16 @@ _$RoomPresenceMemberCopyWith<_RoomPresenceMember> get copyWith => __$RoomPresenc
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _RoomPresenceMember&&(identical(other.clientId, clientId) || other.clientId == clientId)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.activityStatus, activityStatus) || other.activityStatus == activityStatus));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _RoomPresenceMember&&(identical(other.clientId, clientId) || other.clientId == clientId)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.nickname, nickname) || other.nickname == nickname)&&(identical(other.activityStatus, activityStatus) || other.activityStatus == activityStatus));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,clientId,userId,activityStatus);
+int get hashCode => Object.hash(runtimeType,clientId,userId,nickname,activityStatus);
 
 @override
 String toString() {
-  return 'RoomPresenceMember(clientId: $clientId, userId: $userId, activityStatus: $activityStatus)';
+  return 'RoomPresenceMember(clientId: $clientId, userId: $userId, nickname: $nickname, activityStatus: $activityStatus)';
 }
 
 
@@ -254,7 +260,7 @@ abstract mixin class _$RoomPresenceMemberCopyWith<$Res> implements $RoomPresence
   factory _$RoomPresenceMemberCopyWith(_RoomPresenceMember value, $Res Function(_RoomPresenceMember) _then) = __$RoomPresenceMemberCopyWithImpl;
 @override @useResult
 $Res call({
- String clientId, String userId, UserActivityStatusEntity activityStatus
+ String clientId, String userId, String? nickname, UserActivityStatusEntity activityStatus
 });
 
 
@@ -271,11 +277,12 @@ class __$RoomPresenceMemberCopyWithImpl<$Res>
 
 /// Create a copy of RoomPresenceMember
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? clientId = null,Object? userId = null,Object? activityStatus = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? clientId = null,Object? userId = null,Object? nickname = freezed,Object? activityStatus = null,}) {
   return _then(_RoomPresenceMember(
 clientId: null == clientId ? _self.clientId : clientId // ignore: cast_nullable_to_non_nullable
 as String,userId: null == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
-as String,activityStatus: null == activityStatus ? _self.activityStatus : activityStatus // ignore: cast_nullable_to_non_nullable
+as String,nickname: freezed == nickname ? _self.nickname : nickname // ignore: cast_nullable_to_non_nullable
+as String?,activityStatus: null == activityStatus ? _self.activityStatus : activityStatus // ignore: cast_nullable_to_non_nullable
 as UserActivityStatusEntity,
   ));
 }

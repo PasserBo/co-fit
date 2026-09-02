@@ -15,7 +15,10 @@ class MyPageBody extends StatelessWidget {
     required this.deckCount,
     required this.cardCount,
     this.email,
+    this.sessionCount,
+    this.totalDurationMin,
     this.onEditAvatar,
+    this.onEditNickname,
     this.onSignOut,
     super.key,
   });
@@ -28,7 +31,12 @@ class MyPageBody extends StatelessWidget {
   final int deckCount;
   final int cardCount;
   final String? email;
+
+  /// 运动统计(M3 会话历史;null = 数据未加载,不显示该分组)。
+  final int? sessionCount;
+  final int? totalDurationMin;
   final VoidCallback? onEditAvatar;
+  final VoidCallback? onEditNickname;
   final VoidCallback? onSignOut;
 
   @override
@@ -84,10 +92,40 @@ class MyPageBody extends StatelessWidget {
             ),
           ],
         ),
+        if (sessionCount != null && totalDurationMin != null) ...[
+          const SizedBox(height: CoFitDimens.spacingLg),
+          _GroupLabel('运动'),
+          _SettingsGroup(
+            children: [
+              _SettingsRow(
+                iconColor: colors.statusActive,
+                iconBg: colors.primarySubtle,
+                icon: Icons.timer_outlined,
+                label: '累计时长',
+                trailing: '$totalDurationMin 分钟',
+              ),
+              _SettingsRow(
+                iconColor: colors.statusInfo,
+                iconBg: colors.typeFlexibilitySubtle,
+                icon: Icons.check_circle_outline_rounded,
+                label: '完成动作',
+                trailing: '$sessionCount 次',
+              ),
+            ],
+          ),
+        ],
         const SizedBox(height: CoFitDimens.spacingLg),
         _GroupLabel('账号'),
         _SettingsGroup(
           children: [
+            _SettingsRow(
+              iconColor: colors.primaryMain,
+              iconBg: colors.primarySubtle,
+              icon: Icons.badge_outlined,
+              label: '昵称',
+              trailing: displayName,
+              onTap: onEditNickname,
+            ),
             _SettingsRow(
               iconColor: colors.statusPaused,
               iconBg: colors.typeCoreSubtle,
@@ -376,6 +414,7 @@ class _SettingsRow extends StatelessWidget {
     required this.iconBg,
     required this.label,
     required this.trailing,
+    this.onTap,
   });
 
   final IconData icon;
@@ -383,13 +422,14 @@ class _SettingsRow extends StatelessWidget {
   final Color iconBg;
   final String label;
   final String trailing;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<CoFitColors>()!;
     final textTheme = Theme.of(context).textTheme;
 
-    return Padding(
+    final row = Padding(
       padding: const EdgeInsets.all(CoFitDimens.spacingMd),
       child: Row(
         spacing: CoFitDimens.spacingMd,
@@ -415,8 +455,23 @@ class _SettingsRow extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
             ),
           ),
+          if (onTap != null)
+            Icon(
+              Icons.chevron_right_rounded,
+              size: CoFitDimens.sizeCardIcon,
+              color: colors.textTertiary,
+            ),
         ],
       ),
+    );
+
+    if (onTap == null) {
+      return row;
+    }
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: row,
     );
   }
 }

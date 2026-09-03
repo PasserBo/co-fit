@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../../../core/theme/cofit_colors.dart';
 import '../../../../core/theme/cofit_dimens.dart';
@@ -20,12 +21,15 @@ import '../../../../firestore/ably_state_machine.dart';
 import '../../domain/entity/room_presence_member.dart';
 import '../../domain/entity/user_activity_status_entity.dart';
 import '../../provider/room_info_provider.dart';
+import '../../../invite/provider/invite_usecase_providers.dart';
 import '../join_room_provider.dart';
 import '../room_browse_page.dart';
 import '../room_browser_provider.dart';
+import '../widget/dissolve_room_dialog.dart';
 import '../widget/room_actions_sheet.dart';
 import '../widget/room_scene.dart';
 import '../widget/room_top_bar.dart';
+import 'room_edit_sheet_view.dart';
 
 /// 房间主界面(#6b 定稿):全屏沉浸场景,无底部 nav。
 /// 漂浮气泡(presence)+ 左右滑切换房间 + 底部扇形手牌(#5d 聚焦/上滑打出)
@@ -188,8 +192,67 @@ class _RoomMainViewState extends ConsumerState<RoomMainView> {
       builder: (context) =>
           RoomActionsSheet(roomName: roomName, isOwner: isOwner),
     );
-    if (action == RoomSheetAction.leave && mounted) {
-      await _confirmAndLeaveRoom(roomId: roomId, roomName: roomName);
+    if (!mounted || action == null) {
+      return;
+    }
+    switch (action) {
+      case RoomSheetAction.leave:
+        await _confirmAndLeaveRoom(roomId: roomId, roomName: roomName);
+      case RoomSheetAction.editInfo:
+        final room = ref.read(roomInfoProvider(roomId)).value;
+        if (room == null) {
+          return;
+        }
+        await RoomEditSheetView.show(context, room: room);
+      case RoomSheetAction.invite:
+        await _shareInvite(roomId: roomId, roomName: roomName);
+      case RoomSheetAction.dissolve:
+        await _confirmAndDissolveRoom(roomId: roomId, roomName: roomName);
+    }
+  }
+
+  Future<void> _shareInvite({
+    required String roomId,
+    required String roomName,
+  }) async {
+    final room = ref.read(roomInfoProvider(roomId)).value;
+    if (room == null) {
+      return;
+    }
+    final link = ref.read(buildInviteLinkUsecaseProvider).execute(room: room);
+    await SharePlus.instance.share(
+      ShareParams(text: '来 CoFit 一起运动!加入我的房间「$roomName」:$link'),
+    );
+  }
+
+  Future<void> _confirmAndDissolveRoom({
+    required String roomId,
+    required String roomName,
+  }) async {
+    final confirmed =
+        await showDissolveRoomDialog(context, roomName: roomName);
+    if (confirmed != true || !mounted) {
+      return;
+    }
+    try {
+      await ref
+          .read(dissolveRoomUsecaseProvider)
+          .execute(roomId: roomId, ownerId: widget.userId);
+      await ref.read(ablyRuntimeProvider.notifier).leaveRoom(roomId: roomId);
+      await ref.read(userBootstrapProvider.notifier).refreshJoinedRooms();
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text('已解散「$roomName」')));
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text('解散失败:$error')));
     }
   }
 

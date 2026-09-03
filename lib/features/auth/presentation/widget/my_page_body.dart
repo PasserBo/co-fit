@@ -19,6 +19,7 @@ class MyPageBody extends StatelessWidget {
     this.totalDurationMin,
     this.onEditAvatar,
     this.onEditNickname,
+    this.onOpenHistory,
     this.onSignOut,
     super.key,
   });
@@ -37,6 +38,9 @@ class MyPageBody extends StatelessWidget {
   final int? totalDurationMin;
   final VoidCallback? onEditAvatar;
   final VoidCallback? onEditNickname;
+
+  /// 点运动统计行 → 运动历史页(#18)。
+  final VoidCallback? onOpenHistory;
   final VoidCallback? onSignOut;
 
   @override
@@ -103,6 +107,7 @@ class MyPageBody extends StatelessWidget {
                 icon: Icons.timer_outlined,
                 label: '累计时长',
                 trailing: '$totalDurationMin 分钟',
+                onTap: onOpenHistory,
               ),
               _SettingsRow(
                 iconColor: colors.statusInfo,
@@ -110,6 +115,7 @@ class MyPageBody extends StatelessWidget {
                 icon: Icons.check_circle_outline_rounded,
                 label: '完成动作',
                 trailing: '$sessionCount 次',
+                onTap: onOpenHistory,
               ),
             ],
           ),

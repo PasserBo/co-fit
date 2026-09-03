@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../action/presentation/action_template_usecase_provider.dart';
 import '../../../action/provider/action_decks_provider.dart';
+import '../../../action/presentation/view/workout_history_page_view.dart';
 import '../../../action/provider/action_session_history_providers.dart';
 import '../../../profile/domain/entity/user_profile_entity.dart';
 import '../../../profile/provider/user_profile_provider.dart';
@@ -125,6 +126,13 @@ class MyPageView extends ConsumerWidget {
           onEditNickname: profile == null
               ? null
               : () => _editNickname(context, ref, profile),
+          onOpenHistory: () {
+            Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => const WorkoutHistoryPageView(),
+              ),
+            );
+          },
           onSignOut: () async {
             await signOutUsecase.execute();
           },

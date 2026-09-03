@@ -44,6 +44,14 @@ class MyRoomsPageView extends ConsumerWidget {
     Navigator.of(context).pop();
   }
 
+  Future<void> _createRoom(BuildContext context) async {
+    final enterRoom = await RoomCreateSheetView.show(context, userId: userId);
+    // 「先进房间看看」→ 收起本页,回到房间主界面(焦点已在新房间)。
+    if (enterRoom == true && context.mounted) {
+      Navigator.of(context).pop();
+    }
+  }
+
   Future<void> _handleDissolvedRoom(
     BuildContext context,
     WidgetRef ref,
@@ -75,22 +83,22 @@ class MyRoomsPageView extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('我的房间'),
         actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: CoFitDimens.spacingLg),
-            child: FilledButton.icon(
-              onPressed: () =>
-                  RoomCreateSheetView.show(context, userId: userId),
-              icon: const Icon(Icons.add, size: CoFitDimens.sizeCardIcon),
-              label: const Text('新建'),
+          // 空态自带居中「新建房间」CTA,此处不再重复入口
+          if (joinedRoomIds.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(right: CoFitDimens.spacingLg),
+              child: FilledButton.icon(
+                onPressed: () => _createRoom(context),
+                icon: const Icon(Icons.add, size: CoFitDimens.sizeCardIcon),
+                label: const Text('新建'),
+              ),
             ),
-          ),
         ],
       ),
       body: SafeArea(
         child: joinedRoomIds.isEmpty
             ? _EmptyRooms(
-                onCreate: () =>
-                    RoomCreateSheetView.show(context, userId: userId),
+                onCreate: () => _createRoom(context),
                 onManualJoin: () => _manualJoin(context, ref),
               )
             : Column(

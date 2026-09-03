@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -5,9 +7,11 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../../../core/theme/cofit_colors.dart';
 import '../../../../core/theme/cofit_dimens.dart';
+import '../../../auth/presentation/user_bootstrap_provider.dart';
 import '../../../invite/domain/invite_link_format.dart';
 import '../../domain/entity/room_info_entity.dart';
 import '../create_room_provider.dart';
+import '../room_browser_provider.dart';
 
 /// 建房 sheet(stub 协议:无定稿设计,功能优先;替代旧 RoomCreatePage 整页)。
 /// 表单(名称/可见性/描述)→ 成功态切换为分享卡片:
@@ -18,8 +22,9 @@ class RoomCreateSheetView extends ConsumerStatefulWidget {
   final String userId;
 
   /// 统一入口:打开建房 sheet(每次打开先复位表单状态)。
-  static Future<void> show(BuildContext context, {required String userId}) {
-    return showModalBottomSheet<void>(
+  /// 返回 true = 用户点了「先进房间看看」(调用方据此收起自身,回房间主界面)。
+  static Future<bool?> show(BuildContext context, {required String userId}) {
+    return showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Theme.of(context).extension<CoFitColors>()!.bgSurface,
@@ -56,6 +61,23 @@ class _RoomCreateSheetViewState extends ConsumerState<RoomCreateSheetView> {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<CoFitColors>()!;
     final textTheme = Theme.of(context).textTheme;
+
+    // 创建成功瞬间:拉取已加入列表(含 Ably 订阅)并聚焦新房间。
+    // 刷新责任在 sheet 自己,不依赖调用方(修复:建房后列表不出现新房间)。
+    ref.listen<CreateRoomState>(createRoomProvider, (previous, next) {
+      final createdRoomId = next.createdRoomId;
+      if (previous?.createdRoomId == null && createdRoomId != null) {
+        unawaited(
+          ref
+              .read(userBootstrapProvider.notifier)
+              .refreshJoinedRooms()
+              .then((_) {
+            ref.read(roomBrowserProvider.notifier).setFocusedRoom(createdRoomId);
+          }),
+        );
+      }
+    });
+
     final state = ref.watch(createRoomProvider);
     final notifier = ref.read(createRoomProvider.notifier);
     final created =
@@ -303,7 +325,7 @@ class _SuccessBody extends StatelessWidget {
         SizedBox(
           height: CoFitDimens.sizeMinTapTarget,
           child: TextButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => Navigator.of(context).pop(true),
             child: Text(
               '先进房间看看',
               style: TextStyle(color: colors.textTertiary),

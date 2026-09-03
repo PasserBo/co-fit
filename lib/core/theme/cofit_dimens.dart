@@ -57,6 +57,18 @@ abstract class CoFitDimens {
   static const sizeFigureHero = 78.0;
   static const sizeHeroGlow = 128.0;
   static const sizeAuthFormMaxWidth = 360.0;
+  static const sizeCardPreview = 88.0;
+  static const sizeCardPreviewCompact = 76.0;
+  static const sizeCardPreviewLg = 120.0;
+  static const sizeTypeBarHeight = 28.0;
+  static const sizeHistoryChartHeight = 34.0;
+  static const sizeHistoryChartBar = 7.0;
+  static const sizeInviteBand = 86.0;
+  static const sizeSuccessBadge = 44.0;
+  static const sizeBrandStage = 120.0;
+  static const sizeAuthGlow = 110.0;
+  static const sizeLoginFanCardWidth = 30.0;
+  static const sizeLoginFanCardHeight = 42.0;
 
   // blur.*
   static const blurOverlay = 8.0;
@@ -93,6 +105,15 @@ abstract class CoFitMotion {
   static const avatarLoopCore = Duration(milliseconds: 900);
   static const avatarLoopFlexibility = Duration(milliseconds: 2600);
   static const avatarLoopPaused = Duration(milliseconds: 3000);
+
+  /// 建房成功徽章外扩光圈周期 (#20b)
+  static const burstRing = Duration(milliseconds: 1800);
+
+  /// presence 呼吸绿点周期 (#20c)
+  static const shimmer = Duration(milliseconds: 2000);
+
+  /// 新建卡片定位外发光时长 (#16a)
+  static const createGlow = Duration(milliseconds: 1200);
 }
 
 /// decor.* — 装饰性绘制常量

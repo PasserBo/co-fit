@@ -40,23 +40,32 @@ void main() {
     expect(find.text('3 张 · 约 13 min'), findsOneWidget);
   });
 
-  testWidgets('expanded deck shows resolvable thumbs and add tile',
-      (tester) async {
-    ActionDeck? added;
+  testWidgets('active deck shows 使用中 badge, others do not', (tester) async {
     await _pump(
       tester,
       DeckListBody(
-        decks: const [deck],
+        decks: const [
+          deck,
+          ActionDeck(id: 'd2', name: '午后燃脂', cardIds: ['a']),
+        ],
         cardsById: cards,
-        expandedDeckId: 'd1',
-        onAddCard: (d) => added = d,
+        activeDeckId: 'd1',
       ),
     );
 
-    expect(find.text('a'), findsOneWidget);
-    expect(find.text('b'), findsOneWidget);
-    await tester.tap(find.byIcon(Icons.add));
-    expect(added?.id, 'd1');
+    expect(find.text('使用中'), findsOneWidget);
+  });
+
+  testWidgets('empty deck row shows amber guide text', (tester) async {
+    await _pump(
+      tester,
+      DeckListBody(
+        decks: const [ActionDeck(id: 'd3', name: '拉伸放松', cardIds: [])],
+        cardsById: cards,
+      ),
+    );
+
+    expect(find.text('空组 · 去加第一张卡 ›'), findsOneWidget);
   });
 
   testWidgets('tapping a row fires onDeckTap', (tester) async {
@@ -74,9 +83,40 @@ void main() {
     expect(tapped?.id, 'd1');
   });
 
-  testWidgets('shows empty state when there are no decks', (tester) async {
-    await _pump(tester, const DeckListBody(decks: [], cardsById: {}));
+  testWidgets('deck menu exposes setActive/rename/delete', (tester) async {
+    final actions = <DeckMenuAction>[];
+    await _pump(
+      tester,
+      DeckListBody(
+        decks: const [deck],
+        cardsById: cards,
+        onDeckMenuAction: (_, action) => actions.add(action),
+      ),
+    );
 
-    expect(find.text('还没有牌组'), findsOneWidget);
+    await tester.tap(find.byIcon(Icons.more_horiz_rounded));
+    await tester.pumpAndSettle();
+    expect(find.text('设为当前使用'), findsOneWidget);
+    expect(find.text('重命名'), findsOneWidget);
+    await tester.tap(find.text('删除牌组'));
+    await tester.pumpAndSettle();
+    expect(actions, [DeckMenuAction.delete]);
+  });
+
+  testWidgets('create row fires onCreateDeck; empty state keeps it',
+      (tester) async {
+    var created = 0;
+    await _pump(
+      tester,
+      DeckListBody(
+        decks: const [],
+        cardsById: const {},
+        onCreateDeck: () => created++,
+      ),
+    );
+
+    expect(find.text('还没有牌组 — 新建一组,把常练的动作放在一起'), findsOneWidget);
+    await tester.tap(find.text('新建牌组'));
+    expect(created, 1);
   });
 }

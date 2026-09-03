@@ -6,6 +6,7 @@ import '../data/in_memory_custom_card_repository.dart';
 import '../domain/custom_card_repository.dart';
 import '../usecase/create_custom_card_usecase.dart';
 import '../usecase/delete_custom_card_usecase.dart';
+import '../usecase/update_custom_card_usecase.dart';
 import 'action_deck_repository_provider.dart';
 
 /// DI:自建卡仓库。已登录 → Firestore(users/{uid}/cards);
@@ -22,6 +23,12 @@ final createCustomCardUsecaseProvider = Provider<CreateCustomCardUsecase>((
   ref,
 ) {
   return CreateCustomCardUsecase(ref.watch(customCardRepositoryProvider));
+});
+
+final updateCustomCardUsecaseProvider = Provider<UpdateCustomCardUsecase>((
+  ref,
+) {
+  return UpdateCustomCardUsecase(ref.watch(customCardRepositoryProvider));
 });
 
 final deleteCustomCardUsecaseProvider = Provider<DeleteCustomCardUsecase>((

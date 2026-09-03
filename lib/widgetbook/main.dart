@@ -525,8 +525,10 @@ Widget _deckList(BuildContext context) {
     body: DeckListBody(
       decks: decks,
       cardsById: {for (final c in cards) c.id: c},
-      expandedDeckId: 'deck_1',
-      onAddCard: (_) {},
+      activeDeckId: 'deck_1',
+      onDeckTap: (_) {},
+      onDeckMenuAction: (_, _) {},
+      onCreateDeck: () {},
     ),
   );
 }

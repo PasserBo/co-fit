@@ -42,6 +42,18 @@ abstract class CoFitOpacities {
   static const farLimb = 0.8; // 侧视远侧肢体 = 主体色 @80% (#14a)
   static const pausedFigure = 0.75; // 暂停态小人整体透明度 (#14a)
   static const overlay = 0.62; // 悬浮层底 gray-850 @62%
+  static const disabledFill = 0.30; // 禁用 CTA 底 = 主色 @30% (#15c)
+  static const disabledOn = 0.55; // 禁用 CTA 文字 = primary.on @55% (#15c)
+  static const dangerFaint = 0.08; // 危险按钮淡底 = coral @8% (#16b)
+  static const dangerBorder = 0.30; // 危险按钮淡描边 = coral @30% (#16b)
+  static const dangerDisabled = 0.15; // 解散未匹配禁用红底 coral @15% (#17b)
+  static const toast = 0.95; // toast 胶囊底 gray-850 @95% (#15a)
+  static const chartDim = 0.35; // 历史微柱图非当天 lime @35% (#18a)
+  static const chartEmpty = 0.10; // 历史微柱图无记录 white @10% (#18a)
+  static const silhouetteFar = 0.35; // 邀请卡远侧剪影 (#20a)
+  static const silhouetteNear = 0.50; // 邀请卡近侧剪影 (#20a)
+  static const avatarInactive = 0.70; // 非当前房间的灰小人 (#20c)
+  static const backdropDim = 0.45; // 前景 dialog 时背景 sheet 压暗 (#17b)
 }
 
 @immutable

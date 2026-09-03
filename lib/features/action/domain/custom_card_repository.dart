@@ -11,5 +11,8 @@ abstract class CustomCardRepository {
 
   Future<void> createCard(ActionTemplateCard card);
 
+  /// 按 card.id 覆盖 name/type/duration/intensity(#16b 编辑卡片)。
+  Future<void> updateCard(ActionTemplateCard card);
+
   Future<void> deleteCard(String cardId);
 }

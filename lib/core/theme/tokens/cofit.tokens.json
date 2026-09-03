@@ -4,200 +4,933 @@
     "$type": "color",
     "$description": "palette 层 — 仅供 theme 文件内部引用,feature 代码禁止直接使用",
     "lime": {
-      "200": { "$value": "#E4F9A3" },
-      "300": { "$value": "#D9F57E" },
-      "400": { "$value": "#C8F24B", "$description": "★ 品牌主色 (13a)" },
-      "500": { "$value": "#A9D32F" },
-      "900": { "$value": "#5A8A1E" }
+      "200": {
+        "$value": "#E4F9A3"
+      },
+      "300": {
+        "$value": "#D9F57E"
+      },
+      "400": {
+        "$value": "#C8F24B",
+        "$description": "★ 品牌主色 (13a)"
+      },
+      "500": {
+        "$value": "#A9D32F"
+      },
+      "900": {
+        "$value": "#5A8A1E"
+      }
     },
     "coral": {
-      "300": { "$value": "#FFA08A" },
-      "400": { "$value": "#FF7A59", "$description": "★ (13a)" },
-      "500": { "$value": "#E8705F" }
+      "300": {
+        "$value": "#FFA08A"
+      },
+      "400": {
+        "$value": "#FF7A59",
+        "$description": "★ (13a)"
+      },
+      "500": {
+        "$value": "#E8705F"
+      }
     },
     "amber": {
-      "300": { "$value": "#F7D580" },
-      "400": { "$value": "#F2C14B", "$description": "★ (13a)" }
+      "300": {
+        "$value": "#F7D580"
+      },
+      "400": {
+        "$value": "#F2C14B",
+        "$description": "★ (13a)"
+      }
     },
     "blue": {
-      "300": { "$value": "#8FBAFF", "$description": "★ (13a)" },
-      "400": { "$value": "#6EA8FF" }
+      "300": {
+        "$value": "#8FBAFF",
+        "$description": "★ (13a)"
+      },
+      "400": {
+        "$value": "#6EA8FF"
+      }
     },
     "gray": {
-      "50": { "$value": "#F4F3EF" },
-      "500": { "$value": "#8B8F86" },
-      "850": { "$value": "#22252E" },
-      "900": { "$value": "#181B22" },
-      "950": { "$value": "#171A21" },
-      "1000": { "$value": "#14161C" }
+      "50": {
+        "$value": "#F4F3EF"
+      },
+      "500": {
+        "$value": "#8B8F86"
+      },
+      "850": {
+        "$value": "#22252E"
+      },
+      "900": {
+        "$value": "#181B22"
+      },
+      "950": {
+        "$value": "#171A21"
+      },
+      "1000": {
+        "$value": "#14161C"
+      }
     },
-    "white": { "$value": "#FFFFFF" }
+    "white": {
+      "$value": "#FFFFFF"
+    }
   },
   "primary": {
     "$type": "color",
-    "main": { "$value": "{color.lime.400}" },
-    "on": { "$value": "{color.gray.950}", "$description": "主色底上的前景色" },
-    "subtle": { "$value": "#C8F24B29", "$description": "lime.400 @16% — 淡底徽章底色 (13a)" },
-    "border": { "$value": "#C8F24B66", "$description": "lime.400 @40% — 淡底徽章描边 (13a)" },
-    "pressed": { "$value": "{color.lime.500}" }
+    "main": {
+      "$value": "{color.lime.400}"
+    },
+    "on": {
+      "$value": "{color.gray.950}",
+      "$description": "主色底上的前景色"
+    },
+    "subtle": {
+      "$value": "#C8F24B29",
+      "$description": "lime.400 @16% — 淡底徽章底色 (13a)"
+    },
+    "border": {
+      "$value": "#C8F24B66",
+      "$description": "lime.400 @40% — 淡底徽章描边 (13a)"
+    },
+    "pressed": {
+      "$value": "{color.lime.500}"
+    }
   },
   "bg": {
     "$type": "color",
-    "app": { "$value": "{color.gray.900}", "$description": "App 全局底色 (13a)" },
-    "surface": { "$value": "{color.gray.850}", "$description": "卡片容器底色 (13a)" },
-    "overlay": { "$value": "#22252E9E", "$description": "gray.850 @62% — 悬浮层底色,需配合 blur.overlay (README)" },
-    "deep": { "$value": "{color.gray.1000}" }
+    "app": {
+      "$value": "{color.gray.900}",
+      "$description": "App 全局底色 (13a)"
+    },
+    "surface": {
+      "$value": "{color.gray.850}",
+      "$description": "卡片容器底色 (13a)"
+    },
+    "overlay": {
+      "$value": "#22252E9E",
+      "$description": "gray.850 @62% — 悬浮层底色,需配合 blur.overlay (README)"
+    },
+    "deep": {
+      "$value": "{color.gray.1000}"
+    }
   },
   "border": {
     "$type": "color",
-    "subtle": { "$value": "#FFFFFF12", "$description": "white @7% — 卡片描边 (13a)" },
-    "strong": { "$value": "#FFFFFF17", "$description": "white @9% — 分隔线加强档 (13a)" },
-    "focus": { "$value": "{color.lime.400}", "$description": "选中/焦点描边,配合 opacity.glow 光晕 (README)" }
+    "subtle": {
+      "$value": "#FFFFFF12",
+      "$description": "white @7% — 卡片描边 (13a)"
+    },
+    "strong": {
+      "$value": "#FFFFFF17",
+      "$description": "white @9% — 分隔线加强档 (13a)"
+    },
+    "focus": {
+      "$value": "{color.lime.400}",
+      "$description": "选中/焦点描边,配合 opacity.glow 光晕 (README)"
+    }
   },
   "text": {
     "$type": "color",
-    "primary": { "$value": "{color.gray.50}" },
-    "secondary": { "$value": "#F4F3EFB3", "$description": "gray.50 @70% (13a)" },
-    "tertiary": { "$value": "#F4F3EF80", "$description": "gray.50 @50% (13a)" },
-    "disabled": { "$value": "#F4F3EF6B", "$description": "gray.50 @42% (13a)" }
+    "primary": {
+      "$value": "{color.gray.50}"
+    },
+    "secondary": {
+      "$value": "#F4F3EFB3",
+      "$description": "gray.50 @70% (13a)"
+    },
+    "tertiary": {
+      "$value": "#F4F3EF80",
+      "$description": "gray.50 @50% (13a)"
+    },
+    "disabled": {
+      "$value": "#F4F3EF6B",
+      "$description": "gray.50 @42% (13a)"
+    }
   },
   "status": {
     "$type": "color",
-    "active": { "$value": "{color.lime.400}", "$description": "运动中 — 小人光圈/呼吸动画 (README)" },
-    "paused": { "$value": "{color.amber.400}", "$description": "暂停 (README)" },
-    "idle": { "$value": "{color.gray.500}", "$description": "挂机 (README)" },
-    "danger": { "$value": "{color.coral.500}", "$description": "危险操作/移除角标/退出登录 (README)" },
-    "info": { "$value": "{color.blue.400}" }
+    "active": {
+      "$value": "{color.lime.400}",
+      "$description": "运动中 — 小人光圈/呼吸动画 (README)"
+    },
+    "paused": {
+      "$value": "{color.amber.400}",
+      "$description": "暂停 (README)"
+    },
+    "idle": {
+      "$value": "{color.gray.500}",
+      "$description": "挂机 (README)"
+    },
+    "danger": {
+      "$value": "{color.coral.500}",
+      "$description": "危险操作/移除角标/退出登录 (README)"
+    },
+    "info": {
+      "$value": "{color.blue.400}"
+    }
   },
   "type": {
     "$type": "color",
     "$description": "动作卡类型色。⚠ cardio 与品牌色同为 lime.400,其选中态必须靠 ✓ 角标区分 (README)",
-    "strength": { "$value": "{color.coral.400}" },
-    "strengthSubtle": { "$value": "#FF7A5929", "$description": "coral.400 @16%" },
-    "cardio": { "$value": "{color.lime.400}" },
-    "cardioSubtle": { "$value": "#C8F24B29", "$description": "lime.400 @16%" },
-    "core": { "$value": "{color.amber.400}" },
-    "coreSubtle": { "$value": "#F2C14B29", "$description": "amber.400 @16%" },
-    "flexibility": { "$value": "{color.blue.300}" },
-    "flexibilitySubtle": { "$value": "#8FBAFF29", "$description": "blue.300 @16%" }
+    "strength": {
+      "$value": "{color.coral.400}"
+    },
+    "strengthSubtle": {
+      "$value": "#FF7A5929",
+      "$description": "coral.400 @16%"
+    },
+    "cardio": {
+      "$value": "{color.lime.400}"
+    },
+    "cardioSubtle": {
+      "$value": "#C8F24B29",
+      "$description": "lime.400 @16%"
+    },
+    "core": {
+      "$value": "{color.amber.400}"
+    },
+    "coreSubtle": {
+      "$value": "#F2C14B29",
+      "$description": "amber.400 @16%"
+    },
+    "flexibility": {
+      "$value": "{color.blue.300}"
+    },
+    "flexibilitySubtle": {
+      "$value": "#8FBAFF29",
+      "$description": "blue.300 @16%"
+    }
   },
   "opacity": {
     "$type": "number",
-    "subtle": { "$value": 0.16, "$description": "淡底 = 主色 @16% (README alpha 规则)" },
-    "border": { "$value": 0.4, "$description": "淡描边 = 主色 @40% (README alpha 规则)" },
-    "glow": { "$value": 0.18, "$description": "选中光晕 lime@18% (README)" },
-    "faint": { "$value": 0.09, "$description": "更淡的底(创建横幅 lime@9%)(#12b mock)" },
-    "strong": { "$value": 0.9, "$description": "自己小人常亮头环 lime@90% (#6b)" },
-    "auraActive": { "$value": 0.28, "$description": "运动中地面光圈 (#14a)" },
-    "auraPaused": { "$value": 0.25, "$description": "暂停地面光圈 (#14a)" },
-    "farLimb": { "$value": 0.8, "$description": "侧视远侧肢体 = 主体色 @80%(#14a #cfcec8 的派生规则)" },
-    "pausedFigure": { "$value": 0.75, "$description": "暂停态小人整体透明度 (#14a/README)" },
-    "overlay": { "$value": 0.62, "$description": "悬浮层底 (README)" }
+    "subtle": {
+      "$value": 0.16,
+      "$description": "淡底 = 主色 @16% (README alpha 规则)"
+    },
+    "border": {
+      "$value": 0.4,
+      "$description": "淡描边 = 主色 @40% (README alpha 规则)"
+    },
+    "glow": {
+      "$value": 0.18,
+      "$description": "选中光晕 lime@18% (README)"
+    },
+    "faint": {
+      "$value": 0.09,
+      "$description": "更淡的底(创建横幅 lime@9%)(#12b mock)"
+    },
+    "strong": {
+      "$value": 0.9,
+      "$description": "自己小人常亮头环 lime@90% (#6b)"
+    },
+    "auraActive": {
+      "$value": 0.28,
+      "$description": "运动中地面光圈 (#14a)"
+    },
+    "auraPaused": {
+      "$value": 0.25,
+      "$description": "暂停地面光圈 (#14a)"
+    },
+    "farLimb": {
+      "$value": 0.8,
+      "$description": "侧视远侧肢体 = 主体色 @80%(#14a #cfcec8 的派生规则)"
+    },
+    "pausedFigure": {
+      "$value": 0.75,
+      "$description": "暂停态小人整体透明度 (#14a/README)"
+    },
+    "overlay": {
+      "$value": 0.62,
+      "$description": "悬浮层底 (README)"
+    },
+    "disabledFill": {
+      "$value": 0.3,
+      "$description": "禁用 CTA 底 = 主色 @30% (#15c)"
+    },
+    "disabledOn": {
+      "$value": 0.55,
+      "$description": "禁用 CTA 文字 = primary.on @55% (#15c)"
+    },
+    "dangerFaint": {
+      "$value": 0.08,
+      "$description": "危险按钮淡底 = coral @8% (#16b)"
+    },
+    "dangerBorder": {
+      "$value": 0.3,
+      "$description": "危险按钮淡描边 = coral @30% (#16b)"
+    },
+    "dangerDisabled": {
+      "$value": 0.15,
+      "$description": "解散确认未匹配的禁用红底 = coral @15% (#17b)"
+    },
+    "toast": {
+      "$value": 0.95,
+      "$description": "toast 胶囊底 = gray-850 @95% (#15a)"
+    },
+    "chartDim": {
+      "$value": 0.35,
+      "$description": "历史微柱图非当天 = lime @35% (#18a)"
+    },
+    "chartEmpty": {
+      "$value": 0.1,
+      "$description": "历史微柱图无记录 = white @10% (#18a)"
+    },
+    "silhouetteFar": {
+      "$value": 0.35,
+      "$description": "邀请卡远侧剪影 (#20a)"
+    },
+    "silhouetteNear": {
+      "$value": 0.5,
+      "$description": "邀请卡近侧剪影 (#20a)"
+    },
+    "avatarInactive": {
+      "$value": 0.7,
+      "$description": "非当前房间的灰小人 (#20c)"
+    },
+    "backdropDim": {
+      "$value": 0.45,
+      "$description": "前景 dialog 时背景 sheet 压暗 (#17b)"
+    }
   },
   "spacing": {
     "$type": "dimension",
     "$description": "间距刻度,4 基数 (seed v1) — 新间距先吸附到此刻度",
-    "xs": { "$value": { "value": 4, "unit": "px" } },
-    "sm": { "$value": { "value": 8, "unit": "px" } },
-    "md": { "$value": { "value": 12, "unit": "px" } },
-    "lg": { "$value": { "value": 16, "unit": "px" } },
-    "xl": { "$value": { "value": 20, "unit": "px" } },
-    "2xl": { "$value": { "value": 24, "unit": "px" } },
-    "3xl": { "$value": { "value": 32, "unit": "px" } }
+    "xs": {
+      "$value": {
+        "value": 4,
+        "unit": "px"
+      }
+    },
+    "sm": {
+      "$value": {
+        "value": 8,
+        "unit": "px"
+      }
+    },
+    "md": {
+      "$value": {
+        "value": 12,
+        "unit": "px"
+      }
+    },
+    "lg": {
+      "$value": {
+        "value": 16,
+        "unit": "px"
+      }
+    },
+    "xl": {
+      "$value": {
+        "value": 20,
+        "unit": "px"
+      }
+    },
+    "2xl": {
+      "$value": {
+        "value": 24,
+        "unit": "px"
+      }
+    },
+    "3xl": {
+      "$value": {
+        "value": 32,
+        "unit": "px"
+      }
+    }
   },
   "radius": {
     "$type": "dimension",
-    "xs": { "$value": { "value": 4, "unit": "px" }, "$description": "小徽点/glyph/叠牌缩略,mock 3–6 吸附 (seed v1)" },
-    "sm": { "$value": { "value": 8, "unit": "px" }, "$description": "卡片内图标块 (README)" },
-    "md": { "$value": { "value": 12, "unit": "px" }, "$description": "卡片容器下限 (README: 12–16)" },
-    "lg": { "$value": { "value": 16, "unit": "px" }, "$description": "卡片容器上限 / 悬浮 dock (README)" },
-    "xl": { "$value": { "value": 20, "unit": "px" }, "$description": "我的页英雄区大卡 (#10a)" }
+    "xs": {
+      "$value": {
+        "value": 4,
+        "unit": "px"
+      },
+      "$description": "小徽点/glyph/叠牌缩略,mock 3–6 吸附 (seed v1)"
+    },
+    "sm": {
+      "$value": {
+        "value": 8,
+        "unit": "px"
+      },
+      "$description": "卡片内图标块 (README)"
+    },
+    "md": {
+      "$value": {
+        "value": 12,
+        "unit": "px"
+      },
+      "$description": "卡片容器下限 (README: 12–16)"
+    },
+    "lg": {
+      "$value": {
+        "value": 16,
+        "unit": "px"
+      },
+      "$description": "卡片容器上限 / 悬浮 dock (README)"
+    },
+    "xl": {
+      "$value": {
+        "value": 20,
+        "unit": "px"
+      },
+      "$description": "我的页英雄区大卡 (#10a)"
+    }
   },
   "borderWidth": {
     "$type": "dimension",
-    "hairline": { "$value": { "value": 1, "unit": "px" } },
-    "focus": { "$value": { "value": 1.5, "unit": "px" }, "$description": "选中/焦点描边 (README)" }
+    "hairline": {
+      "$value": {
+        "value": 1,
+        "unit": "px"
+      }
+    },
+    "focus": {
+      "$value": {
+        "value": 1.5,
+        "unit": "px"
+      },
+      "$description": "选中/焦点描边 (README)"
+    }
   },
   "size": {
     "$type": "dimension",
-    "cardTypeBar": { "$value": { "value": 4, "unit": "px" }, "$description": "动作卡顶部类型色条,README 允许 4–5,取 4" },
-    "cardIconBlock": { "$value": { "value": 26, "unit": "px" }, "$description": "动作卡图标块 (README)" },
-    "removeBadge": { "$value": { "value": 19, "unit": "px" }, "$description": "编辑态移除角标圆 (README)" },
-    "removeBadgeOffset": { "$value": { "value": 6, "unit": "px" }, "$description": "移除角标右上悬浮偏移 (README: -6px)" },
-    "cardIcon": { "$value": { "value": 14, "unit": "px" }, "$description": "动作卡图标块内 glyph / 角标内图标 (seed v1)" },
-    "checkBadge": { "$value": { "value": 18, "unit": "px" }, "$description": "已入组 ✓ 角标圆 (seed v1)" },
-    "minTapTarget": { "$value": { "value": 44, "unit": "px" }, "$description": "可点击目标最小边长 (seed v1, iOS HIG)" },
-    "libraryCardItem": { "$value": { "value": 112, "unit": "px" }, "$description": "牌库横滑列子项宽度(mock 80/280 宽度比 ≈ 0.29 × 390)(#12b)" },
-    "sectionDot": { "$value": { "value": 9, "unit": "px" }, "$description": "牌库分区标题徽点 (#12b)" },
-    "bannerIcon": { "$value": { "value": 30, "unit": "px" }, "$description": "创建横幅 + 图标块 (#12b)" },
-    "deckStackWidth": { "$value": { "value": 34, "unit": "px" }, "$description": "牌组行叠牌缩略整体宽 (#11b)" },
-    "deckStackHeight": { "$value": { "value": 38, "unit": "px" }, "$description": "牌组行叠牌缩略整体高 (#11b)" },
-    "deckStackCardWidth": { "$value": { "value": 22, "unit": "px" }, "$description": "叠牌缩略单张宽 (#11b)" },
-    "deckStackCardHeight": { "$value": { "value": 30, "unit": "px" }, "$description": "叠牌缩略单张高 (#11b)" },
-    "deckCardThumb": { "$value": { "value": 52, "unit": "px" }, "$description": "牌组展开内嵌迷你卡宽度(高度随内容)(#11b)" },
-    "dockItem": { "$value": { "value": 26, "unit": "px" }, "$description": "悬浮 dock 单个目的地圆形图标位 (#12b/#t9)" },
-    "figureFriend": { "$value": { "value": 46, "unit": "px" }, "$description": "好友小人总高(头/身/腿按比例推导)(#6b)" },
-    "figureSelf": { "$value": { "value": 60, "unit": "px" }, "$description": "自己小人总高 (#6b)" },
-    "auraFriend": { "$value": { "value": 48, "unit": "px" }, "$description": "好友状态光圈直径 (#6b)" },
-    "auraSelf": { "$value": { "value": 70, "unit": "px" }, "$description": "自己状态光圈直径 (#6b)" },
-    "fanCardWidth": { "$value": { "value": 70, "unit": "px" }, "$description": "扇形手牌单张宽 (#6b/#5d)" },
-    "fanCardHeight": { "$value": { "value": 98, "unit": "px" }, "$description": "扇形手牌单张高 (#6b/#5d)" },
-    "fanHeight": { "$value": { "value": 214, "unit": "px" }, "$description": "扇形手牌区域高 (#6b)" },
-    "fanPivotRadius": { "$value": { "value": 320, "unit": "px" }, "$description": "扇形旋转轴心距卡片顶部距离 (#6b transform-origin)" },
-    "deckChipBottom": { "$value": { "value": 178, "unit": "px" }, "$description": "收起态牌组 chip 距底部偏移 (#6b)" },
-    "popoverWidth": { "$value": { "value": 196, "unit": "px" }, "$description": "牌组下拉悬浮层宽 (#6b/#4a)" },
-    "hudRing": { "$value": { "value": 34, "unit": "px" }, "$description": "HUD 当前动作倒计时环直径 (#6b)" },
-    "roomDot": { "$value": { "value": 6, "unit": "px" }, "$description": "房间指示点(非当前)(#6b)" },
-    "roomDotActive": { "$value": { "value": 20, "unit": "px" }, "$description": "房间指示点(当前,长条)宽 (#6b)" },
-    "figureHero": { "$value": { "value": 78, "unit": "px" }, "$description": "我的页英雄区小人总高 (#10a)" },
-    "heroGlow": { "$value": { "value": 128, "unit": "px" }, "$description": "英雄区顶部光晕直径 (#10a)" },
-    "authFormMaxWidth": { "$value": { "value": 360, "unit": "px" }, "$description": "登录/onboarding 表单在大屏下的最大宽度,iPhone 视口级内容宽 (seed v1)" }
+    "cardTypeBar": {
+      "$value": {
+        "value": 4,
+        "unit": "px"
+      },
+      "$description": "动作卡顶部类型色条,README 允许 4–5,取 4"
+    },
+    "cardIconBlock": {
+      "$value": {
+        "value": 26,
+        "unit": "px"
+      },
+      "$description": "动作卡图标块 (README)"
+    },
+    "removeBadge": {
+      "$value": {
+        "value": 19,
+        "unit": "px"
+      },
+      "$description": "编辑态移除角标圆 (README)"
+    },
+    "removeBadgeOffset": {
+      "$value": {
+        "value": 6,
+        "unit": "px"
+      },
+      "$description": "移除角标右上悬浮偏移 (README: -6px)"
+    },
+    "cardIcon": {
+      "$value": {
+        "value": 14,
+        "unit": "px"
+      },
+      "$description": "动作卡图标块内 glyph / 角标内图标 (seed v1)"
+    },
+    "checkBadge": {
+      "$value": {
+        "value": 18,
+        "unit": "px"
+      },
+      "$description": "已入组 ✓ 角标圆 (seed v1)"
+    },
+    "minTapTarget": {
+      "$value": {
+        "value": 44,
+        "unit": "px"
+      },
+      "$description": "可点击目标最小边长 (seed v1, iOS HIG)"
+    },
+    "libraryCardItem": {
+      "$value": {
+        "value": 112,
+        "unit": "px"
+      },
+      "$description": "牌库横滑列子项宽度(mock 80/280 宽度比 ≈ 0.29 × 390)(#12b)"
+    },
+    "sectionDot": {
+      "$value": {
+        "value": 9,
+        "unit": "px"
+      },
+      "$description": "牌库分区标题徽点 (#12b)"
+    },
+    "bannerIcon": {
+      "$value": {
+        "value": 30,
+        "unit": "px"
+      },
+      "$description": "创建横幅 + 图标块 (#12b)"
+    },
+    "deckStackWidth": {
+      "$value": {
+        "value": 34,
+        "unit": "px"
+      },
+      "$description": "牌组行叠牌缩略整体宽 (#11b)"
+    },
+    "deckStackHeight": {
+      "$value": {
+        "value": 38,
+        "unit": "px"
+      },
+      "$description": "牌组行叠牌缩略整体高 (#11b)"
+    },
+    "deckStackCardWidth": {
+      "$value": {
+        "value": 22,
+        "unit": "px"
+      },
+      "$description": "叠牌缩略单张宽 (#11b)"
+    },
+    "deckStackCardHeight": {
+      "$value": {
+        "value": 30,
+        "unit": "px"
+      },
+      "$description": "叠牌缩略单张高 (#11b)"
+    },
+    "deckCardThumb": {
+      "$value": {
+        "value": 52,
+        "unit": "px"
+      },
+      "$description": "牌组展开内嵌迷你卡宽度(高度随内容)(#11b)"
+    },
+    "dockItem": {
+      "$value": {
+        "value": 26,
+        "unit": "px"
+      },
+      "$description": "悬浮 dock 单个目的地圆形图标位 (#12b/#t9)"
+    },
+    "figureFriend": {
+      "$value": {
+        "value": 46,
+        "unit": "px"
+      },
+      "$description": "好友小人总高(头/身/腿按比例推导)(#6b)"
+    },
+    "figureSelf": {
+      "$value": {
+        "value": 60,
+        "unit": "px"
+      },
+      "$description": "自己小人总高 (#6b)"
+    },
+    "auraFriend": {
+      "$value": {
+        "value": 48,
+        "unit": "px"
+      },
+      "$description": "好友状态光圈直径 (#6b)"
+    },
+    "auraSelf": {
+      "$value": {
+        "value": 70,
+        "unit": "px"
+      },
+      "$description": "自己状态光圈直径 (#6b)"
+    },
+    "fanCardWidth": {
+      "$value": {
+        "value": 70,
+        "unit": "px"
+      },
+      "$description": "扇形手牌单张宽 (#6b/#5d)"
+    },
+    "fanCardHeight": {
+      "$value": {
+        "value": 98,
+        "unit": "px"
+      },
+      "$description": "扇形手牌单张高 (#6b/#5d)"
+    },
+    "fanHeight": {
+      "$value": {
+        "value": 214,
+        "unit": "px"
+      },
+      "$description": "扇形手牌区域高 (#6b)"
+    },
+    "fanPivotRadius": {
+      "$value": {
+        "value": 320,
+        "unit": "px"
+      },
+      "$description": "扇形旋转轴心距卡片顶部距离 (#6b transform-origin)"
+    },
+    "deckChipBottom": {
+      "$value": {
+        "value": 178,
+        "unit": "px"
+      },
+      "$description": "收起态牌组 chip 距底部偏移 (#6b)"
+    },
+    "popoverWidth": {
+      "$value": {
+        "value": 196,
+        "unit": "px"
+      },
+      "$description": "牌组下拉悬浮层宽 (#6b/#4a)"
+    },
+    "hudRing": {
+      "$value": {
+        "value": 34,
+        "unit": "px"
+      },
+      "$description": "HUD 当前动作倒计时环直径 (#6b)"
+    },
+    "roomDot": {
+      "$value": {
+        "value": 6,
+        "unit": "px"
+      },
+      "$description": "房间指示点(非当前)(#6b)"
+    },
+    "roomDotActive": {
+      "$value": {
+        "value": 20,
+        "unit": "px"
+      },
+      "$description": "房间指示点(当前,长条)宽 (#6b)"
+    },
+    "figureHero": {
+      "$value": {
+        "value": 78,
+        "unit": "px"
+      },
+      "$description": "我的页英雄区小人总高 (#10a)"
+    },
+    "heroGlow": {
+      "$value": {
+        "value": 128,
+        "unit": "px"
+      },
+      "$description": "英雄区顶部光晕直径 (#10a)"
+    },
+    "authFormMaxWidth": {
+      "$value": {
+        "value": 360,
+        "unit": "px"
+      },
+      "$description": "登录/onboarding 表单在大屏下的最大宽度,iPhone 视口级内容宽 (seed v1)"
+    },
+    "cardPreview": {
+      "$value": {
+        "value": 88,
+        "unit": "px"
+      },
+      "$description": "创建卡片表单实时预览宽 (#16a)"
+    },
+    "cardPreviewCompact": {
+      "$value": {
+        "value": 76,
+        "unit": "px"
+      },
+      "$description": "小屏 375 下预览宽 (#16a 附注)"
+    },
+    "cardPreviewLg": {
+      "$value": {
+        "value": 120,
+        "unit": "px"
+      },
+      "$description": "卡片详情大预览宽 (#16b)"
+    },
+    "typeBarHeight": {
+      "$value": {
+        "value": 28,
+        "unit": "px"
+      },
+      "$description": "列表行内类型色条高 (#15b/#18a)"
+    },
+    "historyChartHeight": {
+      "$value": {
+        "value": 34,
+        "unit": "px"
+      },
+      "$description": "历史页 7 日微柱图高 (#18a)"
+    },
+    "historyChartBar": {
+      "$value": {
+        "value": 7,
+        "unit": "px"
+      },
+      "$description": "历史页微柱图柱宽 (#18a)"
+    },
+    "inviteBand": {
+      "$value": {
+        "value": 86,
+        "unit": "px"
+      },
+      "$description": "邀请卡剪影氛围区高 (#20a)"
+    },
+    "successBadge": {
+      "$value": {
+        "value": 44,
+        "unit": "px"
+      },
+      "$description": "建房成功 ✓ 圆徽直径 (#20b)"
+    },
+    "brandStage": {
+      "$value": {
+        "value": 120,
+        "unit": "px"
+      },
+      "$description": "登录页品牌区舞台边长 (#19a)"
+    },
+    "authGlow": {
+      "$value": {
+        "value": 110,
+        "unit": "px"
+      },
+      "$description": "onboarding 发光圆环直径 (#19b)"
+    },
+    "loginFanCardWidth": {
+      "$value": {
+        "value": 30,
+        "unit": "px"
+      },
+      "$description": "登录页斜插装饰卡宽 (#19a)"
+    },
+    "loginFanCardHeight": {
+      "$value": {
+        "value": 42,
+        "unit": "px"
+      },
+      "$description": "登录页斜插装饰卡高 (#19a)"
+    }
   },
   "decor": {
     "$type": "number",
     "$description": "装饰性绘制常量 (seed v1)",
-    "deckStackTiltBackDeg": { "$value": -10, "$description": "叠牌缩略最底张倾角(度)(#11b)" },
-    "deckStackTiltMidDeg": { "$value": 4, "$description": "叠牌缩略中间张倾角(度)(#11b)" },
-    "dashLength": { "$value": 6, "$description": "虚线描边线段长 px" },
-    "dashGap": { "$value": 4, "$description": "虚线描边间隔 px" },
-    "fanSpreadDeg": { "$value": 12, "$description": "扇形手牌相邻卡夹角(度)(seed v1)" },
-    "fanFocusScale": { "$value": 1.5, "$description": "聚焦模式整体放大倍数 (seed v1)" },
-    "fanFocusLift": { "$value": 120, "$description": "聚焦模式整体上浮 px (seed v1)" },
-    "fanSideOpacity": { "$value": 0.55, "$description": "聚焦模式侧牌透明度 (seed v1)" },
-    "playSwipeThreshold": { "$value": 60, "$description": "上滑打出的位移阈值 px (seed v1)" },
-    "tempoSlow": { "$value": 1.3, "$description": "动画节奏倍率·慢 (README §动画)" },
-    "tempoFast": { "$value": 0.75, "$description": "动画节奏倍率·快 (README §动画)" }
+    "deckStackTiltBackDeg": {
+      "$value": -10,
+      "$description": "叠牌缩略最底张倾角(度)(#11b)"
+    },
+    "deckStackTiltMidDeg": {
+      "$value": 4,
+      "$description": "叠牌缩略中间张倾角(度)(#11b)"
+    },
+    "dashLength": {
+      "$value": 6,
+      "$description": "虚线描边线段长 px"
+    },
+    "dashGap": {
+      "$value": 4,
+      "$description": "虚线描边间隔 px"
+    },
+    "fanSpreadDeg": {
+      "$value": 12,
+      "$description": "扇形手牌相邻卡夹角(度)(seed v1)"
+    },
+    "fanFocusScale": {
+      "$value": 1.5,
+      "$description": "聚焦模式整体放大倍数 (seed v1)"
+    },
+    "fanFocusLift": {
+      "$value": 120,
+      "$description": "聚焦模式整体上浮 px (seed v1)"
+    },
+    "fanSideOpacity": {
+      "$value": 0.55,
+      "$description": "聚焦模式侧牌透明度 (seed v1)"
+    },
+    "playSwipeThreshold": {
+      "$value": 60,
+      "$description": "上滑打出的位移阈值 px (seed v1)"
+    },
+    "tempoSlow": {
+      "$value": 1.3,
+      "$description": "动画节奏倍率·慢 (README §动画)"
+    },
+    "tempoFast": {
+      "$value": 0.75,
+      "$description": "动画节奏倍率·快 (README §动画)"
+    }
   },
   "blur": {
     "$type": "dimension",
-    "overlay": { "$value": { "value": 8, "unit": "px" }, "$description": "悬浮层 backdrop blur (README)" },
-    "glow": { "$value": { "value": 10, "unit": "px" }, "$description": "选中光晕 BoxShadow blur 半径 (seed v1)" }
+    "overlay": {
+      "$value": {
+        "value": 8,
+        "unit": "px"
+      },
+      "$description": "悬浮层 backdrop blur (README)"
+    },
+    "glow": {
+      "$value": {
+        "value": 10,
+        "unit": "px"
+      },
+      "$description": "选中光晕 BoxShadow blur 半径 (seed v1)"
+    }
   },
   "typography": {
     "fontFamily": {
-      "display": { "$type": "fontFamily", "$value": ["Space Grotesk"], "$description": "英文/数字;中文跟随系统字体 (README)" }
+      "display": {
+        "$type": "fontFamily",
+        "$value": [
+          "Space Grotesk"
+        ],
+        "$description": "英文/数字;中文跟随系统字体 (README)"
+      }
     },
     "fontWeight": {
       "$type": "fontWeight",
-      "heading": { "$value": 700, "$description": "标题 (README)" },
-      "label": { "$value": 600, "$description": "标签 (README)" }
+      "heading": {
+        "$value": 700,
+        "$description": "标题 (README)"
+      },
+      "label": {
+        "$value": 600,
+        "$description": "标签 (README)"
+      }
     }
   },
   "motion": {
-    "bobOffset": { "$type": "dimension", "$value": { "value": 5, "unit": "px" }, "$description": "小人上下浮动幅度 (README)" },
-    "breatheScale": { "$type": "number", "$value": 1.055, "$description": "运动中光圈呼吸动画 scale 1→1.055 (README)" },
-    "dockAutoCollapse": { "$type": "duration", "$value": { "value": 5, "unit": "s" }, "$description": "dock 无操作自动收起 (README)" },
-    "dockExpand": { "$type": "duration", "$value": { "value": 220, "unit": "ms" }, "$description": "dock 展开/收起过渡 (#t9 mock transition .22s)" },
-    "bobPeriod": { "$type": "duration", "$value": { "value": 2400, "unit": "ms" }, "$description": "小人上下浮动周期 (seed v1)" },
-    "breathePeriod": { "$type": "duration", "$value": { "value": 1800, "unit": "ms" }, "$description": "运动中光圈呼吸周期 (seed v1)" },
-    "fanTransition": { "$type": "duration", "$value": { "value": 280, "unit": "ms" }, "$description": "扇形聚焦/切牌过渡 (#6b mock .28s)" },
-    "playFly": { "$type": "duration", "$value": { "value": 420, "unit": "ms" }, "$description": "打出卡牌飞出动画 (#6b mock .42s)" },
-    "avatarWindup": { "$type": "duration", "$value": { "value": 400, "unit": "ms" }, "$description": "小人起手 ×1 (README §动画)" },
-    "avatarFinish": { "$type": "duration", "$value": { "value": 1100, "unit": "ms" }, "$description": "小人完成 ×1 (README §动画)" },
-    "avatarLoopStrength": { "$type": "duration", "$value": { "value": 1300, "unit": "ms" }, "$description": "力量·蹲起 loop (README §动画)" },
-    "avatarLoopCardio": { "$type": "duration", "$value": { "value": 600, "unit": "ms" }, "$description": "有氧·原地跑 loop (README §动画)" },
-    "avatarLoopCore": { "$type": "duration", "$value": { "value": 900, "unit": "ms" }, "$description": "核心·支撑 loop (README §动画)" },
-    "avatarLoopFlexibility": { "$type": "duration", "$value": { "value": 2600, "unit": "ms" }, "$description": "柔韧·伸展 loop (README §动画)" },
-    "avatarLoopPaused": { "$type": "duration", "$value": { "value": 3000, "unit": "ms" }, "$description": "暂停摇摆 loop (README §动画)" }
+    "bobOffset": {
+      "$type": "dimension",
+      "$value": {
+        "value": 5,
+        "unit": "px"
+      },
+      "$description": "小人上下浮动幅度 (README)"
+    },
+    "breatheScale": {
+      "$type": "number",
+      "$value": 1.055,
+      "$description": "运动中光圈呼吸动画 scale 1→1.055 (README)"
+    },
+    "dockAutoCollapse": {
+      "$type": "duration",
+      "$value": {
+        "value": 5,
+        "unit": "s"
+      },
+      "$description": "dock 无操作自动收起 (README)"
+    },
+    "dockExpand": {
+      "$type": "duration",
+      "$value": {
+        "value": 220,
+        "unit": "ms"
+      },
+      "$description": "dock 展开/收起过渡 (#t9 mock transition .22s)"
+    },
+    "bobPeriod": {
+      "$type": "duration",
+      "$value": {
+        "value": 2400,
+        "unit": "ms"
+      },
+      "$description": "小人上下浮动周期 (seed v1)"
+    },
+    "breathePeriod": {
+      "$type": "duration",
+      "$value": {
+        "value": 1800,
+        "unit": "ms"
+      },
+      "$description": "运动中光圈呼吸周期 (seed v1)"
+    },
+    "fanTransition": {
+      "$type": "duration",
+      "$value": {
+        "value": 280,
+        "unit": "ms"
+      },
+      "$description": "扇形聚焦/切牌过渡 (#6b mock .28s)"
+    },
+    "playFly": {
+      "$type": "duration",
+      "$value": {
+        "value": 420,
+        "unit": "ms"
+      },
+      "$description": "打出卡牌飞出动画 (#6b mock .42s)"
+    },
+    "avatarWindup": {
+      "$type": "duration",
+      "$value": {
+        "value": 400,
+        "unit": "ms"
+      },
+      "$description": "小人起手 ×1 (README §动画)"
+    },
+    "avatarFinish": {
+      "$type": "duration",
+      "$value": {
+        "value": 1100,
+        "unit": "ms"
+      },
+      "$description": "小人完成 ×1 (README §动画)"
+    },
+    "avatarLoopStrength": {
+      "$type": "duration",
+      "$value": {
+        "value": 1300,
+        "unit": "ms"
+      },
+      "$description": "力量·蹲起 loop (README §动画)"
+    },
+    "avatarLoopCardio": {
+      "$type": "duration",
+      "$value": {
+        "value": 600,
+        "unit": "ms"
+      },
+      "$description": "有氧·原地跑 loop (README §动画)"
+    },
+    "avatarLoopCore": {
+      "$type": "duration",
+      "$value": {
+        "value": 900,
+        "unit": "ms"
+      },
+      "$description": "核心·支撑 loop (README §动画)"
+    },
+    "avatarLoopFlexibility": {
+      "$type": "duration",
+      "$value": {
+        "value": 2600,
+        "unit": "ms"
+      },
+      "$description": "柔韧·伸展 loop (README §动画)"
+    },
+    "avatarLoopPaused": {
+      "$type": "duration",
+      "$value": {
+        "value": 3000,
+        "unit": "ms"
+      },
+      "$description": "暂停摇摆 loop (README §动画)"
+    },
+    "burstRing": {
+      "$type": "duration",
+      "$value": {
+        "value": 1800,
+        "unit": "ms"
+      },
+      "$description": "建房成功徽章外扩光圈周期 (#20b)"
+    },
+    "shimmer": {
+      "$type": "duration",
+      "$value": {
+        "value": 2000,
+        "unit": "ms"
+      },
+      "$description": "presence 呼吸绿点周期 (#20c)"
+    },
+    "createGlow": {
+      "$type": "duration",
+      "$value": {
+        "value": 1200,
+        "unit": "ms"
+      },
+      "$description": "新建卡片定位外发光时长 (#16a)"
+    }
   }
 }

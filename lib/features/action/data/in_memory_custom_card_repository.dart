@@ -17,6 +17,15 @@ class InMemoryCustomCardRepository implements CustomCardRepository {
   }
 
   @override
+  Future<void> updateCard(ActionTemplateCard card) async {
+    final index = _cards.indexWhere((existing) => existing.id == card.id);
+    if (index < 0) {
+      throw StateError('Custom card not found: ${card.id}');
+    }
+    _cards[index] = card;
+  }
+
+  @override
   Future<void> deleteCard(String cardId) async {
     _cards.removeWhere((existing) => existing.id == cardId);
   }

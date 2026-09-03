@@ -53,6 +53,18 @@ class FirebaseCustomCardRepository implements CustomCardRepository {
   }
 
   @override
+  Future<void> updateCard(ActionTemplateCard card) {
+    return _cardsRef.doc(card.id).update({
+      'name': card.name,
+      'type': card.rawType,
+      'ablyActionId': card.ablyActionId,
+      'defaultDurationSec': card.defaultDurationSec,
+      'intensityBaseline': card.intensityBaseline,
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+  }
+
+  @override
   Future<void> deleteCard(String cardId) {
     return _cardsRef.doc(cardId).delete();
   }

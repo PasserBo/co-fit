@@ -23,12 +23,12 @@ import '../../domain/entity/user_activity_status_entity.dart';
 import '../../provider/room_info_provider.dart';
 import '../../../invite/provider/invite_usecase_providers.dart';
 import '../join_room_provider.dart';
-import '../room_browse_page.dart';
 import '../room_browser_provider.dart';
 import '../widget/dissolve_room_dialog.dart';
 import '../widget/room_actions_sheet.dart';
 import '../widget/room_scene.dart';
 import '../widget/room_top_bar.dart';
+import 'my_rooms_page_view.dart';
 import 'room_edit_sheet_view.dart';
 
 /// 房间主界面(#6b 定稿):全屏沉浸场景,无底部 nav。
@@ -168,10 +168,7 @@ class _RoomMainViewState extends ConsumerState<RoomMainView> {
   void _openBrowse() {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) => Scaffold(
-          appBar: AppBar(title: const Text('浏览房间')),
-          body: RoomBrowsePage(userId: widget.userId),
-        ),
+        builder: (_) => MyRoomsPageView(userId: widget.userId),
       ),
     );
   }

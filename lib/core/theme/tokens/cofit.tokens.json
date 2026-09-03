@@ -749,6 +749,14 @@
     "tempoFast": {
       "$value": 0.75,
       "$description": "动画节奏倍率·快 (README §动画)"
+    },
+    "loginFanTiltDeg": {
+      "$value": 16,
+      "$description": "登录页斜插装饰卡倾角(度,±)(#19a)"
+    },
+    "brandCompactScale": {
+      "$value": 0.8,
+      "$description": "小屏 375 品牌区小人缩放(#19a 附注)"
     }
   },
   "blur": {
@@ -788,6 +796,14 @@
         "$value": 600,
         "$description": "标签 (README)"
       }
+    },
+    "letterSpacingWide": {
+      "$type": "dimension",
+      "$value": {
+        "value": 1,
+        "unit": "px"
+      },
+      "$description": "eyebrow 小标字距(≈.08em)(#20a)"
     }
   },
   "motion": {

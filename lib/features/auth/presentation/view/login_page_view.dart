@@ -7,6 +7,7 @@ import '../../../../core/theme/cofit_dimens.dart';
 import '../../domain/repository/auth_repository.dart';
 import '../../provider/auth_usecase_providers.dart';
 import '../widget/auth_provider_button.dart';
+import '../widget/login_brand_block.dart';
 
 /// 登录页(stub 协议:无定稿设计,功能优先)。
 /// 结构:品牌区 → 第三方登录(Apple 按钮位预留,E1-Apple 落地后置于 Google 上方)
@@ -130,7 +131,19 @@ class _LoginPageViewState extends ConsumerState<LoginPageView> {
 
     return Scaffold(
       backgroundColor: colors.bgApp,
-      body: SafeArea(
+      // 顶部 lime 径向环境光(#19a)
+      body: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: RadialGradient(
+            center: const Alignment(0, -0.6),
+            radius: 1,
+            colors: [
+              colors.primaryMain.withValues(alpha: CoFitOpacities.faint),
+              Colors.transparent,
+            ],
+          ),
+        ),
+        child: SafeArea(
         child: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(CoFitDimens.spacing2xl),
@@ -142,6 +155,9 @@ class _LoginPageViewState extends ConsumerState<LoginPageView> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  // 品牌区(#19a):bob 小人 + 两侧斜插卡牌
+                  const Center(child: LoginBrandBlock()),
+                  const SizedBox(height: CoFitDimens.spacingSm),
                   Text(
                     'CoFit',
                     textAlign: TextAlign.center,
@@ -150,16 +166,17 @@ class _LoginPageViewState extends ConsumerState<LoginPageView> {
                       fontWeight: CoFitFontWeights.heading,
                     ),
                   ),
-                  const SizedBox(height: CoFitDimens.spacingSm),
+                  const SizedBox(height: CoFitDimens.spacingXs),
                   Text(
-                    '和朋友一起,把运动变成日常',
+                    '和朋友在同一间虚拟健身房',
                     textAlign: TextAlign.center,
                     style: textTheme.bodyMedium?.copyWith(
                       color: colors.textSecondary,
                     ),
                   ),
                   const SizedBox(height: CoFitDimens.spacing3xl),
-                  // E1-Apple:Apple 登录按钮预留位(HIG 要求置于最上方)。
+                  // E1-Apple:Apple 登录按钮预留位(HIG 要求置于最上方,
+                  // gray-50 底 + gray-950 字;未启用期整行隐藏不留洞)。
                   AuthProviderButton(
                     icon: Icon(
                       Icons.g_mobiledata_rounded,
@@ -225,6 +242,7 @@ class _LoginPageViewState extends ConsumerState<LoginPageView> {
               ),
             ),
           ),
+        ),
         ),
       ),
     );

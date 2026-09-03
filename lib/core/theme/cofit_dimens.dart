@@ -136,10 +136,22 @@ abstract class CoFitDecor {
   /// 动画节奏倍率(README §动画:慢/标准/快 → 时长 ×1.3/×1/×0.75)
   static const tempoSlow = 1.3;
   static const tempoFast = 0.75;
+
+  /// 登录页斜插装饰卡倾角(度,±)(#19a)
+  static const loginFanTiltDeg = 16.0;
+
+  /// 小屏 375 品牌区小人缩放(#19a 附注)
+  static const brandCompactScale = 0.8;
 }
 
 /// typography.fontWeight.* — 字重 token(字体族见 CoFitTheme)
 abstract class CoFitFontWeights {
   static const heading = FontWeight.w700;
   static const label = FontWeight.w600;
+}
+
+/// typography.* — 字距等排版 token
+abstract class CoFitTypography {
+  /// eyebrow 小标字距(≈.08em)(#20a)
+  static const letterSpacingWide = 1.0;
 }

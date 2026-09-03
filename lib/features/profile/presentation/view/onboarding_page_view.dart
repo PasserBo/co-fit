@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/cofit_colors.dart';
 import '../../../../core/theme/cofit_dimens.dart';
+import '../../../avatar/presentation/idle_avatar_figure.dart';
 import '../../domain/entity/user_profile_entity.dart';
 import '../../provider/user_profile_repository_provider.dart';
 
@@ -78,47 +79,91 @@ class _OnboardingPageViewState extends ConsumerState<OnboardingPageView> {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // 形象占位:avatar 编辑功能未设计(见 STATUS.md stub 登记)。
-                    Center(
-                      child: Container(
-                        width: CoFitDimens.sizeHeroGlow,
-                        height: CoFitDimens.sizeHeroGlow,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: colors.primarySubtle,
-                          border: Border.all(
-                            color: colors.primaryBorder,
-                            width: CoFitDimens.borderWidthHairline,
-                          ),
-                        ),
-                        child: Icon(
-                          Icons.person_rounded,
-                          size: CoFitDimens.sizeFigureHero,
-                          color: colors.primaryMain,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: CoFitDimens.spacing2xl),
                     Text(
-                      '给自己起个名字',
+                      '你的小人已就位',
                       textAlign: TextAlign.center,
                       style: textTheme.headlineSmall?.copyWith(
                         color: colors.textPrimary,
                         fontWeight: CoFitFontWeights.heading,
                       ),
                     ),
-                    const SizedBox(height: CoFitDimens.spacingSm),
+                    const SizedBox(height: CoFitDimens.spacingXs),
                     Text(
-                      '朋友会在房间里看到这个昵称',
+                      '起个名字,朋友在房间里认出你',
                       textAlign: TextAlign.center,
                       style: textTheme.bodyMedium?.copyWith(
                         color: colors.textSecondary,
                       ),
                     ),
                     const SizedBox(height: CoFitDimens.spacing2xl),
+                    // 发光圆环 + bob 小人;头像区可点但仅提示「即将上线」(#19b)。
+                    Center(
+                      child: GestureDetector(
+                        onTap: () {
+                          ScaffoldMessenger.of(context)
+                            ..hideCurrentSnackBar()
+                            ..showSnackBar(
+                              const SnackBar(content: Text('形象定制:即将上线')),
+                            );
+                        },
+                        behavior: HitTestBehavior.opaque,
+                        child: Stack(
+                          alignment: Alignment.center,
+                          clipBehavior: Clip.none,
+                          children: [
+                            Container(
+                              width: CoFitDimens.sizeAuthGlow,
+                              height: CoFitDimens.sizeAuthGlow,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: colors.primaryMain.withValues(
+                                  alpha: CoFitOpacities.faint,
+                                ),
+                                border: Border.all(
+                                  color: colors.primaryBorder,
+                                  width: CoFitDimens.borderWidthHairline,
+                                ),
+                              ),
+                            ),
+                            const IdleAvatarFigure(
+                              figureHeight: CoFitDimens.sizeFigureHero,
+                            ),
+                            Positioned(
+                              right: 0,
+                              bottom: 0,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: CoFitDimens.spacingSm,
+                                  vertical: CoFitDimens.spacingXs / 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: colors.bgOverlay,
+                                  borderRadius: BorderRadius.circular(
+                                    CoFitDimens.radiusSm,
+                                  ),
+                                  border: Border.all(
+                                    color: colors.borderStrong,
+                                    width: CoFitDimens.borderWidthHairline,
+                                  ),
+                                ),
+                                child: Text(
+                                  '形象定制 即将上线',
+                                  style: textTheme.labelSmall?.copyWith(
+                                    color: colors.textTertiary,
+                                    fontWeight: CoFitFontWeights.label,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: CoFitDimens.spacing2xl),
                     TextFormField(
                       controller: _nicknameController,
                       enabled: !_isSubmitting,
+                      onChanged: (_) => setState(() {}),
                       maxLength: UserProfileEntity.nicknameMaxLength,
                       decoration: const InputDecoration(
                         labelText: '昵称',
@@ -141,7 +186,17 @@ class _OnboardingPageViewState extends ConsumerState<OnboardingPageView> {
                     SizedBox(
                       height: CoFitDimens.sizeMinTapTarget,
                       child: FilledButton(
-                        onPressed: _isSubmitting ? null : _submit,
+                        // 空名禁用(#19b:lime@30% 底 + 半透字)
+                        onPressed: _isSubmitting ||
+                                _nicknameController.text.trim().isEmpty
+                            ? null
+                            : _submit,
+                        style: FilledButton.styleFrom(
+                          disabledBackgroundColor: colors.primaryMain
+                              .withValues(alpha: CoFitOpacities.disabledFill),
+                          disabledForegroundColor: colors.primaryOn
+                              .withValues(alpha: CoFitOpacities.disabledOn),
+                        ),
                         child: _isSubmitting
                             ? SizedBox(
                                 width: CoFitDimens.spacingLg,

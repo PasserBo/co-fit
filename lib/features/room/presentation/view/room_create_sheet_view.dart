@@ -76,24 +76,25 @@ class _RoomCreateSheetViewState extends ConsumerState<RoomCreateSheetView> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(
-                created ? '房间已创建' : '创建房间',
-                textAlign: TextAlign.center,
-                style: textTheme.titleMedium?.copyWith(
-                  fontWeight: CoFitFontWeights.heading,
-                ),
-              ),
-              const SizedBox(height: CoFitDimens.spacingXl),
               if (created)
-                _ShareCard(
+                _SuccessBody(
                   roomName: state.name,
                   link: _inviteLink(
                     state.createdRoomId!,
                     state.createdShareLinkHash!,
                   ),
                 )
-              else
+              else ...[
+                Text(
+                  '创建房间',
+                  textAlign: TextAlign.center,
+                  style: textTheme.titleMedium?.copyWith(
+                    fontWeight: CoFitFontWeights.heading,
+                  ),
+                ),
+                const SizedBox(height: CoFitDimens.spacingXl),
                 _buildForm(state, notifier, colors),
+              ],
             ],
           ),
         ),
@@ -183,9 +184,10 @@ class _RoomCreateSheetViewState extends ConsumerState<RoomCreateSheetView> {
   }
 }
 
-/// 建房成功态:邀请链接 + 分享/复制 CTA(纯展示 + 系统分享面板)。
-class _ShareCard extends StatelessWidget {
-  const _ShareCard({required this.roomName, required this.link});
+/// 建房成功态(#20b「创建即邀请」):✓ burst 徽章 + 「已就绪」+
+/// 链接卡(等宽截断 + 复制小按钮)+ 主 CTA 分享 + 次级「先进房间看看」。
+class _SuccessBody extends StatelessWidget {
+  const _SuccessBody({required this.roomName, required this.link});
 
   final String roomName;
   final Uri link;
@@ -200,27 +202,91 @@ class _ShareCard extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        const Center(child: _BurstBadge()),
+        const SizedBox(height: CoFitDimens.spacingSm),
+        Text(
+          '「$roomName」已就绪',
+          textAlign: TextAlign.center,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: textTheme.titleMedium?.copyWith(
+            fontWeight: CoFitFontWeights.heading,
+          ),
+        ),
+        const SizedBox(height: CoFitDimens.spacingXs),
+        Text(
+          '把链接发给朋友,他们一键即可加入',
+          textAlign: TextAlign.center,
+          style: textTheme.bodySmall?.copyWith(color: colors.textTertiary),
+        ),
+        const SizedBox(height: CoFitDimens.spacingLg),
         Container(
-          padding: const EdgeInsets.all(CoFitDimens.spacingMd),
+          padding: const EdgeInsets.symmetric(
+            horizontal: CoFitDimens.spacingMd,
+            vertical: CoFitDimens.spacingSm,
+          ),
           decoration: BoxDecoration(
-            color: colors.primarySubtle,
+            color: colors.bgDeep,
             borderRadius: BorderRadius.circular(CoFitDimens.radiusMd),
             border: Border.all(
-              color: colors.primaryBorder,
+              color: colors.borderStrong,
               width: CoFitDimens.borderWidthHairline,
             ),
           ),
-          child: SelectableText(
-            '$link',
-            textAlign: TextAlign.center,
-            style: textTheme.bodySmall?.copyWith(color: colors.textSecondary),
+          child: Row(
+            spacing: CoFitDimens.spacingSm,
+            children: [
+              Icon(
+                Icons.link_rounded,
+                size: CoFitDimens.sizeCardIcon,
+                color: colors.primaryMain,
+              ),
+              Expanded(
+                child: Text(
+                  '$link',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: textTheme.labelSmall?.copyWith(
+                    color: colors.textSecondary,
+                    fontFamily: 'monospace',
+                  ),
+                ),
+              ),
+              GestureDetector(
+                onTap: () async {
+                  await Clipboard.setData(ClipboardData(text: '$link'));
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context)
+                      ..hideCurrentSnackBar()
+                      ..showSnackBar(
+                          const SnackBar(content: Text('已复制')));
+                  }
+                },
+                behavior: HitTestBehavior.opaque,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: CoFitDimens.spacingSm,
+                    vertical: CoFitDimens.spacingXs,
+                  ),
+                  decoration: BoxDecoration(
+                    borderRadius:
+                        BorderRadius.circular(CoFitDimens.radiusSm),
+                    border: Border.all(
+                      color: colors.borderStrong,
+                      width: CoFitDimens.borderWidthHairline,
+                    ),
+                  ),
+                  child: Text(
+                    '复制',
+                    style: textTheme.labelSmall?.copyWith(
+                      color: colors.textSecondary,
+                      fontWeight: CoFitFontWeights.heading,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
-        ),
-        const SizedBox(height: CoFitDimens.spacingSm),
-        Text(
-          '朋友装了 CoFit 后点开即可加入(链接暂不支持网页打开)',
-          textAlign: TextAlign.center,
-          style: textTheme.bodySmall?.copyWith(color: colors.textTertiary),
         ),
         const SizedBox(height: CoFitDimens.spacingLg),
         SizedBox(
@@ -230,26 +296,95 @@ class _ShareCard extends StatelessWidget {
               SharePlus.instance.share(ShareParams(text: _shareText));
             },
             icon: const Icon(Icons.ios_share_rounded),
-            label: const Text('分享邀请链接'),
+            label: const Text('分享给朋友'),
           ),
         ),
-        const SizedBox(height: CoFitDimens.spacingSm),
+        const SizedBox(height: CoFitDimens.spacingXs),
         SizedBox(
           height: CoFitDimens.sizeMinTapTarget,
-          child: OutlinedButton.icon(
-            onPressed: () async {
-              await Clipboard.setData(ClipboardData(text: '$link'));
-              if (context.mounted) {
-                ScaffoldMessenger.of(context)
-                  ..hideCurrentSnackBar()
-                  ..showSnackBar(const SnackBar(content: Text('链接已复制')));
-              }
-            },
-            icon: const Icon(Icons.copy_rounded),
-            label: const Text('复制链接'),
+          child: TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(
+              '先进房间看看',
+              style: TextStyle(color: colors.textTertiary),
+            ),
           ),
         ),
       ],
+    );
+  }
+}
+
+/// ✓ 圆徽 + 外扩光圈动画(#20b,burstRing 周期 token)。
+class _BurstBadge extends StatefulWidget {
+  const _BurstBadge();
+
+  @override
+  State<_BurstBadge> createState() => _BurstBadgeState();
+}
+
+class _BurstBadgeState extends State<_BurstBadge>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: CoFitMotion.burstRing,
+  )..repeat();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<CoFitColors>()!;
+
+    return SizedBox(
+      width: CoFitDimens.sizeSuccessBadge,
+      height: CoFitDimens.sizeSuccessBadge,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          ScaleTransition(
+            scale: Tween<double>(begin: 1, end: CoFitDecor.fanFocusScale)
+                .animate(CurvedAnimation(
+              parent: _controller,
+              curve: Curves.easeOut,
+            )),
+            child: FadeTransition(
+              opacity: Tween<double>(begin: CoFitOpacities.border, end: 0)
+                  .animate(_controller),
+              child: Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: colors.primaryMain,
+                    width: CoFitDimens.borderWidthFocus,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Container(
+            width: CoFitDimens.sizeSuccessBadge,
+            height: CoFitDimens.sizeSuccessBadge,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: colors.primarySubtle,
+              border: Border.all(
+                color: colors.primaryBorder,
+                width: CoFitDimens.borderWidthHairline,
+              ),
+            ),
+            child: Icon(
+              Icons.check_rounded,
+              color: colors.primaryMain,
+              size: CoFitDimens.sizeCheckBadge,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

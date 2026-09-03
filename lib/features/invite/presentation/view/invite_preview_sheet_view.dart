@@ -5,6 +5,7 @@ import '../../../../core/navigation/app_shell_index_provider.dart';
 import '../../../../core/theme/cofit_colors.dart';
 import '../../../../core/theme/cofit_dimens.dart';
 import '../../../auth/presentation/user_bootstrap_provider.dart';
+import '../../../avatar/presentation/idle_avatar_figure.dart';
 import '../../../room/presentation/join_room_provider.dart';
 import '../../../room/presentation/room_browser_provider.dart';
 import '../../domain/entity/invite_link_entity.dart';
@@ -107,51 +108,62 @@ class _InvitePreviewSheetViewState
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              '房间邀请',
+              '收到房间邀请',
               textAlign: TextAlign.center,
-              style: textTheme.titleMedium?.copyWith(
-                color: colors.textSecondary,
+              style: textTheme.labelMedium?.copyWith(
+                color: colors.primaryMain,
+                fontWeight: CoFitFontWeights.heading,
+                letterSpacing: CoFitTypography.letterSpacingWide,
               ),
             ),
-            const SizedBox(height: CoFitDimens.spacingLg),
+            const SizedBox(height: CoFitDimens.spacingMd),
             if (_errorMessage != null) ...[
-              Icon(
-                Icons.link_off_rounded,
-                size: CoFitDimens.sizeBannerIcon,
-                color: colors.statusDanger,
-              ),
-              const SizedBox(height: CoFitDimens.spacingMd),
-              Text(
-                _errorMessage!,
-                textAlign: TextAlign.center,
-                style: TextStyle(color: colors.statusDanger),
-              ),
-            ] else if (result == null)
-              const Center(child: CircularProgressIndicator())
-            else ...[
-              Text(
-                result.room.name,
-                textAlign: TextAlign.center,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: textTheme.headlineSmall?.copyWith(
-                  color: colors.textPrimary,
-                  fontWeight: CoFitFontWeights.heading,
-                ),
-              ),
-              if (result.room.description.isNotEmpty) ...[
-                const SizedBox(height: CoFitDimens.spacingSm),
-                Text(
-                  result.room.description,
-                  textAlign: TextAlign.center,
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
-                  style: textTheme.bodyMedium?.copyWith(
-                    color: colors.textSecondary,
+              // 链接失效:卡片区换失效说明 + 「知道了」(#20a)
+              Container(
+                padding: const EdgeInsets.all(CoFitDimens.spacingXl),
+                decoration: BoxDecoration(
+                  color: colors.bgDeep,
+                  borderRadius: BorderRadius.circular(CoFitDimens.radiusLg),
+                  border: Border.all(
+                    color: colors.borderStrong,
+                    width: CoFitDimens.borderWidthHairline,
                   ),
                 ),
-              ],
-              const SizedBox(height: CoFitDimens.spacingXl),
+                child: Column(
+                  spacing: CoFitDimens.spacingSm,
+                  children: [
+                    Icon(
+                      Icons.link_off_rounded,
+                      size: CoFitDimens.sizeBannerIcon,
+                      color: colors.statusDanger,
+                    ),
+                    Text(
+                      _errorMessage!,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: colors.textSecondary),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: CoFitDimens.spacingLg),
+              SizedBox(
+                height: CoFitDimens.sizeMinTapTarget,
+                child: FilledButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('知道了'),
+                ),
+              ),
+            ] else if (result == null)
+              const Padding(
+                padding: EdgeInsets.all(CoFitDimens.spacing2xl),
+                child: Center(child: CircularProgressIndicator()),
+              )
+            else ...[
+              _RoomInviteCard(
+                name: result.room.name,
+                description: result.room.description,
+              ),
+              const SizedBox(height: CoFitDimens.spacingLg),
               SizedBox(
                 height: CoFitDimens.sizeMinTapTarget,
                 child: FilledButton(
@@ -169,20 +181,136 @@ class _InvitePreviewSheetViewState
                 ),
               ),
             ],
-            const SizedBox(height: CoFitDimens.spacingSm),
-            SizedBox(
-              height: CoFitDimens.sizeMinTapTarget,
-              child: TextButton(
-                onPressed:
-                    _isJoining ? null : () => Navigator.of(context).pop(),
-                child: Text(
-                  '暂不',
-                  style: TextStyle(color: colors.textTertiary),
+            if (_errorMessage == null) ...[
+              const SizedBox(height: CoFitDimens.spacingSm),
+              SizedBox(
+                height: CoFitDimens.sizeMinTapTarget,
+                child: TextButton(
+                  onPressed:
+                      _isJoining ? null : () => Navigator.of(context).pop(),
+                  child: Text(
+                    '暂不',
+                    style: TextStyle(color: colors.textTertiary),
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// 房间邀请卡(#20a):上半 = 剪影氛围区(中央发光小人 + 两侧灰剪影,
+/// 静态装饰,不依赖成员数据 —— 传达「有人等你」但不谎报人数);
+/// 下半 = 房名 + 描述(空描述整块收起,卡片只剩房名行)。
+class _RoomInviteCard extends StatelessWidget {
+  const _RoomInviteCard({required this.name, required this.description});
+
+  final String name;
+  final String description;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<CoFitColors>()!;
+    final textTheme = Theme.of(context).textTheme;
+
+    return Container(
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        color: colors.bgDeep,
+        borderRadius: BorderRadius.circular(CoFitDimens.radiusLg),
+        border: Border.all(
+          color: colors.borderStrong,
+          width: CoFitDimens.borderWidthHairline,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SizedBox(
+            height: CoFitDimens.sizeInviteBand,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: RadialGradient(
+                  center: const Alignment(0, 0.6),
+                  radius: 1,
+                  colors: [
+                    colors.primaryMain
+                        .withValues(alpha: CoFitOpacities.subtle),
+                    Colors.transparent,
+                  ],
+                ),
+              ),
+              child: Stack(
+                alignment: Alignment.bottomCenter,
+                children: [
+                  Align(
+                    alignment: const Alignment(-0.55, 1),
+                    child: Opacity(
+                      opacity: CoFitOpacities.silhouetteFar,
+                      child: const IdleAvatarFigure(
+                        figureHeight: CoFitDimens.sizeFigureFriend,
+                        withHeadRing: false,
+                        dimmed: true,
+                      ),
+                    ),
+                  ),
+                  Align(
+                    alignment: const Alignment(0.55, 0.9),
+                    child: Opacity(
+                      opacity: CoFitOpacities.silhouetteNear,
+                      child: const IdleAvatarFigure(
+                        figureHeight: CoFitDimens.sizeFigureFriend,
+                        withHeadRing: false,
+                        dimmed: true,
+                      ),
+                    ),
+                  ),
+                  const IdleAvatarFigure(
+                    figureHeight: CoFitDimens.sizeFigureSelf,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.all(CoFitDimens.spacingMd),
+            decoration: BoxDecoration(
+              border: Border(
+                top: BorderSide(
+                  color: colors.borderSubtle,
+                  width: CoFitDimens.borderWidthHairline,
                 ),
               ),
             ),
-          ],
-        ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name,
+                  style: textTheme.titleMedium?.copyWith(
+                    fontWeight: CoFitFontWeights.heading,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                if (description.isNotEmpty) ...[
+                  const SizedBox(height: CoFitDimens.spacingXs),
+                  Text(
+                    description,
+                    style: textTheme.bodySmall?.copyWith(
+                      color: colors.textSecondary,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

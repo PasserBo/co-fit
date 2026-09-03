@@ -19,7 +19,11 @@ import '../features/action/presentation/widget/card_fan.dart';
 import '../features/action/presentation/widget/deck_list_body.dart';
 import '../features/action/presentation/widget/deck_switcher.dart';
 import '../features/action/presentation/widget/library_tab_body.dart';
+import '../features/action/domain/entity/action_session_record.dart';
+import '../features/action/presentation/widget/card_face_preview.dart';
+import '../features/action/presentation/widget/workout_history_body.dart';
 import '../features/auth/presentation/widget/auth_provider_button.dart';
+import '../features/auth/presentation/widget/login_brand_block.dart';
 import '../features/auth/presentation/widget/my_page_body.dart';
 import '../features/avatar/domain/entity/avatar_motion.dart';
 import '../features/avatar/presentation/renderer/avatar_renderer.dart';
@@ -71,6 +75,8 @@ class CoFitWidgetbook extends StatelessWidget {
               name: 'LibraryTabBody',
               useCases: [
                 WidgetbookUseCase(name: '牌库 tab', builder: _libraryTab),
+                WidgetbookUseCase(name: '卡面预览(#16)', builder: _cardPreview),
+                WidgetbookUseCase(name: '运动历史(#18a)', builder: _historyBody),
               ],
             ),
             WidgetbookComponent(
@@ -111,8 +117,9 @@ class CoFitWidgetbook extends StatelessWidget {
             WidgetbookComponent(
               name: 'RoomActionsSheet',
               useCases: [
-                WidgetbookUseCase(name: '成员(可退出)', builder: _roomActionsMember),
-                WidgetbookUseCase(name: '房主(不可退出)', builder: _roomActionsOwner),
+                WidgetbookUseCase(name: '成员(退出)', builder: _roomActionsMember),
+                WidgetbookUseCase(
+                    name: '房主(编辑/邀请/解散)', builder: _roomActionsOwner),
               ],
             ),
           ],
@@ -142,6 +149,12 @@ class CoFitWidgetbook extends StatelessWidget {
               name: 'AuthProviderButton',
               useCases: [
                 WidgetbookUseCase(name: '默认/加载中', builder: _authProviderButton),
+              ],
+            ),
+            WidgetbookComponent(
+              name: 'LoginBrandBlock',
+              useCases: [
+                WidgetbookUseCase(name: '品牌区(#19a)', builder: _loginBrand),
               ],
             ),
           ],
@@ -306,6 +319,72 @@ Widget _myPage(BuildContext context) {
         cardCount: 8,
         onEditAvatar: () {},
         onSignOut: () {},
+      ),
+    ),
+  );
+}
+
+Widget _loginBrand(BuildContext context) {
+  return const Scaffold(body: Center(child: LoginBrandBlock()));
+}
+
+Widget _cardPreview(BuildContext context) {
+  return Scaffold(
+    body: Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        spacing: 16,
+        children: const [
+          CardFacePreview(
+            name: '壶铃摆荡',
+            type: ActionType.strength,
+            durationSec: 480,
+            intensityLabel: '中等',
+          ),
+          CardFacePreview(
+            name: '壶铃摆荡',
+            type: ActionType.strength,
+            durationSec: 480,
+            intensityLabel: '中等',
+            source: ActionSource.custom,
+            large: true,
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+Widget _historyBody(BuildContext context) {
+  final now = DateTime.now();
+  return Scaffold(
+    body: SafeArea(
+      child: WorkoutHistoryBody(
+        now: now,
+        records: [
+          ActionSessionRecord(
+            sessionId: 's1',
+            roomId: 'r1',
+            userId: 'u1',
+            templateId: 't1',
+            templateName: '开合跳',
+            actionKey: 'cardio',
+            durationSec: 300,
+            startedAt: now.subtract(const Duration(minutes: 6)),
+            completedAt: now.subtract(const Duration(minutes: 1)),
+          ),
+          ActionSessionRecord(
+            sessionId: 's2',
+            roomId: 'r1',
+            userId: 'u1',
+            templateId: 't2',
+            templateName: '深蹲',
+            actionKey: 'strength',
+            durationSec: 600,
+            startedAt: now.subtract(const Duration(days: 1, minutes: 12)),
+            completedAt: now.subtract(const Duration(days: 1)),
+          ),
+        ],
       ),
     ),
   );

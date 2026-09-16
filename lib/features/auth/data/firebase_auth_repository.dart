@@ -98,6 +98,11 @@ class FirebaseAuthRepository implements AuthRepository {
     final credential = OAuthProvider('apple.com').credential(
       idToken: appleCredential.identityToken,
       rawNonce: rawNonce,
+      // ⚠️ Firebase 校验 Apple 凭证时必须带授权码。只传 idToken + rawNonce
+      // 会报 "Invalid OAuth response from apple.com"(invalid-credential),
+      // 且报错文案会把排查方向误导到 Firebase/Apple 的 provider 配置上。
+      // 见 flutterfire#18289 / #13235。
+      accessToken: appleCredential.authorizationCode,
     );
     return _firebaseAuth.signInWithCredential(credential);
   }

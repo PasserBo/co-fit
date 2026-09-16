@@ -34,8 +34,12 @@ fvm flutter analyze
 ### Firebase / 平台
 
 - Firebase 项目 `cofit-lmdyd`,**iOS-only**(无 `android/` 目录,`firebase_options.dart` 仅 iOS 配置)。
-- Bundle id **`com.passerbo.cofitapp`**(2026-09-16 迁移:旧 `com.passerbo.cofit` 被旧免费账号占用,显式 App ID 跨团队全局唯一),由用户**新付费 Apple 账号**持有(团队 id 以 Xcode 实配为准;pbxproj 里的 `Q4C958AWVT` 为旧值,用户在 Xcode 选新团队时覆盖)。Firebase iOS app 已换新(`1:154412755372:ios:cfd018…`),旧 app 注册待真机验证后由用户在 console 删除。
-- Auth 已启用 provider:**Apple + Google + Email/Password**(Apple 于 2026-09-16 实装:entitlements `Runner.entitlements` + nonce 流;⚠️ Apple provider 需用户在 Firebase console 启用后才可用)。⚠️ **Apple 登录产生独立 Firebase uid**,与既有 Google/邮箱账号不互通;账号关联(linkWithCredential)待产品决议。
+- Bundle id **`com.passerbo.cofitapp`**、团队 **`J95TRWHWYM`**(付费,证书 `Apple Development: Yiyang Xu`)。2026-09-16 从旧免费账号的 `com.passerbo.cofit` 迁移——显式 App ID 跨团队全局唯一,旧 id 无法在新团队注册。Firebase iOS app 已换新(`1:154412755372:ios:cfd018…`),旧 app 注册可由用户在 console 删除。
+- **iOS 插件集成已切到 Swift Package Manager**(`enable-swift-package-manager: true`):8 个插件走 SPM,仅 `ably_flutter` / `sign_in_with_apple` / `Flutter` 走 CocoaPods。所以 `pod install` 显示「3 依赖 / 6 pod」是**正常的**,不是装残。`flutter clean` 后必须先 `flutter build ios --config-only` 再 `pod install`,否则插件列表为空。
+- Auth 已启用 provider:**Apple + Google + Email/Password**(Apple 于 2026-09-17 真机验证通过)。
+  - ⚠️ **Apple 凭证必须带 `accessToken: appleCredential.authorizationCode`**,只传 `idToken` + `rawNonce` 会报 `invalid-credential / Invalid OAuth response from apple.com`——该文案会把排查引向 Firebase/Apple provider 配置,**实为客户端漏传授权码**(flutterfire#18289 / #13235)。改 `signInWithApple` 时勿删。
+  - Apple 侧已配:Services ID、Sign in with Apple 私钥(`.p8` 存本地 `keys/`,已 gitignore)、邮件转发源 `noreply@cofit-lmdyd.firebaseapp.com`。私钥同时是上架「账号删除需 token revocation」的前提。
+  - ⚠️ **Apple 登录产生独立 Firebase uid**,与既有 Google/邮箱账号不互通;账号关联(linkWithCredential)待产品决议。
 - Firestore 集合(rules 全部显式声明,末尾全局 deny):`rooms`、`users/{uid}`(profile,可选键 `activeDeckId`)、`users/{uid}/memberships`、`users/{uid}/decks`、`users/{uid}/sessions`(只追加打卡日志)、`card_templates`(只读)。
 - Ably key 走 `--dart-define`(`ABLY_API_KEY` / `ABLY_CLIENT_ID_PREFIX`);仓库根 `.env`(gitignored,含真实 key)配合 `.vscode/launch.json` 的 `--dart-define-from-file` 使用。**不要把 key 写进任何被提交的文件。**
 - 深链:自定义 scheme **`cofit://room/<roomId>?h=<shareLinkHash>`**(拼装/解析唯一事实源 `lib/features/invite/domain/invite_link_format.dart`;Info.plist 已注册 `cofit` 与 Google 回跳两条 scheme)。本期无 Universal Links。

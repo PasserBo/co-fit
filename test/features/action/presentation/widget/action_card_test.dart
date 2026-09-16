@@ -19,7 +19,7 @@ ActionTemplateCard _card({ActionSource source = ActionSource.official}) {
 }
 
 Future<void> _pump(WidgetTester tester, Widget child) {
-  // 不用 CoFitTheme.dark:widget test 里避免 google_fonts 的运行时字体加载,
+  // 不用 CoFitTheme.dark:widget test 只验证结构与 token,不依赖字体资源加载,
   // 组件本身只依赖 CoFitColors extension。
   return tester.pumpWidget(
     MaterialApp(

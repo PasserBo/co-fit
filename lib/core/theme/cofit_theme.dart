@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import 'cofit_colors.dart';
 import 'cofit_dimens.dart';
@@ -7,6 +6,7 @@ import 'cofit_dimens.dart';
 /// CoFit 全局主题(深色唯一)。
 /// 设计事实源:lib/core/theme/tokens/cofit.tokens.json + docs/README.md。
 /// 字体:英文/数字 Space Grotesk(标题 700 / 标签 600),中文按字形自动 fallback 系统字体。
+/// 字体文件已打包进 assets/fonts(OFL 许可),不再运行时拉取 —— 离线首启也不掉字形。
 abstract class CoFitTheme {
   static ThemeData get dark {
     const scheme = ColorScheme.dark(
@@ -31,8 +31,9 @@ abstract class CoFitTheme {
 
     final cofitColors = CoFitColors.dark;
 
-    final textTheme = GoogleFonts.spaceGroteskTextTheme(base.textTheme)
+    final textTheme = base.textTheme
         .apply(
+          fontFamily: _fontFamily,
           bodyColor: cofitColors.textPrimary,
           displayColor: cofitColors.textPrimary,
         )
@@ -77,7 +78,10 @@ abstract class CoFitTheme {
     );
   }
 
+  /// 打包字体的 family 名(与 pubspec.yaml 的 fonts.family 一致)。
+  static const _fontFamily = 'SpaceGrotesk';
+
   static TextStyle? _weight(TextStyle? style, FontWeight weight) {
-    return GoogleFonts.spaceGrotesk(textStyle: style?.copyWith(fontWeight: weight));
+    return style?.copyWith(fontFamily: _fontFamily, fontWeight: weight);
   }
 }

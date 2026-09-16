@@ -43,7 +43,7 @@ fvm flutter analyze
 - Firestore 集合(rules 全部显式声明,末尾全局 deny):`rooms`、`users/{uid}`(profile,可选键 `activeDeckId`)、`users/{uid}/memberships`、`users/{uid}/decks`、`users/{uid}/sessions`(只追加打卡日志)、`card_templates`(只读)。
 - Ably key 走 `--dart-define`(`ABLY_API_KEY` / `ABLY_CLIENT_ID_PREFIX`);仓库根 `.env`(gitignored,含真实 key)配合 `.vscode/launch.json` 的 `--dart-define-from-file` 使用。**不要把 key 写进任何被提交的文件。**
 - 深链:自定义 scheme **`cofit://room/<roomId>?h=<shareLinkHash>`**(拼装/解析唯一事实源 `lib/features/invite/domain/invite_link_format.dart`;Info.plist 已注册 `cofit` 与 Google 回跳两条 scheme)。本期无 Universal Links。
-- 上线前遗留:google_fonts 运行时拉取 Space Grotesk 需改打包进 assets(STATUS.md 决议)。
+- **账号删除**(Apple 上架强制):`profile/usecase/delete_account_usecase.dart`。⚠️ 顺序不可调换——Firestore 清理必须在注销 Auth 用户**之前**,uid 失效后 rules 会拒绝一切写入、数据永久残留(已有单测锁住顺序)。Apple 账号会重新授权取新鲜 authorizationCode 用于 `revokeTokenWithAuthorizationCode`;邮箱账号无法静默重认证 → 抛 `ReauthenticationRequiredException`,UI 引导重登。
 
 ## 架构(SSOT)
 

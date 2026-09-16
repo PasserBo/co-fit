@@ -21,6 +21,7 @@ class MyPageBody extends StatelessWidget {
     this.onEditNickname,
     this.onOpenHistory,
     this.onSignOut,
+    this.onDeleteAccount,
     super.key,
   });
 
@@ -42,6 +43,9 @@ class MyPageBody extends StatelessWidget {
   /// 点运动统计行 → 运动历史页(#18)。
   final VoidCallback? onOpenHistory;
   final VoidCallback? onSignOut;
+
+  /// 删除账号(Apple 上架要求);null 时不显示该入口。
+  final VoidCallback? onDeleteAccount;
 
   @override
   Widget build(BuildContext context) {
@@ -166,6 +170,27 @@ class MyPageBody extends StatelessWidget {
             ),
           ),
         ),
+        if (onDeleteAccount != null) ...[
+          const SizedBox(height: CoFitDimens.spacingSm),
+          GestureDetector(
+            onTap: onDeleteAccount,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                vertical: CoFitDimens.spacingMd,
+              ),
+              child: Center(
+                child: Text(
+                  '删除账号',
+                  style: textTheme.bodySmall?.copyWith(
+                    color: colors.textTertiary,
+                    decoration: TextDecoration.underline,
+                    decorationColor: colors.textTertiary,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ],
     );
   }

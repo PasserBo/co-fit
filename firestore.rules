@@ -232,7 +232,8 @@ service cloud.firestore {
         request.resource.data.uid == resource.data.uid &&
         request.resource.data.createdAt == resource.data.createdAt;
 
-      allow delete: if false;
+      // 账号删除:仅本人可删自己的 profile(Apple 上架要求支持账号删除)。
+      allow delete: if isSignedIn() && request.auth.uid == userId;
     }
 
     match /users/{userId}/memberships/{roomId} {
@@ -398,7 +399,9 @@ service cloud.firestore {
         request.resource.data.completedAt is timestamp &&
         request.resource.data.status == 'completed';
 
-      allow update, delete: if false;
+      // 只追加日志:不可改;但账号删除时本人需能清空。
+      allow update: if false;
+      allow delete: if isSignedIn() && request.auth.uid == userId;
     }
 
     match /card_templates/{templateId} {

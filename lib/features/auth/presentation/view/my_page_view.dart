@@ -2,13 +2,17 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/theme/cofit_colors.dart';
+
 import '../../../action/presentation/action_template_usecase_provider.dart';
 import '../../../action/provider/action_decks_provider.dart';
 import '../../../action/presentation/view/workout_history_page_view.dart';
 import '../../../action/provider/action_session_history_providers.dart';
 import '../../../profile/domain/entity/user_profile_entity.dart';
 import '../../../profile/provider/user_profile_provider.dart';
+import '../../../profile/provider/delete_account_provider.dart';
 import '../../../profile/provider/user_profile_repository_provider.dart';
+import '../../domain/repository/auth_repository.dart';
 import '../../usecase/sign_out_usecase.dart';
 import '../user_bootstrap_provider.dart';
 import '../widget/my_page_body.dart';
@@ -93,6 +97,69 @@ class MyPageView extends ConsumerWidget {
     }
   }
 
+  /// 删除账号(Apple 上架要求)。二次确认 → 重认证 → 清数据 → 注销。
+  Future<void> _deleteAccount(BuildContext context, WidgetRef ref) async {
+    final colors = Theme.of(context).extension<CoFitColors>()!;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('删除账号?'),
+        content: const Text(
+          '将永久删除:你的资料与昵称、全部牌组与自建卡、运动历史记录,'
+          '并退出所有房间(你创建的房间会被解散)。\n\n此操作不可撤销。',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text('取消', style: TextStyle(color: colors.textSecondary)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text(
+              '删除账号',
+              style: TextStyle(color: colors.statusDanger),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !context.mounted) {
+      return;
+    }
+
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
+    try {
+      await ref
+          .read(deleteAccountUsecaseProvider)
+          .execute(userId: user.uid);
+      // 成功后 authStateChanges 会把 AuthGate 切回登录页,无需手动导航。
+    } on AuthCancelledException {
+      if (context.mounted) {
+        Navigator.of(context).pop();
+      }
+    } on ReauthenticationRequiredException {
+      if (context.mounted) {
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(
+            const SnackBar(content: Text('为安全起见,请先退出登录并重新登录后再删除账号')),
+          );
+      }
+    } catch (error) {
+      if (context.mounted) {
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(SnackBar(content: Text('删除失败:$error')));
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final roomCount =
@@ -136,6 +203,7 @@ class MyPageView extends ConsumerWidget {
           onSignOut: () async {
             await signOutUsecase.execute();
           },
+          onDeleteAccount: () => _deleteAccount(context, ref),
         ),
       ),
     );

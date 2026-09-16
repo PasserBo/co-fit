@@ -3,9 +3,9 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>154412755372-okb2kuir2ubv2s5m1ec0u8vblekmjosm.apps.googleusercontent.com</string>
+	<string>154412755372-ft6edeljvr7kadrm0ksjlnnhmh5jrlu1.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.154412755372-okb2kuir2ubv2s5m1ec0u8vblekmjosm</string>
+	<string>com.googleusercontent.apps.154412755372-ft6edeljvr7kadrm0ksjlnnhmh5jrlu1</string>
 	<key>API_KEY</key>
 	<string>AIzaSyBRXvZKDC2DKpVy13dDBsTh-JOOZ70N088</string>
 	<key>GCM_SENDER_ID</key>
@@ -13,7 +13,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.passerbo.cofit</string>
+	<string>com.passerbo.cofitapp</string>
 	<key>PROJECT_ID</key>
 	<string>cofit-lmdyd</string>
 	<key>STORAGE_BUCKET</key>
@@ -29,6 +29,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:154412755372:ios:5b994b758606edf0017209</string>
+	<string>1:154412755372:ios:cfd0188152fd0666017209</string>
 </dict>
 </plist>

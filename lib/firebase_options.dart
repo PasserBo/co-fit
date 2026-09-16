@@ -54,12 +54,12 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyBRXvZKDC2DKpVy13dDBsTh-JOOZ70N088',
-    appId: '1:154412755372:ios:5b994b758606edf0017209',
+    appId: '1:154412755372:ios:cfd0188152fd0666017209',
     messagingSenderId: '154412755372',
     projectId: 'cofit-lmdyd',
     storageBucket: 'cofit-lmdyd.firebasestorage.app',
-    iosClientId: '154412755372-okb2kuir2ubv2s5m1ec0u8vblekmjosm.apps.googleusercontent.com',
-    iosBundleId: 'com.passerbo.cofit',
+    iosClientId: '154412755372-ft6edeljvr7kadrm0ksjlnnhmh5jrlu1.apps.googleusercontent.com',
+    iosBundleId: 'com.passerbo.cofitapp',
   );
 
 }

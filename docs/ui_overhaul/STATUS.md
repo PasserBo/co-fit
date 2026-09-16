@@ -21,7 +21,7 @@ P0 主题基建 → P1 动作卡片组件 → P2 牌库主页 → P3 悬浮 dock
 | 创建/删除自建卡 | #16a/b | ✅ 完成 | `custom_card_form_sheet_view.dart`(实时预览/类型四选/时长档位+自定义/强度 chips;创建与编辑共用)+ `card_detail_sheet_view.dart`(大预览/已加入N组/加入牌组/编辑/删除,官方卡无编辑删除区)。**未做润色**:创建成功后滚动定位到新卡 + 1.2s 外发光(现为 toast「已创建」) |
 | 房间管理·房主侧 | #17a/b | ✅ 完成 | `room_actions_sheet.dart` 房主版(房主徽章/编辑/邀请/解散红字)+ `room_edit_sheet_view.dart` + `dissolve_room_dialog.dart`(输入房间名解锁);成员端进入已解散房间 → toast+懒清理(在我的房间页) |
 | 运动历史 | #18a/b | ✅ 完成 | `workout_history_page_view.dart` + `workout_history_body.dart`(本周小结+7日微柱现算/日期分组/100条尾注)+ bob 小人空态;我的页运动行点击进入 |
-| 登录页(正式视觉) | #19a | ✅ 完成 | 品牌区(`login_brand_block.dart`:bob 小人+斜插卡)+ 径向环境光 + 新 slogan;Apple 按钮仍预留(E1-Apple) |
+| 登录页(正式视觉) | #19a | ✅ 完成 | 品牌区(`login_brand_block.dart`:bob 小人+斜插卡)+ 径向环境光 + 新 slogan;**Apple / Google / 邮箱三种登录全部上线**(2026-09-17 真机验证) |
 | Onboarding(正式视觉) | #19b | ✅ 完成 | 「你的小人已就位」+ 发光圆环 + 「形象定制 即将上线」角标(点按 toast)+ 空名禁用 CTA |
 | 邀请预览(正式视觉) | #20a | ✅ 完成 | eyebrow + 房卡(剪影氛围区,静态装饰不谎报人数)+ 失效态「知道了」+ 空描述收起 |
 | 建房成功态(正式视觉) | #20b | ✅ 完成 | ✓ burst 徽章(burstRing token)+ 链接卡(等宽截断+复制)+ 主 CTA 分享 + 「先进房间看看」 |
@@ -42,20 +42,16 @@ P0 主题基建 → P1 动作卡片组件 → P2 牌库主页 → P3 悬浮 dock
 
 ## Stub 登记表(预估数据模型的临时实现)
 
-| feature | draft entity | in-memory repo | 页面 | 转正待办 |
-|---|---|---|---|---|
-| action(牌组) | `domain/entity/action_deck.dart` | ~~in-memory~~ → **已转正**(2026-08-10 A2):`data/firebase_action_deck_repository.dart`(`users/{uid}/decks` + profile.activeDeckId,首启幂等播种 3 套种子);in-memory 保留给测试/widgetbook | 牌库页「我的卡组」tab | 牌组增删改/排序 UI 仍未做 |
-| action(创建卡片) | `domain/custom_card_repository.dart`(DRAFT,数据层已先行 2026-08-10) | `data/in_memory_custom_card_repository.dart`(测试/未登录兜底;线上走 `firebase_custom_card_repository.dart` → `users/{uid}/cards`) | 牌库页横幅 → SnackBar | **仅剩 UI**:12a 创建表单设计定稿后接 `createCustomCardUsecaseProvider`;字段有出入以届时决议为准 |
-| action(卡片详情/加入卡组) | — | — | 点卡 → SnackBar | 详情/加组弹层设计未出 |
-| action(分享给好友) | — | — | 自建卡 ↗ → SnackBar | 依赖 social feature(G4) |
-| room(成员昵称) | — | — | 气泡昵称 = userId 前 6 位 | G5:等 profile/social 的昵称数据 |
-| room(小人形象) | — | — | `avatar_bubble.dart` 占位几何小人 | 范围外决议:接 Rive 动画时替换 `_PlaceholderFigure` |
-| avatar(编辑形象) | — | — | 我的页「编辑形象」→ SnackBar | avatar feature 为空目录,换肤功能未设计 |
-| auth(登录页) | — | — | `auth/presentation/view/login_page_view.dart`(Google + 邮箱折叠表单 + 忘记密码) | 无定稿设计,功能优先;Apple 按钮预留首位,待 E1-Apple(付费开发者账号就绪)落地 |
-| profile(onboarding) | `profile/domain/entity/user_profile_entity.dart`(DRAFT) | —(直连 Firestore `users/{uid}`) | `profile/presentation/view/onboarding_page_view.dart`(昵称 + 占位头像) | 无定稿设计;形象定制区为占位圆,等 avatar 功能;`avatarConfig` 字段结构待 avatar 定稿 |
-| room(房间操作 sheet) | — | — | `room/presentation/widget/room_actions_sheet.dart`(顶栏 ⋯ 进入;退出房间,owner 隐藏) | 无定稿设计;踢人/改名/解散未做;owner 退出/移交待产品决议 |
-| invite(邀请预览) | `invite/domain/entity/invite_link_entity.dart`(DRAFT) | — | `invite/presentation/view/invite_preview_sheet_view.dart`(房名/描述 + 加入 CTA) | 无定稿设计;成员头像预览未做(entity 无 members);Universal Links 未做(仅 cofit:// scheme) |
-| room(建房 sheet) | — | — | `room/presentation/view/room_create_sheet_view.dart`(表单 → 成功态=分享链接卡片) | 无定稿设计;替代旧 RoomCreatePage(已删) |
+| feature | 现状 | 仍缺什么 |
+|---|---|---|
+| action(分享给好友) | 自建卡 ↗ → SnackBar | 依赖 social feature(G4 好友系统未实现) |
+| action(创建成功定位) | 创建后仅 toast「已创建」 | #16a 附注的「滚动到新卡 + 1.2s 外发光」润色未做(token 已备:`motion.createGlow`) |
+| room(小人形象) | `avatar_bubble.dart` 占位几何小人 | 范围外决议:接 Rive 时替换 `_PlaceholderFigure` |
+| avatar(编辑形象) | 我的页/onboarding 头像区 → toast「即将上线」 | 换肤功能未设计,`UserProfileEntity.avatarConfig` 字段结构待定 |
+| invite(成员预览) | 邀请卡用静态剪影氛围区 | `RoomInfoEntity` 无 members 字段,真实成员头像/人数需扩 entity + rules(待决议) |
+| room(成员数显示) | 我的房间页显示 presence 在线数 | 同上:设计要的是「N 名成员」,数据只有在线数 |
+| room(踢人 / 房主移交) | 未实现 | 待产品决议(解散/改名/退出已完成) |
+| 深链(Universal Links) | 仅 `cofit://` 自定义 scheme | 需域名 + AASA 托管 + Associated Domains entitlement |
 
 ## 决议记录
 

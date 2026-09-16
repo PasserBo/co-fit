@@ -1,5 +1,10 @@
+import 'dart:convert';
+import 'dart:math';
+
+import 'package:crypto/crypto.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 import '../domain/repository/auth_repository.dart';
 
@@ -66,6 +71,45 @@ class FirebaseAuthRepository implements AuthRepository {
     }
     final credential = GoogleAuthProvider.credential(idToken: idToken);
     return _firebaseAuth.signInWithCredential(credential);
+  }
+
+  @override
+  Future<UserCredential> signInWithApple() async {
+    // 防重放:rawNonce 给 Firebase,sha256(rawNonce) 给 Apple。
+    final rawNonce = _generateNonce();
+    final hashedNonce = sha256.convert(utf8.encode(rawNonce)).toString();
+
+    final AuthorizationCredentialAppleID appleCredential;
+    try {
+      appleCredential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+        nonce: hashedNonce,
+      );
+    } on SignInWithAppleAuthorizationException catch (error) {
+      if (error.code == AuthorizationErrorCode.canceled) {
+        throw const AuthCancelledException();
+      }
+      rethrow;
+    }
+
+    final credential = OAuthProvider('apple.com').credential(
+      idToken: appleCredential.identityToken,
+      rawNonce: rawNonce,
+    );
+    return _firebaseAuth.signInWithCredential(credential);
+  }
+
+  static String _generateNonce() {
+    const charset =
+        '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-._';
+    final random = Random.secure();
+    return List.generate(
+      32,
+      (_) => charset[random.nextInt(charset.length)],
+    ).join();
   }
 
   @override

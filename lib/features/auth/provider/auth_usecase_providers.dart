@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../usecase/register_usecase.dart';
 import '../usecase/send_password_reset_usecase.dart';
 import '../usecase/sign_in_usecase.dart';
+import '../usecase/sign_in_with_apple_usecase.dart';
 import '../usecase/sign_in_with_google_usecase.dart';
 import '../usecase/sign_out_usecase.dart';
 import '../usecase/watch_auth_state_usecase.dart';
@@ -24,6 +25,12 @@ final signInWithGoogleUsecaseProvider = Provider<SignInWithGoogleUsecase>((
   ref,
 ) {
   return SignInWithGoogleUsecase(ref.watch(authRepositoryProvider));
+});
+
+final signInWithAppleUsecaseProvider = Provider<SignInWithAppleUsecase>((
+  ref,
+) {
+  return SignInWithAppleUsecase(ref.watch(authRepositoryProvider));
 });
 
 final sendPasswordResetUsecaseProvider = Provider<SendPasswordResetUsecase>((

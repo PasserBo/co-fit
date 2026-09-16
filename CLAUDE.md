@@ -34,8 +34,8 @@ fvm flutter analyze
 ### Firebase / 平台
 
 - Firebase 项目 `cofit-lmdyd`,**iOS-only**(无 `android/` 目录,`firebase_options.dart` 仅 iOS 配置)。
-- Bundle id `com.passerbo.cofit`(pbxproj 三个构建配置 + RunnerTests `com.passerbo.cofit.RunnerTests`),由用户**个人 Apple 账号**持有(升级付费中,期间免费签名 7 天描述文件,Team `Q4C958AWVT`)。
-- Auth 已启用 provider:**Google + Email/Password**。**Sign in with Apple 延后(E1-Apple 轨道)**:免费账号无此 capability,等付费账号就绪;⚠️ 上架前硬性阻塞(App Store 规则:有第三方登录必须有 Apple 登录)。登录页已为 Apple 按钮预留首位。
+- Bundle id **`com.passerbo.cofitapp`**(2026-09-16 迁移:旧 `com.passerbo.cofit` 被旧免费账号占用,显式 App ID 跨团队全局唯一),由用户**新付费 Apple 账号**持有(团队 id 以 Xcode 实配为准;pbxproj 里的 `Q4C958AWVT` 为旧值,用户在 Xcode 选新团队时覆盖)。Firebase iOS app 已换新(`1:154412755372:ios:cfd018…`),旧 app 注册待真机验证后由用户在 console 删除。
+- Auth 已启用 provider:**Apple + Google + Email/Password**(Apple 于 2026-09-16 实装:entitlements `Runner.entitlements` + nonce 流;⚠️ Apple provider 需用户在 Firebase console 启用后才可用)。⚠️ **Apple 登录产生独立 Firebase uid**,与既有 Google/邮箱账号不互通;账号关联(linkWithCredential)待产品决议。
 - Firestore 集合(rules 全部显式声明,末尾全局 deny):`rooms`、`users/{uid}`(profile,可选键 `activeDeckId`)、`users/{uid}/memberships`、`users/{uid}/decks`、`users/{uid}/sessions`(只追加打卡日志)、`card_templates`(只读)。
 - Ably key 走 `--dart-define`(`ABLY_API_KEY` / `ABLY_CLIENT_ID_PREFIX`);仓库根 `.env`(gitignored,含真实 key)配合 `.vscode/launch.json` 的 `--dart-define-from-file` 使用。**不要把 key 写进任何被提交的文件。**
 - 深链:自定义 scheme **`cofit://room/<roomId>?h=<shareLinkHash>`**(拼装/解析唯一事实源 `lib/features/invite/domain/invite_link_format.dart`;Info.plist 已注册 `cofit` 与 Google 回跳两条 scheme)。本期无 Universal Links。

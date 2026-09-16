@@ -15,7 +15,7 @@ Future<void> _pump(
       home: Scaffold(
         body: AuthProviderButton(
           icon: const Icon(Icons.login),
-          label: '使用 Google 登录',
+          label: '通过 Google 登录',
           onPressed: onPressed,
           isLoading: isLoading,
         ),
@@ -29,7 +29,7 @@ void main() {
     var tapped = false;
     await _pump(tester, onPressed: () => tapped = true);
 
-    expect(find.text('使用 Google 登录'), findsOneWidget);
+    expect(find.text('通过 Google 登录'), findsOneWidget);
     await tester.tap(find.byType(AuthProviderButton));
     expect(tapped, isTrue);
   });
@@ -39,7 +39,7 @@ void main() {
     await _pump(tester, onPressed: () => tapped = true, isLoading: true);
 
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
-    expect(find.text('使用 Google 登录'), findsNothing);
+    expect(find.text('通过 Google 登录'), findsNothing);
     await tester.tap(find.byType(AuthProviderButton));
     expect(tapped, isFalse);
   });

@@ -9,9 +9,9 @@ import '../../provider/auth_usecase_providers.dart';
 import '../widget/auth_provider_button.dart';
 import '../widget/login_brand_block.dart';
 
-/// 登录页(stub 协议:无定稿设计,功能优先)。
-/// 结构:品牌区 → 第三方登录(Apple 按钮位预留,E1-Apple 落地后置于 Google 上方)
-/// → 分隔 → 邮箱/密码折叠表单(登录/注册切换 + 忘记密码)。
+/// 登录页(#19a 定稿)。
+/// 结构:品牌区 → Apple(HIG 黑白,最上)→ Google → 分隔
+/// → 邮箱/密码折叠表单(登录/注册切换 + 忘记密码)。
 class LoginPageView extends ConsumerStatefulWidget {
   const LoginPageView({super.key});
 
@@ -27,16 +27,39 @@ class _LoginPageViewState extends ConsumerState<LoginPageView> {
   bool _isRegisterMode = false;
   bool _isSubmittingEmail = false;
   bool _isSubmittingGoogle = false;
+  bool _isSubmittingApple = false;
   String? _errorMessage;
   String? _infoMessage;
 
-  bool get _isBusy => _isSubmittingEmail || _isSubmittingGoogle;
+  bool get _isBusy =>
+      _isSubmittingEmail || _isSubmittingGoogle || _isSubmittingApple;
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+
+  Future<void> _signInWithApple() async {
+    setState(() {
+      _isSubmittingApple = true;
+      _errorMessage = null;
+      _infoMessage = null;
+    });
+    try {
+      await ref.read(signInWithAppleUsecaseProvider).execute();
+    } on AuthCancelledException {
+      // 用户主动取消,静默返回。
+    } on FirebaseAuthException catch (error) {
+      _showError(error.message ?? 'Apple 登录失败,请重试。');
+    } catch (_) {
+      _showError('Apple 登录失败,请重试。');
+    } finally {
+      if (mounted) {
+        setState(() => _isSubmittingApple = false);
+      }
+    }
   }
 
   Future<void> _signInWithGoogle() async {
@@ -175,15 +198,26 @@ class _LoginPageViewState extends ConsumerState<LoginPageView> {
                     ),
                   ),
                   const SizedBox(height: CoFitDimens.spacing3xl),
-                  // E1-Apple:Apple 登录按钮预留位(HIG 要求置于最上方,
-                  // gray-50 底 + gray-950 字;未启用期整行隐藏不留洞)。
+                  // Apple 登录(#19a:HIG 黑白款,置于最上方)
+                  AuthProviderButton(
+                    apple: true,
+                    icon: Icon(
+                      Icons.apple_rounded,
+                      color: colors.primaryOn,
+                      size: CoFitDimens.sizeBannerIcon,
+                    ),
+                    label: '通过 Apple 登录',
+                    isLoading: _isSubmittingApple,
+                    onPressed: _isBusy ? null : _signInWithApple,
+                  ),
+                  const SizedBox(height: CoFitDimens.spacingSm),
                   AuthProviderButton(
                     icon: Icon(
                       Icons.g_mobiledata_rounded,
                       color: colors.textPrimary,
                       size: CoFitDimens.sizeBannerIcon,
                     ),
-                    label: '使用 Google 登录',
+                    label: '通过 Google 登录',
                     isLoading: _isSubmittingGoogle,
                     onPressed: _isBusy ? null : _signInWithGoogle,
                   ),

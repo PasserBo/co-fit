@@ -422,14 +422,21 @@ Widget _authProviderButton(BuildContext context) {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             AuthProviderButton(
+              apple: true,
+              icon: const Icon(Icons.apple_rounded),
+              label: '通过 Apple 登录',
+              onPressed: () {},
+            ),
+            const SizedBox(height: 16),
+            AuthProviderButton(
               icon: const Icon(Icons.g_mobiledata_rounded),
-              label: '使用 Google 登录',
+              label: '通过 Google 登录',
               onPressed: () {},
             ),
             const SizedBox(height: 16),
             const AuthProviderButton(
               icon: Icon(Icons.g_mobiledata_rounded),
-              label: '使用 Google 登录',
+              label: '通过 Google 登录',
               isLoading: true,
             ),
           ],

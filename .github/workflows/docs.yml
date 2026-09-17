@@ -1,0 +1,45 @@
+# Copy this into .github/workflows/ of your own repository — or let the setup page do it:
+# https://passerbo.github.io/GitSpec/_setup/ opens a pull request adding this file and a
+# gitspec.yaml, committed as you.
+#
+# It needs no secret and contacts no GitSpec service. Enable Pages once
+# (Settings > Pages > Source: GitHub Actions), and add a gitspec.yaml at the root.
+
+name: Docs
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: PasserBo/GitSpec@main
+        with:
+          output: _site
+          # A GitHub Pages *project* site is served at https://<user>.github.io/<repo>/,
+          # so links need that prefix. Delete this line if you publish to a user site
+          # (<user>.github.io) or to a custom domain, which both serve from the root.
+          base: /${{ github.event.repository.name }}
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/deploy-pages@v5
+        id: deploy

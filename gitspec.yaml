@@ -1,0 +1,24 @@
+# GitSpec site configuration. Added by the setup page; edit freely.
+version: 1
+
+site:
+  title: "co-fit"
+
+# Where the editor proposes changes. Remove this block for a read-only site.
+repository:
+  owner: "PasserBo"
+  name: "co-fit"
+  branch: "main"
+
+# Sign-in for the editor. Both values are public. This points at GitSpec's own broker;
+# run your own and change the URL if you would rather not depend on it.
+auth:
+  clientId: "Iv23liJvhF7nbMOPOAeu"
+  broker: "https://gitspec-broker.bobo-yiyangxu.workers.dev"
+
+spaces:
+  # `key` is this space's permanent identity. Rename `title` or `path` freely; never `key`.
+  - key: docs
+    title: Docs
+    path: /
+    directory: ./docs

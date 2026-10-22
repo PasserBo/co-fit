@@ -8,7 +8,7 @@ import '../../domain/entity/user_profile_entity.dart';
 import '../../provider/user_profile_repository_provider.dart';
 
 /// 首登 onboarding(stub 协议:无定稿设计,功能优先)。
-/// 昵称必填;形象定制未设计,仅展示占位小人。
+/// 昵称必填;形象定制为 v2,仅展示小人(无占位入口)。
 /// 完成后写 users/{uid},AuthGate 监听 profile 流自动切入主壳。
 class OnboardingPageView extends ConsumerStatefulWidget {
   const OnboardingPageView({required this.userId, super.key});
@@ -96,67 +96,31 @@ class _OnboardingPageViewState extends ConsumerState<OnboardingPageView> {
                       ),
                     ),
                     const SizedBox(height: CoFitDimens.spacing2xl),
-                    // 发光圆环 + bob 小人;头像区可点但仅提示「即将上线」(#19b)。
+                    // 发光圆环 + bob 小人(#19b)。形象定制为 v2 功能,
+                    // 首版不放占位入口(审核指南 2.1)。
                     Center(
-                      child: GestureDetector(
-                        onTap: () {
-                          ScaffoldMessenger.of(context)
-                            ..hideCurrentSnackBar()
-                            ..showSnackBar(
-                              const SnackBar(content: Text('形象定制:即将上线')),
-                            );
-                        },
-                        behavior: HitTestBehavior.opaque,
-                        child: Stack(
-                          alignment: Alignment.center,
-                          clipBehavior: Clip.none,
-                          children: [
-                            Container(
-                              width: CoFitDimens.sizeAuthGlow,
-                              height: CoFitDimens.sizeAuthGlow,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: colors.primaryMain.withValues(
-                                  alpha: CoFitOpacities.faint,
-                                ),
-                                border: Border.all(
-                                  color: colors.primaryBorder,
-                                  width: CoFitDimens.borderWidthHairline,
-                                ),
+                      child: Stack(
+                        alignment: Alignment.center,
+                        clipBehavior: Clip.none,
+                        children: [
+                          Container(
+                            width: CoFitDimens.sizeAuthGlow,
+                            height: CoFitDimens.sizeAuthGlow,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: colors.primaryMain.withValues(
+                                alpha: CoFitOpacities.faint,
+                              ),
+                              border: Border.all(
+                                color: colors.primaryBorder,
+                                width: CoFitDimens.borderWidthHairline,
                               ),
                             ),
-                            const IdleAvatarFigure(
-                              figureHeight: CoFitDimens.sizeFigureHero,
-                            ),
-                            Positioned(
-                              right: 0,
-                              bottom: 0,
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: CoFitDimens.spacingSm,
-                                  vertical: CoFitDimens.spacingXs / 2,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: colors.bgOverlay,
-                                  borderRadius: BorderRadius.circular(
-                                    CoFitDimens.radiusSm,
-                                  ),
-                                  border: Border.all(
-                                    color: colors.borderStrong,
-                                    width: CoFitDimens.borderWidthHairline,
-                                  ),
-                                ),
-                                child: Text(
-                                  '形象定制 即将上线',
-                                  style: textTheme.labelSmall?.copyWith(
-                                    color: colors.textTertiary,
-                                    fontWeight: CoFitFontWeights.label,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
+                          ),
+                          const IdleAvatarFigure(
+                            figureHeight: CoFitDimens.sizeFigureHero,
+                          ),
+                        ],
                       ),
                     ),
                     const SizedBox(height: CoFitDimens.spacing2xl),

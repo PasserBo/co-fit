@@ -11,6 +11,7 @@ import '../../provider/room_info_provider.dart';
 import '../join_room_provider.dart';
 import '../room_browser_provider.dart';
 import 'room_create_sheet_view.dart';
+import 'room_members_sheet_view.dart';
 
 /// 「我的房间」(#20c 定稿,替代旧 RoomBrowsePage/RoomCommunityPage):
 /// 已加入房间列表(presence 副行 + 当前/进入)+ ＋新建 +
@@ -50,6 +51,17 @@ class MyRoomsPageView extends ConsumerWidget {
     if (enterRoom == true && context.mounted) {
       Navigator.of(context).pop();
     }
+  }
+
+  Future<void> _handleRemovedRoom(
+    BuildContext context,
+    WidgetRef ref,
+    String roomId,
+  ) async {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(const SnackBar(content: Text('你已被移出该房间')));
+    await cleanupRemovedRoom(ref, roomId: roomId, userId: userId);
   }
 
   Future<void> _handleDissolvedRoom(
@@ -124,6 +136,8 @@ class MyRoomsPageView extends ConsumerWidget {
                           onEnter: () => _enterRoom(context, ref, roomId),
                           onDissolved: () =>
                               _handleDissolvedRoom(context, ref, roomId),
+                          onRemoved: () =>
+                              _handleRemovedRoom(context, ref, roomId),
                         );
                       },
                     ),
@@ -168,6 +182,7 @@ class _RoomRow extends ConsumerWidget {
     required this.members,
     required this.onEnter,
     required this.onDissolved,
+    required this.onRemoved,
   });
 
   final String roomId;
@@ -177,6 +192,9 @@ class _RoomRow extends ConsumerWidget {
   final VoidCallback onEnter;
   final VoidCallback onDissolved;
 
+  /// 被房主移出(房间仍在,但 members 不含自己)→ 点按清理。
+  final VoidCallback onRemoved;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = Theme.of(context).extension<CoFitColors>()!;
@@ -184,15 +202,18 @@ class _RoomRow extends ConsumerWidget {
     final roomInfoAsync = ref.watch(roomInfoProvider(roomId));
     final roomInfo = roomInfoAsync.value;
     final isDissolved = roomInfoAsync.hasValue && roomInfo == null;
+    final isRemoved = wasRemovedFromRoom(roomInfo, userId);
+    final isGone = isDissolved || isRemoved;
     final isOwner = roomInfo?.ownerId == userId;
 
     final activeCount = members
-        .where((m) =>
-            m.activityStatus.activityState == UserActivityState.active)
+        .where(
+          (m) => m.activityStatus.activityState == UserActivityState.active,
+        )
         .length;
 
     return GestureDetector(
-      onTap: isDissolved ? onDissolved : onEnter,
+      onTap: isDissolved ? onDissolved : (isRemoved ? onRemoved : onEnter),
       behavior: HitTestBehavior.opaque,
       child: Container(
         padding: const EdgeInsets.all(CoFitDimens.spacingMd),
@@ -222,12 +243,14 @@ class _RoomRow extends ConsumerWidget {
                         child: Text(
                           isDissolved
                               ? '房间已解散'
+                              : isRemoved
+                              ? '已被移出「${roomInfo!.name}」'
                               : (roomInfo?.name.isNotEmpty == true
-                                  ? roomInfo!.name
-                                  : roomId),
+                                    ? roomInfo!.name
+                                    : roomId),
                           style: textTheme.titleMedium?.copyWith(
                             fontWeight: CoFitFontWeights.heading,
-                            color: isDissolved
+                            color: isGone
                                 ? colors.textTertiary
                                 : colors.textPrimary,
                           ),
@@ -266,7 +289,7 @@ class _RoomRow extends ConsumerWidget {
                     ],
                   ),
                   const SizedBox(height: CoFitDimens.spacingXs / 2),
-                  if (isDissolved)
+                  if (isGone)
                     Text(
                       '点按移除',
                       style: textTheme.labelSmall?.copyWith(
@@ -284,8 +307,8 @@ class _RoomRow extends ConsumerWidget {
                             activeCount > 0
                                 ? '$activeCount 人正在运动 · ${members.length} 人在线'
                                 : (members.isEmpty
-                                    ? '暂无人在线'
-                                    : '暂无人运动 · ${members.length} 人在线'),
+                                      ? '暂无人在线'
+                                      : '暂无人运动 · ${members.length} 人在线'),
                             style: textTheme.labelSmall?.copyWith(
                               color: activeCount > 0
                                   ? colors.primaryMain
@@ -303,7 +326,7 @@ class _RoomRow extends ConsumerWidget {
                 ],
               ),
             ),
-            if (!isDissolved)
+            if (!isGone)
               Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: CoFitDimens.spacingMd,
@@ -361,15 +384,14 @@ class _ShimmerDotState extends State<_ShimmerDot>
   @override
   Widget build(BuildContext context) {
     return FadeTransition(
-      opacity: Tween<double>(begin: CoFitOpacities.border, end: 1)
-          .animate(_controller),
+      opacity: Tween<double>(
+        begin: CoFitOpacities.border,
+        end: 1,
+      ).animate(_controller),
       child: Container(
         width: CoFitDimens.sizeRoomDot,
         height: CoFitDimens.sizeRoomDot,
-        decoration: BoxDecoration(
-          color: widget.color,
-          shape: BoxShape.circle,
-        ),
+        decoration: BoxDecoration(color: widget.color, shape: BoxShape.circle),
       ),
     );
   }
@@ -393,8 +415,7 @@ class _EmptyRooms extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           spacing: CoFitDimens.spacingLg,
           children: [
-            const IdleAvatarFigure(
-                figureHeight: CoFitDimens.sizeFigureHero),
+            const IdleAvatarFigure(figureHeight: CoFitDimens.sizeFigureHero),
             Column(
               spacing: CoFitDimens.spacingXs,
               children: [
@@ -417,10 +438,7 @@ class _EmptyRooms extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               spacing: CoFitDimens.spacingSm,
               children: [
-                FilledButton(
-                  onPressed: onCreate,
-                  child: const Text('新建房间'),
-                ),
+                FilledButton(onPressed: onCreate, child: const Text('新建房间')),
                 TextButton(
                   onPressed: onManualJoin,
                   child: Text(
@@ -506,8 +524,8 @@ class _ManualJoinSheetState extends ConsumerState<_ManualJoinSheet> {
               '输入房间 ID 加入',
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: CoFitFontWeights.heading,
-                  ),
+                fontWeight: CoFitFontWeights.heading,
+              ),
             ),
             const SizedBox(height: CoFitDimens.spacingLg),
             TextField(

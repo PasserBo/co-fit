@@ -37,7 +37,8 @@ void main() {
     expect(find.text('xiaoman'), findsNWidgets(2));
     expect(find.text('昵称'), findsOneWidget);
     expect(find.text('@a1b2c3'), findsOneWidget);
-    expect(find.text('编辑形象'), findsOneWidget);
+    // 无 onEditAvatar 回调时不渲「编辑形象」(v2 功能,首版无占位入口)
+    expect(find.text('编辑形象'), findsNothing);
     expect(find.text('3'), findsOneWidget);
     expect(find.text('加入房间'), findsOneWidget);
     expect(find.text('牌组'), findsOneWidget);

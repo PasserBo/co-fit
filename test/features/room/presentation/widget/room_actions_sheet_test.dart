@@ -19,13 +19,15 @@ Future<void> _pump(
 }
 
 void main() {
-  testWidgets('member sees only leave action', (tester) async {
+  testWidgets('member sees report + leave only', (tester) async {
     await _pump(tester, isOwner: false);
 
     expect(find.text('考研自习室'), findsOneWidget);
+    expect(find.text('举报'), findsOneWidget);
     expect(find.text('退出房间'), findsOneWidget);
     expect(find.text('解散房间'), findsNothing);
     expect(find.text('编辑房间信息'), findsNothing);
+    expect(find.text('成员管理'), findsNothing);
   });
 
   testWidgets('owner sees edit/invite/dissolve and badge, no leave',
@@ -35,6 +37,8 @@ void main() {
     expect(find.text('房主'), findsOneWidget);
     expect(find.text('编辑房间信息'), findsOneWidget);
     expect(find.text('邀请好友'), findsOneWidget);
+    expect(find.text('成员管理'), findsOneWidget);
+    expect(find.text('举报'), findsOneWidget);
     expect(find.text('解散房间'), findsOneWidget);
     expect(find.text('退出房间'), findsNothing);
   });

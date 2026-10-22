@@ -27,6 +27,9 @@ P0 主题基建 → P1 动作卡片组件 → P2 牌库主页 → P3 悬浮 dock
 | 建房成功态(正式视觉) | #20b | ✅ 完成 | ✓ burst 徽章(burstRing token)+ 链接卡(等宽截断+复制)+ 主 CTA 分享 + 「先进房间看看」 |
 | 我的房间(房间浏览重做) | #20c | ✅ 完成 | `my_rooms_page_view.dart` 替代旧 RoomBrowsePage/RoomCommunityPage(均已删):presence 副行(呼吸绿点)+ 当前/进入 + 房主徽章 + 手输 ID 降级页尾 + 空态双 CTA + 已解散房间懒清理 |
 | 「我的」/个人设置 | #t10 → 10a | ✅ 完成 | P5:用户选定 10a(形象优先),内容收敛到已实现功能(hero + 房间/牌组/卡牌统计 + 邮箱 + 退出登录);10a 的 累计时长/打卡/通知隐私开关 未做(功能不存在);`auth/presentation/view/my_page_view.dart` + `widget/my_page_body.dart` |
+| 成员管理 sheet(房主移出成员) | 无定稿(stub 协议) | ✅ 完成 | 2026-10-22:`room/presentation/view/room_members_sheet_view.dart`;成员 = Firestore members ∪ presence,离线成员昵称走 `memberNicknameProvider`;房主可移出非房主成员(二次确认);被移出者懒清理(房间主界面 / 我的房间列表均能感知) |
+| 举报 sheet(房间内容 / 成员) | 无定稿(stub 协议) | ✅ 完成 | 2026-10-22:`room/presentation/view/report_sheet_view.dart`;落 `reports` 集合(rules 只允许本人 create);房主与成员都能从房间 ⋯ 进入 |
+| 房间 tab 空态(新用户首屏) | 无定稿 | ✅ 完成 | 2026-10-22:主 CTA 直接「新建房间」(建房 sheet),次 CTA 去「我的房间」手输 ID;替代原「浏览房间」单按钮 |
 
 状态图例:⬜ 未开始 / 🟡 进行中 / ✅ 完成 / ⏸ 等决议
 
@@ -44,19 +47,20 @@ P0 主题基建 → P1 动作卡片组件 → P2 牌库主页 → P3 悬浮 dock
 
 | feature | 现状 | 仍缺什么 |
 |---|---|---|
-| action(分享给好友) | 自建卡 ↗ → SnackBar | 依赖 social feature(G4 好友系统未实现) |
+| action(分享给好友 / 查看全部) | ~~SnackBar「开发中」~~ → **入口已隐藏**(2026-10-22) | 依赖 social feature(G4);v2 再放出入口 |
 | action(创建成功定位) | 创建后仅 toast「已创建」 | #16a 附注的「滚动到新卡 + 1.2s 外发光」润色未做(token 已备:`motion.createGlow`) |
 | room(小人形象) | `avatar_bubble.dart` 占位几何小人 | 范围外决议:接 Rive 时替换 `_PlaceholderFigure` |
-| avatar(编辑形象) | 我的页/onboarding 头像区 → toast「即将上线」 | 换肤功能未设计,`UserProfileEntity.avatarConfig` 字段结构待定 |
-| invite(成员预览) | 邀请卡用静态剪影氛围区 | `RoomInfoEntity` 无 members 字段,真实成员头像/人数需扩 entity + rules(待决议) |
-| room(成员数显示) | 我的房间页显示 presence 在线数 | 同上:设计要的是「N 名成员」,数据只有在线数 |
-| room(踢人 / 房主移交) | 未实现 | 待产品决议(解散/改名/退出已完成) |
+| avatar(编辑形象) | ~~toast「即将上线」~~ → **入口与角标已移除**(2026-10-22,审核指南 2.1 不接受占位) | 换肤功能未设计,`UserProfileEntity.avatarConfig` 字段结构待定;`MyPageBody.onEditAvatar` 传回调即恢复按钮 |
+| invite(成员预览) | 邀请卡用静态剪影氛围区 | `RoomInfoEntity.memberIds` 已有(2026-10-22,从 members map 派生,rules 不动),预览可改为真实人数——等设计决定是否要 |
+| room(成员数显示) | 我的房间页显示 presence 在线数 | 同上:`memberIds.length` 可直接给「N 名成员」,待设计确认 |
+| room(房主移交) | 未实现 | v2;首版房主只能解散。**踢人已完成**(2026-10-22) |
 | 深链(Universal Links) | 仅 `cofit://` 自定义 scheme | 需域名 + AASA 托管 + Associated Domains entitlement |
 
 ## 决议记录
 
 | 日期 | 问题 | 决议 |
 |---|---|---|
+| 2026-10-22 | 上架前功能收口(流程盘点见 [docs/flows_status.md](../flows_status.md)) | ① **清占位**:onboarding「形象定制 即将上线」角标+toast、我的页「编辑形象」按钮、牌库「分享↗」「全部 ›」全部隐藏(审核指南 2.1);② **UGC 合规(指南 1.2)**:新增房主移出成员(`RemoveRoomMemberUsecase`,走 rules owner 编辑分支,无需改 rules)+ 举报(`SubmitReportUsecase` → `reports` 集合,rules 新增 create-only)+ `RoomActionsSheet` 加「成员管理」「举报」行(房主 5 行,sheet 改可滚动);③ **被移出者感知**:`RoomInfoEntity.memberIds`(members map key 派生,只读投影不写回)+ `isMember()`;房间主界面/我的房间列表检测到自己不在 members → toast + 懒清理(`leaveRoom` 改为 members 不含自己时只删 membership,避免 rules 第三分支拒绝);④ 房间 tab 空态改为直接建房。**rules 改动需 push 到 main 由 CI 部署,diff 先给用户确认** |
 | 2026-08-01 | 阶段顺序 | 按 P0→P5 组件先行顺序推进 |
 | 2026-08-01 | G1 类型枚举 | domain 加枚举 + repository 映射,详见上表 |
 | 2026-08-01 | G2 来源字段 | entity 加 source 枚举字段,详见上表 |

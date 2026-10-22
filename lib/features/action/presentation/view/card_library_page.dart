@@ -18,7 +18,7 @@ import 'custom_card_form_sheet_view.dart';
 import 'deck_detail_page_view.dart';
 
 /// 牌库主页(#12b 定稿 + 阶段三 #15/#16 接线)。
-/// 分享给好友仍为 stub(G4 social 未实现)。
+/// 分享给好友 / 查看全部 为 v2 功能(G4 social),首版隐藏入口。
 class CardLibraryPage extends ConsumerStatefulWidget {
   const CardLibraryPage({super.key});
 
@@ -30,12 +30,6 @@ class _CardLibraryPageState extends ConsumerState<CardLibraryPage> {
   static const _tabLibrary = 0;
 
   int _tabIndex = _tabLibrary;
-
-  void _stub(String what) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text('$what:开发中')));
-  }
 
   void _toast(String message) {
     ScaffoldMessenger.of(context)
@@ -220,8 +214,7 @@ class _CardLibraryPageState extends ConsumerState<CardLibraryPage> {
         cards: cards,
         onCreateCard: _createCard,
         onCardTap: _openCardDetail,
-        onShareCard: (card) => _stub('分享「${card.name}」'),
-        onSeeAll: (type) => _stub('查看全部'),
+        // 分享给好友 / 查看全部 为 v2(social),首版不放入口。
       ),
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (error, _) => _ErrorRetry(

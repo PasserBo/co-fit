@@ -409,6 +409,34 @@ service cloud.firestore {
       allow create, update, delete: if false;
     }
 
+    // 举报(App Store 指南 1.2 UGC 合规):只允许本人创建,客户端不可读/改/删;
+    // 处理走 Firebase console。
+    match /reports/{reportId} {
+      allow read, update, delete: if false;
+      allow create: if isSignedIn() &&
+        request.resource.data.keys().hasAll([
+          'reporterId',
+          'roomId',
+          'targetUserId',
+          'reason',
+          'createdAt',
+        ]) &&
+        request.resource.data.keys().hasOnly([
+          'reporterId',
+          'roomId',
+          'targetUserId',
+          'reason',
+          'createdAt',
+        ]) &&
+        request.resource.data.reporterId == request.auth.uid &&
+        isNonEmptyString(request.resource.data.roomId) &&
+        (request.resource.data.targetUserId == null ||
+          isNonEmptyString(request.resource.data.targetUserId)) &&
+        isNonEmptyString(request.resource.data.reason) &&
+        request.resource.data.reason.size() <= 500 &&
+        request.resource.data.createdAt is timestamp;
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }

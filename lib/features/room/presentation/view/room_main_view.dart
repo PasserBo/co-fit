@@ -16,6 +16,7 @@ import '../../../action/provider/action_deck_repository_provider.dart';
 import '../../../action/provider/action_decks_provider.dart';
 import '../../../action/provider/own_action_session_notifier.dart';
 import '../../../auth/presentation/user_bootstrap_provider.dart';
+import '../../../avatar/presentation/idle_avatar_figure.dart';
 import '../../../avatar/provider/avatar_renderer_provider.dart';
 import '../../../../firestore/ably_state_machine.dart';
 import '../../domain/entity/room_presence_member.dart';
@@ -29,7 +30,10 @@ import '../widget/room_actions_sheet.dart';
 import '../widget/room_scene.dart';
 import '../widget/room_top_bar.dart';
 import 'my_rooms_page_view.dart';
+import 'report_sheet_view.dart';
+import 'room_create_sheet_view.dart';
 import 'room_edit_sheet_view.dart';
+import 'room_members_sheet_view.dart';
 
 /// 房间主界面(#6b 定稿):全屏沉浸场景,无底部 nav。
 /// 漂浮气泡(presence)+ 左右滑切换房间 + 底部扇形手牌(#5d 聚焦/上滑打出)
@@ -94,7 +98,8 @@ class _RoomMainViewState extends ConsumerState<RoomMainView> {
   }
 
   /// 顶栏/内容给悬浮 dock 让出的左侧空间(与牌库页一致)。
-  static const _dockInset = CoFitDimens.spacingLg +
+  static const _dockInset =
+      CoFitDimens.spacingLg +
       FloatingDock.collapsedWidth +
       CoFitDimens.spacingSm;
 
@@ -139,11 +144,9 @@ class _RoomMainViewState extends ConsumerState<RoomMainView> {
     }
     setState(() => _isPlaying = true);
     try {
-      await ref.read(ownActionSessionProvider.notifier).play(
-            card: card,
-            roomId: roomId,
-            userId: widget.userId,
-          );
+      await ref
+          .read(ownActionSessionProvider.notifier)
+          .play(card: card, roomId: roomId, userId: widget.userId);
       if (!mounted) {
         return;
       }
@@ -203,6 +206,24 @@ class _RoomMainViewState extends ConsumerState<RoomMainView> {
         await RoomEditSheetView.show(context, room: room);
       case RoomSheetAction.invite:
         await _shareInvite(roomId: roomId, roomName: roomName);
+      case RoomSheetAction.members:
+        await RoomMembersSheetView.show(
+          context,
+          roomId: roomId,
+          viewerId: widget.userId,
+        );
+      case RoomSheetAction.report:
+        final submitted = await ReportSheetView.show(
+          context,
+          roomId: roomId,
+          roomName: roomName,
+          reporterId: widget.userId,
+        );
+        if (submitted == true && mounted) {
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(const SnackBar(content: Text('已收到举报,感谢反馈')));
+        }
       case RoomSheetAction.dissolve:
         await _confirmAndDissolveRoom(roomId: roomId, roomName: roomName);
     }
@@ -226,8 +247,7 @@ class _RoomMainViewState extends ConsumerState<RoomMainView> {
     required String roomId,
     required String roomName,
   }) async {
-    final confirmed =
-        await showDissolveRoomDialog(context, roomName: roomName);
+    final confirmed = await showDissolveRoomDialog(context, roomName: roomName);
     if (confirmed != true || !mounted) {
       return;
     }
@@ -303,6 +323,23 @@ class _RoomMainViewState extends ConsumerState<RoomMainView> {
     }
   }
 
+  /// 被房主移出后的懒清理(每房间只跑一次)。
+  final Set<String> _removedCleanupStarted = {};
+
+  void _handleRemovedRoom(String roomId) {
+    if (!_removedCleanupStarted.add(roomId)) {
+      return;
+    }
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(const SnackBar(content: Text('你已被移出该房间')));
+    unawaited(cleanupRemovedRoom(ref, roomId: roomId, userId: widget.userId));
+  }
+
+  Future<void> _createFirstRoom() async {
+    await RoomCreateSheetView.show(context, userId: widget.userId);
+  }
+
   @override
   void dispose() {
     _ticker?.cancel();
@@ -317,43 +354,55 @@ class _RoomMainViewState extends ConsumerState<RoomMainView> {
     final joinedRoomIds = browser.joinedRoomIds;
 
     if (joinedRoomIds.isEmpty) {
-      return _EmptyRooms(onBrowse: _openBrowse);
+      return _EmptyRooms(onCreate: _createFirstRoom, onBrowse: _openBrowse);
     }
 
     final focusedRoomId = browser.focusedRoomId ?? joinedRoomIds.first;
-    final roomIndex =
-        (joinedRoomIds.indexOf(focusedRoomId)).clamp(0, joinedRoomIds.length - 1);
+    final roomIndex = (joinedRoomIds.indexOf(
+      focusedRoomId,
+    )).clamp(0, joinedRoomIds.length - 1);
     _pageController ??= PageController(initialPage: roomIndex);
 
     // 外部聚焦变更(邀请加入后跳转)→ PageView 跟随;
     // 用户自己滑动产生的变更被 currentPage 相等分支吸收。
-    ref.listen<String?>(
-      roomBrowserProvider.select((s) => s.focusedRoomId),
-      (_, next) {
-        final controller = _pageController;
-        if (next == null || controller == null || !controller.hasClients) {
-          return;
-        }
-        final targetIndex = ref.read(roomBrowserProvider).joinedRoomIds.indexOf(next);
-        if (targetIndex < 0 ||
-            (controller.page?.round() ?? controller.initialPage) ==
-                targetIndex) {
-          return;
-        }
-        controller.animateToPage(
-          targetIndex,
-          duration: CoFitMotion.fanTransition,
-          curve: Curves.easeOut,
-        );
-      },
-    );
+    ref.listen<String?>(roomBrowserProvider.select((s) => s.focusedRoomId), (
+      _,
+      next,
+    ) {
+      final controller = _pageController;
+      if (next == null || controller == null || !controller.hasClients) {
+        return;
+      }
+      final targetIndex = ref
+          .read(roomBrowserProvider)
+          .joinedRoomIds
+          .indexOf(next);
+      if (targetIndex < 0 ||
+          (controller.page?.round() ?? controller.initialPage) == targetIndex) {
+        return;
+      }
+      controller.animateToPage(
+        targetIndex,
+        duration: CoFitMotion.fanTransition,
+        curve: Curves.easeOut,
+      );
+    });
 
     final now = DateTime.now();
     final members = _mergedMembers(browser, focusedRoomId, now);
     final activeCount = members
-        .where((m) => m.activityStatus.activityState == UserActivityState.active)
+        .where(
+          (m) => m.activityStatus.activityState == UserActivityState.active,
+        )
         .length;
     final roomInfo = ref.watch(roomInfoProvider(focusedRoomId)).value;
+    if (wasRemovedFromRoom(roomInfo, widget.userId)) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _handleRemovedRoom(focusedRoomId);
+        }
+      });
+    }
 
     final decks = ref.watch(actionDecksProvider).value ?? const <ActionDeck>[];
     final activeDeckId = ref.watch(activeDeckIdProvider).value;
@@ -442,13 +491,13 @@ class _RoomMainViewState extends ConsumerState<RoomMainView> {
           if (self != null &&
               self.activityStatus.activityState == UserActivityState.active)
             Positioned(
-              top: safeTop + CoFitDimens.sizeMinTapTarget +
+              top:
+                  safeTop +
+                  CoFitDimens.sizeMinTapTarget +
                   CoFitDimens.spacingXl,
               left: 0,
               right: 0,
-              child: Center(
-                child: _ActivityHud(status: self.activityStatus),
-              ),
+              child: Center(child: _ActivityHud(status: self.activityStatus)),
             ),
 
           // 聚焦模式 scrim(盖住场景与顶栏,点击关闭)
@@ -457,8 +506,9 @@ class _RoomMainViewState extends ConsumerState<RoomMainView> {
               child: GestureDetector(
                 onTap: _closeOverlays,
                 child: ColoredBox(
-                  color:
-                      colors.bgDeep.withValues(alpha: CoFitOpacities.overlay),
+                  color: colors.bgDeep.withValues(
+                    alpha: CoFitOpacities.overlay,
+                  ),
                 ),
               ),
             ),
@@ -471,14 +521,12 @@ class _RoomMainViewState extends ConsumerState<RoomMainView> {
               right: 0,
               child: Column(
                 children: [
-                  Text('选择下一项',
-                      style: Theme.of(context).textTheme.titleMedium),
+                  Text('选择下一项', style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: CoFitDimens.spacingSm),
                   DeckChip(
                     deckName: activeDeck?.name ?? '未选择牌组',
                     open: _popoverOpen,
-                    onTap: () =>
-                        setState(() => _popoverOpen = !_popoverOpen),
+                    onTap: () => setState(() => _popoverOpen = !_popoverOpen),
                   ),
                 ],
               ),
@@ -494,8 +542,7 @@ class _RoomMainViewState extends ConsumerState<RoomMainView> {
               focused: _fanFocused,
               centerIndex: _fanCenterIndex,
               onTapCollapsed: () => setState(() => _fanFocused = true),
-              onFocusCard: (index) =>
-                  setState(() => _fanCenterIndex = index),
+              onFocusCard: (index) => setState(() => _fanCenterIndex = index),
               onPlay: (card) => unawaited(_playCard(card, focusedRoomId)),
             ),
           ),
@@ -530,11 +577,12 @@ class _RoomMainViewState extends ConsumerState<RoomMainView> {
               bottom: _fanFocused
                   ? null
                   : CoFitDimens.sizeDeckChipBottom +
-                      CoFitDimens.sizeDockItem +
-                      CoFitDimens.spacingSm,
+                        CoFitDimens.sizeDockItem +
+                        CoFitDimens.spacingSm,
               child: Align(
-                alignment:
-                    _fanFocused ? Alignment.topCenter : Alignment.bottomLeft,
+                alignment: _fanFocused
+                    ? Alignment.topCenter
+                    : Alignment.bottomLeft,
                 child: DeckPopover(
                   decks: decks,
                   activeDeckId: activeDeck?.id,
@@ -600,8 +648,9 @@ class _ActivityHud extends StatelessWidget {
             children: [
               Text(
                 '当前动作',
-                style:
-                    textTheme.labelSmall?.copyWith(color: colors.textTertiary),
+                style: textTheme.labelSmall?.copyWith(
+                  color: colors.textTertiary,
+                ),
               ),
               Text(name, style: textTheme.titleSmall),
             ],
@@ -612,30 +661,73 @@ class _ActivityHud extends StatelessWidget {
   }
 }
 
+/// 房间 tab 空态(新用户首屏):主 CTA 直接建房,次 CTA 去「我的房间」手输 ID。
 class _EmptyRooms extends StatelessWidget {
-  const _EmptyRooms({required this.onBrowse});
+  const _EmptyRooms({required this.onCreate, required this.onBrowse});
 
+  final VoidCallback onCreate;
   final VoidCallback onBrowse;
 
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<CoFitColors>()!;
+    final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          spacing: CoFitDimens.spacingMd,
-          children: [
-            Text(
-              '还没有加入任何房间',
-              style: Theme.of(context)
-                  .textTheme
-                  .bodyMedium
-                  ?.copyWith(color: colors.textTertiary),
+      body: SafeArea(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              maxWidth: CoFitDimens.sizeAuthFormMaxWidth,
             ),
-            FilledButton(onPressed: onBrowse, child: const Text('浏览房间')),
-          ],
+            child: Padding(
+              padding: const EdgeInsets.all(CoFitDimens.spacing3xl),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                spacing: CoFitDimens.spacingLg,
+                children: [
+                  const IdleAvatarFigure(
+                    figureHeight: CoFitDimens.sizeFigureHero,
+                  ),
+                  Column(
+                    spacing: CoFitDimens.spacingXs,
+                    children: [
+                      Text(
+                        '你的小人已就位',
+                        style: textTheme.titleMedium?.copyWith(
+                          fontWeight: CoFitFontWeights.heading,
+                        ),
+                      ),
+                      Text(
+                        '建一间房,把链接发给朋友,一起打出第一张卡',
+                        textAlign: TextAlign.center,
+                        style: textTheme.bodySmall?.copyWith(
+                          color: colors.textTertiary,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    spacing: CoFitDimens.spacingSm,
+                    children: [
+                      FilledButton(
+                        onPressed: onCreate,
+                        child: const Text('新建房间'),
+                      ),
+                      TextButton(
+                        onPressed: onBrowse,
+                        child: Text(
+                          '有邀请链接或房间 ID?',
+                          style: TextStyle(color: colors.textSecondary),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
         ),
       ),
     );
@@ -679,8 +771,9 @@ class _DeckSheet extends StatelessWidget {
                       padding: const EdgeInsets.all(CoFitDimens.spacingMd),
                       decoration: BoxDecoration(
                         color: active ? colors.primarySubtle : colors.bgDeep,
-                        borderRadius:
-                            BorderRadius.circular(CoFitDimens.radiusMd),
+                        borderRadius: BorderRadius.circular(
+                          CoFitDimens.radiusMd,
+                        ),
                         border: Border.all(
                           color: active
                               ? colors.primaryBorder

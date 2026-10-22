@@ -165,15 +165,16 @@ class _TypeSection extends StatelessWidget {
                     textTheme.labelSmall?.copyWith(color: colors.textDisabled),
               ),
               const Spacer(),
-              GestureDetector(
-                onTap: onSeeAll == null ? null : () => onSeeAll!(type),
-                behavior: HitTestBehavior.opaque,
-                child: Text(
-                  '全部 ›',
-                  style: textTheme.labelSmall
-                      ?.copyWith(color: colors.textTertiary),
+              if (onSeeAll != null)
+                GestureDetector(
+                  onTap: () => onSeeAll!(type),
+                  behavior: HitTestBehavior.opaque,
+                  child: Text(
+                    '全部 ›',
+                    style: textTheme.labelSmall
+                        ?.copyWith(color: colors.textTertiary),
+                  ),
                 ),
-              ),
             ],
           ),
         ),

@@ -18,7 +18,7 @@ import '../user_bootstrap_provider.dart';
 import '../widget/my_page_body.dart';
 
 /// 「我的」页(10a 形象优先,内容收敛到已实现功能)。
-/// 编辑形象为 stub(avatar feature 未实现,见 STATUS.md Stub 登记表)。
+/// 编辑形象为 v2 功能,首版不放入口(onEditAvatar 留空即隐藏按钮)。
 class MyPageView extends ConsumerWidget {
   const MyPageView({
     required this.user,
@@ -183,13 +183,6 @@ class MyPageView extends ConsumerWidget {
           sessionCount: hasSessionData ? totals.count : null,
           totalDurationMin:
               hasSessionData ? totals.totalDurationSec ~/ 60 : null,
-          onEditAvatar: () {
-            ScaffoldMessenger.of(context)
-              ..hideCurrentSnackBar()
-              ..showSnackBar(
-                const SnackBar(content: Text('编辑形象:开发中')),
-              );
-          },
           onEditNickname: profile == null
               ? null
               : () => _editNickname(context, ref, profile),

@@ -4,11 +4,12 @@ import '../../../../core/theme/cofit_colors.dart';
 import '../../../../core/theme/cofit_dimens.dart';
 
 /// 房间操作 sheet 可返回的动作。
-enum RoomSheetAction { leave, editInfo, invite, dissolve }
+enum RoomSheetAction { leave, editInfo, invite, members, report, dissolve }
 
 /// 房间操作 sheet(#17a 定稿):
-/// 房主版 = 房名 + amber「房主」徽章 + 编辑房间信息 / 邀请好友 / 解散房间(红);
-/// 成员版 = 房名 + 「退出房间」红字行。
+/// 房主版 = 房名 + amber「房主」徽章 + 编辑房间信息 / 邀请好友 / 成员管理 /
+/// 举报 / 解散房间(红);成员版 = 房名 + 举报 / 「退出房间」红字行。
+/// 成员管理与举报为 UGC 合规必需项(App Store 指南 1.2)。
 /// 纯展示:选择动作后以 Navigator.pop(RoomSheetAction) 返回。
 class RoomActionsSheet extends StatelessWidget {
   const RoomActionsSheet({
@@ -25,8 +26,9 @@ class RoomActionsSheet extends StatelessWidget {
     final colors = Theme.of(context).extension<CoFitColors>()!;
     final textTheme = Theme.of(context).textTheme;
 
+    // 房主版有 5 行,小屏 + 大字时可能超过 sheet 默认封顶高度 → 可滚动。
     return SafeArea(
-      child: Padding(
+      child: SingleChildScrollView(
         padding: const EdgeInsets.all(CoFitDimens.spacingLg),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -54,11 +56,11 @@ class RoomActionsSheet extends StatelessWidget {
                     ),
                     decoration: BoxDecoration(
                       color: colors.typeCoreSubtle,
-                      borderRadius:
-                          BorderRadius.circular(CoFitDimens.radiusSm),
+                      borderRadius: BorderRadius.circular(CoFitDimens.radiusSm),
                       border: Border.all(
-                        color: colors.statusPaused
-                            .withValues(alpha: CoFitOpacities.border),
+                        color: colors.statusPaused.withValues(
+                          alpha: CoFitOpacities.border,
+                        ),
                         width: CoFitDimens.borderWidthHairline,
                       ),
                     ),
@@ -84,8 +86,10 @@ class RoomActionsSheet extends StatelessWidget {
                 onTap: () =>
                     Navigator.of(context).pop(RoomSheetAction.editInfo),
               ),
-              Divider(height: CoFitDimens.borderWidthHairline,
-                  color: colors.borderSubtle),
+              Divider(
+                height: CoFitDimens.borderWidthHairline,
+                color: colors.borderSubtle,
+              ),
               _ActionRow(
                 icon: Icons.ios_share_rounded,
                 iconColor: colors.typeFlexibility,
@@ -93,36 +97,80 @@ class RoomActionsSheet extends StatelessWidget {
                 title: '邀请好友',
                 subtitle: '分享房间链接',
                 showChevron: true,
-                onTap: () =>
-                    Navigator.of(context).pop(RoomSheetAction.invite),
+                onTap: () => Navigator.of(context).pop(RoomSheetAction.invite),
               ),
-              Divider(height: CoFitDimens.borderWidthHairline,
-                  color: colors.borderSubtle),
+              Divider(
+                height: CoFitDimens.borderWidthHairline,
+                color: colors.borderSubtle,
+              ),
+              _ActionRow(
+                icon: Icons.group_outlined,
+                iconColor: colors.statusInfo,
+                iconBg: colors.typeFlexibilitySubtle,
+                title: '成员管理',
+                subtitle: '查看成员 · 移出成员',
+                showChevron: true,
+                onTap: () => Navigator.of(context).pop(RoomSheetAction.members),
+              ),
+              Divider(
+                height: CoFitDimens.borderWidthHairline,
+                color: colors.borderSubtle,
+              ),
+              _ReportRow(),
+              Divider(
+                height: CoFitDimens.borderWidthHairline,
+                color: colors.borderSubtle,
+              ),
               _ActionRow(
                 icon: Icons.close_rounded,
                 iconColor: colors.statusDanger,
-                iconBg: colors.statusDanger
-                    .withValues(alpha: CoFitOpacities.dangerFaint),
+                iconBg: colors.statusDanger.withValues(
+                  alpha: CoFitOpacities.dangerFaint,
+                ),
                 title: '解散房间',
                 titleColor: colors.statusDanger,
                 subtitle: '房主无法退出,只能解散 · 不可撤销',
                 onTap: () =>
                     Navigator.of(context).pop(RoomSheetAction.dissolve),
               ),
-            ] else
+            ] else ...[
+              _ReportRow(),
+              Divider(
+                height: CoFitDimens.borderWidthHairline,
+                color: colors.borderSubtle,
+              ),
               _ActionRow(
                 icon: Icons.logout_rounded,
                 iconColor: colors.statusDanger,
-                iconBg: colors.statusDanger
-                    .withValues(alpha: CoFitOpacities.dangerFaint),
+                iconBg: colors.statusDanger.withValues(
+                  alpha: CoFitOpacities.dangerFaint,
+                ),
                 title: '退出房间',
                 titleColor: colors.statusDanger,
                 subtitle: '退出后需重新受邀或输入房间 ID',
                 onTap: () => Navigator.of(context).pop(RoomSheetAction.leave),
               ),
+            ],
           ],
         ),
       ),
+    );
+  }
+}
+
+/// 举报行(房主/成员共用)。
+class _ReportRow extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<CoFitColors>()!;
+    return _ActionRow(
+      icon: Icons.flag_outlined,
+      iconColor: colors.textSecondary,
+      iconBg: colors.bgOverlay,
+      title: '举报',
+      subtitle: '举报房间内容或成员',
+      showChevron: true,
+      onTap: () => Navigator.of(context).pop(RoomSheetAction.report),
     );
   }
 }
@@ -171,8 +219,11 @@ class _ActionRow extends StatelessWidget {
                 color: iconBg,
                 borderRadius: BorderRadius.circular(CoFitDimens.radiusSm),
               ),
-              child: Icon(icon,
-                  size: CoFitDimens.sizeCardIcon, color: iconColor),
+              child: Icon(
+                icon,
+                size: CoFitDimens.sizeCardIcon,
+                color: iconColor,
+              ),
             ),
             Expanded(
               child: Column(

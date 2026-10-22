@@ -187,12 +187,46 @@ class FirebaseRoomRepository {
         if (ownerId == trimmedUserId) {
           throw StateError('Room owner cannot leave the room: $trimmedRoomId');
         }
-        transaction.update(roomRef, {
-          'members.$trimmedUserId': FieldValue.delete(),
-          'updatedAt': FieldValue.serverTimestamp(),
-        });
+        // 已被房主移出时 members 里没有自己,rules 第三分支会拒绝该 update,
+        // 此时只清理残留 membership。
+        final members = roomData['members'];
+        final stillMember =
+            members is Map && members.containsKey(trimmedUserId);
+        if (stillMember) {
+          transaction.update(roomRef, {
+            'members.$trimmedUserId': FieldValue.delete(),
+            'updatedAt': FieldValue.serverTimestamp(),
+          });
+        }
       }
       transaction.delete(membershipRef);
+    });
+  }
+
+  /// 房主移出成员:删除 rooms.members 里该成员的条目(rules owner 编辑分支)。
+  /// 被移出者的 membership 无法由房主删除(rules 限本人),
+  /// 靠被移出者侧懒清理:fetchRoomInfo 的 memberIds 不含自己 → leaveRoom。
+  Future<void> removeMember({
+    required String roomId,
+    required String ownerId,
+    required String memberUserId,
+  }) async {
+    final trimmedRoomId = roomId.trim();
+    final trimmedOwnerId = ownerId.trim();
+    final trimmedMemberId = memberUserId.trim();
+    if (trimmedRoomId.isEmpty ||
+        trimmedOwnerId.isEmpty ||
+        trimmedMemberId.isEmpty) {
+      throw ArgumentError(
+        'roomId, ownerId and memberUserId must not be empty.',
+      );
+    }
+    if (trimmedMemberId == trimmedOwnerId) {
+      throw StateError('Room owner cannot be removed: $trimmedRoomId');
+    }
+    await _firestore.collection('rooms').doc(trimmedRoomId).update({
+      'members.$trimmedMemberId': FieldValue.delete(),
+      'updatedAt': FieldValue.serverTimestamp(),
     });
   }
 

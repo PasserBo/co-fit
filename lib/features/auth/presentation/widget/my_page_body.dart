@@ -5,7 +5,7 @@ import '../../../../core/theme/cofit_dimens.dart';
 import '../../../../core/widget/floating_dock.dart';
 
 /// 「我的」页纯展示层(10a 形象优先,2026-08-01 决议:内容收敛到已实现功能)。
-/// 英雄区(占位小人 + 名字 + 编辑形象)+ 真实数据统计块 + 账号分组 + 退出登录。
+/// 英雄区(占位小人 + 名字 + 可选「编辑形象」,回调为 null 时隐藏)+ 真实数据统计块 + 账号分组 + 退出登录。
 /// 10a 中的 累计时长/连续打卡/通知隐私开关 等未实现功能不做。
 class MyPageBody extends StatelessWidget {
   const MyPageBody({
@@ -267,6 +267,7 @@ class _HeroCard extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
+                if (onEditAvatar != null) ...[
                 const SizedBox(height: CoFitDimens.spacingMd),
                 GestureDetector(
                   onTap: onEditAvatar,
@@ -288,6 +289,7 @@ class _HeroCard extends StatelessWidget {
                     ),
                   ),
                 ),
+                ],
               ],
             ),
           ),

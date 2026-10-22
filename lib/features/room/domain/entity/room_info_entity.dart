@@ -22,7 +22,15 @@ abstract class RoomInfoEntity with _$RoomInfoEntity {
     required String shareSalt,
     DateTime? createdAt,
     DateTime? updatedAt,
+
+    /// 成员 uid 列表(含房主),由 Firestore `members` map 的 key 派生;
+    /// 只读投影,不参与 [toMap] 写回(members 的写入走 repository 事务)。
+    @Default(<String>[]) List<String> memberIds,
   }) = _RoomInfoEntity;
+
+  /// 该用户是否仍是成员(被房主移出后为 false;房主恒为 true)。
+  bool isMember(String userId) =>
+      userId == ownerId || memberIds.contains(userId);
 
   Map<String, dynamic> toMap() {
     return {
@@ -49,7 +57,18 @@ abstract class RoomInfoEntity with _$RoomInfoEntity {
       shareSalt: (source['shareSalt'] ?? '').toString(),
       createdAt: _asDateTime(source['createdAt']),
       updatedAt: _asDateTime(source['updatedAt']),
+      memberIds: _memberIdsOf(source['members']),
     );
+  }
+
+  static List<String> _memberIdsOf(Object? members) {
+    if (members is! Map) {
+      return const <String>[];
+    }
+    return [
+      for (final key in members.keys)
+        if (key.toString().trim().isNotEmpty) key.toString().trim(),
+    ];
   }
 
   static DateTime? _asDateTime(Object? value) {

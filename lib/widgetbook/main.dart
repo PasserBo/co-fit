@@ -29,7 +29,13 @@ import '../features/avatar/domain/entity/avatar_motion.dart';
 import '../features/avatar/presentation/renderer/avatar_renderer.dart';
 import '../features/avatar/presentation/renderer/vector_avatar_renderer.dart';
 import '../features/room/domain/entity/room_presence_member.dart';
+import '../features/room/domain/entity/room_info_entity.dart';
+import '../features/room/presentation/room_browser_provider.dart';
+import '../features/room/presentation/view/report_sheet_view.dart';
+import '../features/room/presentation/view/room_members_sheet_view.dart';
 import '../features/room/presentation/widget/room_actions_sheet.dart';
+import '../features/room/provider/member_nickname_provider.dart';
+import '../features/room/provider/room_info_provider.dart';
 import '../features/room/domain/entity/user_activity_status_entity.dart';
 import '../features/room/presentation/widget/room_scene.dart';
 import '../features/room/presentation/widget/room_top_bar.dart';
@@ -48,7 +54,11 @@ class CoFitWidgetbook extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // 无头验收用:--dart-define=WB_PATH=room/<component>/<use-case> 直接打开某用例
+    // (路径规则:名称小写、空格→'-';见 WidgetbookNode.path)。
+    const initialPath = String.fromEnvironment('WB_PATH');
     return Widgetbook.material(
+      initialRoute: initialPath.isEmpty ? '/' : '/?path=$initialPath',
       addons: [
         MaterialThemeAddon(
           themes: [WidgetbookTheme(name: 'CoFit Dark', data: CoFitTheme.dark)],
@@ -98,9 +108,7 @@ class CoFitWidgetbook extends StatelessWidget {
           children: [
             WidgetbookComponent(
               name: 'RoomScene',
-              useCases: [
-                WidgetbookUseCase(name: '6 人房间', builder: _roomScene),
-              ],
+              useCases: [WidgetbookUseCase(name: '6 人房间', builder: _roomScene)],
             ),
             WidgetbookComponent(
               name: 'CardFan',
@@ -110,16 +118,29 @@ class CoFitWidgetbook extends StatelessWidget {
             ),
             WidgetbookComponent(
               name: 'RoomTopBar + DeckChip',
-              useCases: [
-                WidgetbookUseCase(name: '默认', builder: _roomChrome),
-              ],
+              useCases: [WidgetbookUseCase(name: '默认', builder: _roomChrome)],
             ),
             WidgetbookComponent(
               name: 'RoomActionsSheet',
               useCases: [
                 WidgetbookUseCase(name: '成员(退出)', builder: _roomActionsMember),
                 WidgetbookUseCase(
-                    name: '房主(编辑/邀请/解散)', builder: _roomActionsOwner),
+                  name: '房主(编辑/邀请/成员/举报/解散)',
+                  builder: _roomActionsOwner,
+                ),
+              ],
+            ),
+            WidgetbookComponent(
+              name: 'RoomMembersSheetView',
+              useCases: [
+                WidgetbookUseCase(name: 'owner', builder: _roomMembersOwner),
+                WidgetbookUseCase(name: 'member', builder: _roomMembersMember),
+              ],
+            ),
+            WidgetbookComponent(
+              name: 'ReportSheetView',
+              useCases: [
+                WidgetbookUseCase(name: 'default', builder: _reportSheet),
               ],
             ),
           ],
@@ -130,7 +151,10 @@ class CoFitWidgetbook extends StatelessWidget {
             WidgetbookComponent(
               name: 'AvatarMotion(动作集 #14a)',
               useCases: [
-                WidgetbookUseCase(name: 'Playground', builder: _avatarPlayground),
+                WidgetbookUseCase(
+                  name: 'Playground',
+                  builder: _avatarPlayground,
+                ),
                 WidgetbookUseCase(name: '全状态一览', builder: _avatarGallery),
               ],
             ),
@@ -141,9 +165,7 @@ class CoFitWidgetbook extends StatelessWidget {
           children: [
             WidgetbookComponent(
               name: 'MyPageBody',
-              useCases: [
-                WidgetbookUseCase(name: '我的页(10a)', builder: _myPage),
-              ],
+              useCases: [WidgetbookUseCase(name: '我的页(10a)', builder: _myPage)],
             ),
             WidgetbookComponent(
               name: 'AuthProviderButton',
@@ -164,15 +186,11 @@ class CoFitWidgetbook extends StatelessWidget {
           children: [
             WidgetbookComponent(
               name: 'FloatingDock',
-              useCases: [
-                WidgetbookUseCase(name: '点击展开/收起', builder: _dock),
-              ],
+              useCases: [WidgetbookUseCase(name: '点击展开/收起', builder: _dock)],
             ),
             WidgetbookComponent(
               name: 'AppShell',
-              useCases: [
-                WidgetbookUseCase(name: '导航壳演示', builder: _appShell),
-              ],
+              useCases: [WidgetbookUseCase(name: '导航壳演示', builder: _appShell)],
             ),
           ],
         ),
@@ -202,25 +220,23 @@ Widget _avatarPlayground(BuildContext context) {
 
   return Scaffold(
     body: Center(
-      child: Builder(builder: (context) {
-        final colors = Theme.of(context).extension<CoFitColors>()!;
-        return const VectorAvatarRenderer().build(
-          motion: AvatarMotion(
-            state: state,
-            actionType: type,
-            tempo: tempo,
-          ),
-          appearance: AvatarAppearance(
-            body: isSelf ? colors.textPrimary : colors.statusActive,
-            aura: type.mainOf(colors),
-            auraOpacity: CoFitOpacities.auraActive,
-            headRing: isSelf
-                ? colors.primaryMain.withValues(alpha: CoFitOpacities.strong)
-                : null,
-          ),
-          height: 200,
-        );
-      }),
+      child: Builder(
+        builder: (context) {
+          final colors = Theme.of(context).extension<CoFitColors>()!;
+          return const VectorAvatarRenderer().build(
+            motion: AvatarMotion(state: state, actionType: type, tempo: tempo),
+            appearance: AvatarAppearance(
+              body: isSelf ? colors.textPrimary : colors.statusActive,
+              aura: type.mainOf(colors),
+              auraOpacity: CoFitOpacities.auraActive,
+              headRing: isSelf
+                  ? colors.primaryMain.withValues(alpha: CoFitOpacities.strong)
+                  : null,
+            ),
+            height: 200,
+          );
+        },
+      ),
     ),
   );
 }
@@ -238,8 +254,9 @@ Widget _avatarGallery(BuildContext context) {
             body: colors.textPrimary,
             aura: aura ?? colors.primaryMain,
             auraOpacity: CoFitOpacities.auraActive,
-            headRing:
-                colors.primaryMain.withValues(alpha: CoFitOpacities.strong),
+            headRing: colors.primaryMain.withValues(
+              alpha: CoFitOpacities.strong,
+            ),
           ),
           height: 120,
         ),
@@ -259,8 +276,7 @@ Widget _avatarGallery(BuildContext context) {
           alignment: WrapAlignment.center,
           children: [
             cell('待机', AvatarMotion.idle()),
-            cell('起手 ×1',
-                const AvatarMotion(state: AvatarMotionState.windup)),
+            cell('起手 ×1', const AvatarMotion(state: AvatarMotionState.windup)),
             cell(
               '力量·蹲起',
               const AvatarMotion(
@@ -298,8 +314,7 @@ Widget _avatarGallery(BuildContext context) {
               const AvatarMotion(state: AvatarMotionState.paused),
               aura: colors.statusPaused,
             ),
-            cell('完成 ×1',
-                const AvatarMotion(state: AvatarMotionState.finish)),
+            cell('完成 ×1', const AvatarMotion(state: AvatarMotionState.finish)),
           ],
         ),
       ),
@@ -398,16 +413,69 @@ class _ShellIndexAtLibrary extends AppShellIndexNotifier {
 
 Widget _roomActionsMember(BuildContext context) {
   return const Scaffold(
-    body: Center(
-      child: RoomActionsSheet(roomName: '考研自习室', isOwner: false),
-    ),
+    body: Center(child: RoomActionsSheet(roomName: '考研自习室', isOwner: false)),
   );
 }
 
 Widget _roomActionsOwner(BuildContext context) {
   return const Scaffold(
-    body: Center(
-      child: RoomActionsSheet(roomName: '考研自习室', isOwner: true),
+    body: Center(child: RoomActionsSheet(roomName: '考研自习室', isOwner: true)),
+  );
+}
+
+// ---- 成员管理 / 举报 sheet:用 provider 覆盖喂假数据,不碰 Firebase ----
+
+const _wbRoomId = 'wb-room';
+
+final _wbRoom = RoomInfoEntity.fromMap({
+  'roomId': _wbRoomId,
+  'name': '晨练小队',
+  'ownerId': 'owner',
+  'members': {
+    'owner': {'role': 'owner'},
+    'alice': {'role': 'member'},
+    'bob': {'role': 'member'},
+    'carol': {'role': 'member'},
+  },
+});
+
+const _wbPresence = [
+  RoomPresenceMember(clientId: 'c1', userId: 'owner', nickname: '队长'),
+  RoomPresenceMember(clientId: 'c2', userId: 'alice', nickname: '小爱'),
+];
+
+Widget _withRoomOverrides(Widget child) {
+  return ProviderScope(
+    overrides: [
+      roomInfoProvider(_wbRoomId).overrideWith((ref) async => _wbRoom),
+      roomPresenceByIdProvider(_wbRoomId).overrideWithValue(_wbPresence),
+      memberNicknameProvider('bob').overrideWith((ref) => Stream.value('鲍勃')),
+      memberNicknameProvider('carol').overrideWith((ref) => Stream.value(null)),
+    ],
+    child: Scaffold(
+      body: Align(alignment: Alignment.bottomCenter, child: child),
+    ),
+  );
+}
+
+Widget _roomMembersOwner(BuildContext context) {
+  return _withRoomOverrides(
+    const RoomMembersSheetView(roomId: _wbRoomId, viewerId: 'owner'),
+  );
+}
+
+Widget _roomMembersMember(BuildContext context) {
+  return _withRoomOverrides(
+    const RoomMembersSheetView(roomId: _wbRoomId, viewerId: 'alice'),
+  );
+}
+
+Widget _reportSheet(BuildContext context) {
+  return _withRoomOverrides(
+    const ReportSheetView(
+      roomId: _wbRoomId,
+      roomName: '晨练小队',
+      reporterId: 'alice',
     ),
   );
 }
@@ -460,9 +528,7 @@ Widget _dock(BuildContext context) {
 }
 
 Widget _appShell(BuildContext context) {
-  Widget page(String label) => Scaffold(
-        body: Center(child: Text(label)),
-      );
+  Widget page(String label) => Scaffold(body: Center(child: Text(label)));
   return ProviderScope(
     overrides: [
       templateCardsProvider.overrideWith((ref) async => _sampleLibrary()),
@@ -569,25 +635,25 @@ Widget _roomChrome(BuildContext context) {
 }
 
 List<ActionTemplateCard> _sampleLibrary() => [
-      _sample(),
-      _sample(
-        type: ActionType.strength,
-        source: ActionSource.custom,
-        name: '壶铃摆荡',
-        durationSec: 480,
-      ),
-      _sample(type: ActionType.strength, name: '硬拉', durationSec: 720),
-      _sample(type: ActionType.cardio, durationSec: 300),
-      _sample(
-        type: ActionType.cardio,
-        source: ActionSource.friendShared,
-        name: '高抬腿',
-        durationSec: 240,
-      ),
-      _sample(type: ActionType.core, durationSec: 180),
-      _sample(type: ActionType.core, name: '卷腹', durationSec: 360),
-      _sample(type: ActionType.flexibility, durationSec: 300),
-    ];
+  _sample(),
+  _sample(
+    type: ActionType.strength,
+    source: ActionSource.custom,
+    name: '壶铃摆荡',
+    durationSec: 480,
+  ),
+  _sample(type: ActionType.strength, name: '硬拉', durationSec: 720),
+  _sample(type: ActionType.cardio, durationSec: 300),
+  _sample(
+    type: ActionType.cardio,
+    source: ActionSource.friendShared,
+    name: '高抬腿',
+    durationSec: 240,
+  ),
+  _sample(type: ActionType.core, durationSec: 180),
+  _sample(type: ActionType.core, name: '卷腹', durationSec: 360),
+  _sample(type: ActionType.flexibility, durationSec: 300),
+];
 
 Widget _libraryTab(BuildContext context) {
   return Scaffold(body: LibraryTabBody(cards: _sampleLibrary()));
@@ -746,9 +812,7 @@ Widget _allStates(BuildContext context) {
             ),
             item(
               '长名称截断',
-              ActionCard(
-                card: _sample(name: '超长名称的动作卡片应当省略号截断不换行'),
-              ),
+              ActionCard(card: _sample(name: '超长名称的动作卡片应当省略号截断不换行')),
             ),
           ],
         ),

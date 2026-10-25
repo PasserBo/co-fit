@@ -350,9 +350,10 @@ List<String> roomMemberIdsOf(
   return ids;
 }
 
-/// 懒清理入口:当前用户已不在房间成员列表(被房主移出)时为 true。
+/// 清理入口:当前用户已不在房间成员列表(被房主移出)时为 true。
+/// 缓存快照一律不算(可能是加入前缓存的旧文档,会把自己误踢出去)。
 bool wasRemovedFromRoom(RoomInfoEntity? roomInfo, String userId) {
-  return roomInfo != null && !roomInfo.isMember(userId);
+  return roomInfo != null && !roomInfo.fromCache && !roomInfo.isMember(userId);
 }
 
 /// 被移出后的本地清理:删残留 membership → Ably 离场 → 刷新已加入列表。

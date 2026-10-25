@@ -136,6 +136,11 @@ void main() {
         expect(wasRemovedFromRoom(_room, 'owner'), isFalse);
         expect(wasRemovedFromRoom(_room, 'carol'), isTrue);
         expect(wasRemovedFromRoom(null, 'carol'), isFalse);
+      // 缓存快照(可能是加入前的旧文档)绝不触发清理
+      expect(
+        wasRemovedFromRoom(_room.copyWith(fromCache: true), 'carol'),
+        isFalse,
+      );
       },
     );
 

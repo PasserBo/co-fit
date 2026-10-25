@@ -2,6 +2,7 @@ import 'package:cofit/features/room/domain/entity/room_info_entity.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  _fromCacheTests();
   group('RoomInfoEntity.memberIds', () {
     test('derives from members map keys; owner always counts as member', () {
       final room = RoomInfoEntity.fromMap({
@@ -37,5 +38,14 @@ void main() {
       expect(room.toMap().containsKey('memberIds'), isFalse);
       expect(room.toMap().containsKey('members'), isFalse);
     });
+  });
+}
+
+void _fromCacheTests() {
+  test('fromCache defaults false and is not written back', () {
+    final room = RoomInfoEntity.fromMap({'roomId': 'r', 'ownerId': 'o'});
+    expect(room.fromCache, isFalse);
+    expect(room.copyWith(fromCache: true).toMap().containsKey('fromCache'),
+        isFalse);
   });
 }

@@ -87,21 +87,31 @@ class FirebaseRoomRepository {
 
   /// 实时订阅房间文档:成员被移出 / 房间被解散 / 改名都即时下发
   /// (rules 对登录用户放开 read,被移出者仍能收到最后一次变更)。
-  /// 房间不存在或被删除时流出 null。
+  /// 房间不存在或被删除时流出 null(**仅服务端确认**的快照会流出 null)。
+  ///
+  /// Firestore 的 snapshots() 第一帧常来自本地缓存:
+  /// - 缓存里有旧文档 → 照常流出,但 `fromCache = true`(只做展示);
+  /// - 缓存里没有该文档 → 跳过,等服务端帧,否则会被误读成「已解散」。
   Stream<RoomInfoEntity?> watchRoomInfo({required String roomId}) {
     final trimmed = roomId.trim();
     if (trimmed.isEmpty) {
       return Stream.value(null);
     }
-    return _firestore.collection('rooms').doc(trimmed).snapshots().map((
-      snapshot,
-    ) {
-      final data = snapshot.data();
-      if (!snapshot.exists || data == null) {
-        return null;
-      }
-      return RoomInfoEntity.fromMap({...data, 'roomId': trimmed});
-    });
+    return _firestore
+        .collection('rooms')
+        .doc(trimmed)
+        .snapshots(includeMetadataChanges: true)
+        .where((snapshot) => !snapshot.metadata.isFromCache || snapshot.exists)
+        .map((snapshot) {
+          final data = snapshot.data();
+          if (!snapshot.exists || data == null) {
+            return null;
+          }
+          return RoomInfoEntity.fromMap({
+            ...data,
+            'roomId': trimmed,
+          }).copyWith(fromCache: snapshot.metadata.isFromCache);
+        });
   }
 
   Future<void> joinRoom({

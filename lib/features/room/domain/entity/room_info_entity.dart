@@ -26,6 +26,11 @@ abstract class RoomInfoEntity with _$RoomInfoEntity {
     /// 成员 uid 列表(含房主),由 Firestore `members` map 的 key 派生;
     /// 只读投影,不参与 [toMap] 写回(members 的写入走 repository 事务)。
     @Default(<String>[]) List<String> memberIds,
+
+    /// true = 来自 Firestore 本地缓存的快照,**可能过期**(例如邀请预览时
+    /// 缓存的旧文档,members 里还没有自己)。只能用于展示,
+    /// 不得据此判定「被移出 / 已解散」——那会把自己误踢出房间。
+    @Default(false) bool fromCache,
   }) = _RoomInfoEntity;
 
   /// 该用户是否仍是成员(被房主移出后为 false;房主恒为 true)。

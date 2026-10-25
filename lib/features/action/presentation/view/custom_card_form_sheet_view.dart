@@ -181,7 +181,6 @@ class _CustomCardFormSheetViewState
                 onChanged: (_) => setState(() {}),
                 decoration: InputDecoration(
                   hintText: '如:壶铃摆荡',
-                  border: const OutlineInputBorder(),
                   enabledBorder: !_isNameValid &&
                           _nameController.text.isNotEmpty
                       ? OutlineInputBorder(
@@ -243,7 +242,6 @@ class _CustomCardFormSheetViewState
                   onChanged: (_) => setState(() {}),
                   decoration: const InputDecoration(
                     labelText: '自定义时长(秒)',
-                    border: OutlineInputBorder(),
                   ),
                 ),
               ],

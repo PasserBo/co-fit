@@ -30,6 +30,10 @@ P0 主题基建 → P1 动作卡片组件 → P2 牌库主页 → P3 悬浮 dock
 | 成员管理 sheet(房主移出成员) | 无定稿(stub 协议) | ✅ 完成 | 2026-10-22:`room/presentation/view/room_members_sheet_view.dart`;成员 = Firestore members ∪ presence,离线成员昵称走 `memberNicknameProvider`;房主可移出非房主成员(二次确认);被移出者懒清理(房间主界面 / 我的房间列表均能感知) |
 | 举报 sheet(房间内容 / 成员) | 无定稿(stub 协议) | ✅ 完成 | 2026-10-22:`room/presentation/view/report_sheet_view.dart`;落 `reports` 集合(rules 只允许本人 create);房主与成员都能从房间 ⋯ 进入 |
 | 房间 tab 空态(新用户首屏) | 无定稿 | ✅ 完成 | 2026-10-22:主 CTA 直接「新建房间」(建房 sheet),次 CTA 去「我的房间」手输 ID;替代原「浏览房间」单按钮 |
+| 房间页连接状态提示条 | 无定稿 | ✅ 完成 | 2026-10-26:`room/provider/room_connection_status_provider.dart`(Ably 连接态+频道态 → live/connecting/offline/unavailable 四档,纯函数可测)+ `widget/room_connection_banner.dart`(live 不渲染;悬浮顶栏下,HUD 自动让位)。旧 `presentation/widgets/` 7 个无引用文件已删 |
+| 统一确认弹窗 / 文本输入 sheet | 无定稿 | ✅ 完成 | 2026-10-26:`core/widget/cofit_confirm_sheet.dart`(`showCoFitConfirmSheet` danger 变体 + `showCoFitTextInputSheet`);替换 6 处原生 AlertDialog(退出房间/删除账号/删卡/删牌组/移出成员/昵称编辑)。解散房间 #17b 与牌组命名 #15c 有定稿,保留 |
+| 全局组件主题(表单/弹层/按钮/chip) | #13a | ✅ 完成 | 2026-10-26:`cofit_theme.dart` 加 inputDecorationTheme(bgDeep 填充 + radiusMd + lime 聚焦)、bottomSheetTheme、dialogTheme、filled/outlined/text button、chipTheme;各 feature 的 `border: OutlineInputBorder()` 覆盖已全部删除(14 处)。建房 sheet 可见性改为 ChoiceChip 二选一 |
+| 品牌 Splash + iOS 启动图 + App 图标 | 无定稿 | ✅ 完成 | 2026-10-26:`core/widget/brand_splash.dart`(AuthGate 两处 loading 用);LaunchScreen.storyboard 底色 gray-900 + bob 小人 LaunchImage(1x/2x/3x);AppIcon 全尺寸由 SVG(小人 + 两张斜卡)rsvg-convert 生成。素材源 SVG 在 `docs/brand/` |
 
 状态图例:⬜ 未开始 / 🟡 进行中 / ✅ 完成 / ⏸ 等决议
 
@@ -60,6 +64,7 @@ P0 主题基建 → P1 动作卡片组件 → P2 牌库主页 → P3 悬浮 dock
 
 | 日期 | 问题 | 决议 |
 |---|---|---|
+| 2026-10-26 | 简陋页面收口第一轮(顺序:核心 → 补全 → 新功能) | ① 核心:房间页连接状态提示(断网/未配 key/重连中可见);② 补全:统一确认 sheet 替换原生 AlertDialog、全局表单/弹层主题、建房可见性 chip;③ 素材:品牌 splash、启动图、App 图标(临时版,正式图标待设计;SVG 源已入库 `docs/brand/`,README 记录导出命令);④ 清理:`room/presentation/widgets/`、`action/presentation/widgets/` 死代码删除。仍未动:好友/形象/大厅/房主移交(v2),邮箱登录折叠表单视觉(已随全局 inputDecorationTheme 变好,未重做) |
 | 2026-10-22 | 上架前功能收口(流程盘点见 [docs/flows_status.md](../flows_status.md)) | ① **清占位**:onboarding「形象定制 即将上线」角标+toast、我的页「编辑形象」按钮、牌库「分享↗」「全部 ›」全部隐藏(审核指南 2.1);② **UGC 合规(指南 1.2)**:新增房主移出成员(`RemoveRoomMemberUsecase`,走 rules owner 编辑分支,无需改 rules)+ 举报(`SubmitReportUsecase` → `reports` 集合,rules 新增 create-only)+ `RoomActionsSheet` 加「成员管理」「举报」行(房主 5 行,sheet 改可滚动);③ **被移出者感知**:`RoomInfoEntity.memberIds`(members map key 派生,只读投影不写回)+ `isMember()`;房间主界面/我的房间列表检测到自己不在 members → toast + 懒清理(`leaveRoom` 改为 members 不含自己时只删 membership,避免 rules 第三分支拒绝);④ 房间 tab 空态改为直接建房。**rules 改动需 push 到 main 由 CI 部署,diff 先给用户确认** |
 | 2026-08-01 | 阶段顺序 | 按 P0→P5 组件先行顺序推进 |
 | 2026-08-01 | G1 类型枚举 | domain 加枚举 + repository 映射,详见上表 |

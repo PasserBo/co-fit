@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/cofit_colors.dart';
 import '../../../../core/theme/cofit_dimens.dart';
+import '../../../../core/widget/cofit_confirm_sheet.dart';
 import '../../../../core/widget/floating_dock.dart';
 import '../../domain/entity/action_deck.dart';
 import '../../domain/entity/action_template_card.dart';
@@ -113,7 +114,6 @@ class _CardLibraryPageState extends ConsumerState<CardLibraryPage> {
   }
 
   Future<void> _deleteDeck(ActionDeck deck) async {
-    final colors = Theme.of(context).extension<CoFitColors>()!;
     final activeDeckId = ref.read(activeDeckIdProvider).value;
     final decks = ref.read(actionDecksProvider).value ?? const <ActionDeck>[];
     final isActive = deck.id == activeDeckId;
@@ -127,28 +127,17 @@ class _CardLibraryPageState extends ConsumerState<CardLibraryPage> {
       }
     }
 
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text('删除牌组「${deck.name}」?'),
-        content: Text(
-          isActive
-              ? '该组正在使用中,删除后当前使用将切换为'
-                  '${successor == null ? '空' : '「${successor.name}」'}。'
-                  '此操作不可撤销。'
-              : '此操作不可撤销。',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: Text('取消', style: TextStyle(color: colors.textSecondary)),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text('删除', style: TextStyle(color: colors.statusDanger)),
-          ),
-        ],
-      ),
+    final confirmed = await showCoFitConfirmSheet(
+      context,
+      title: '删除牌组「${deck.name}」?',
+      message: isActive
+          ? '该组正在使用中,删除后当前使用将切换为'
+              '${successor == null ? '空' : '「${successor.name}」'}。'
+              '此操作不可撤销。'
+          : '此操作不可撤销。',
+      confirmLabel: '删除',
+      danger: true,
+      icon: Icons.delete_outline_rounded,
     );
     if (confirmed != true || !mounted) {
       return;

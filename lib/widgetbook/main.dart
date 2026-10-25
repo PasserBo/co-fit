@@ -6,6 +6,8 @@ import '../core/navigation/app_shell.dart';
 import '../core/navigation/app_shell_index_provider.dart';
 import '../core/theme/cofit_colors.dart';
 import '../core/theme/cofit_theme.dart';
+import '../core/widget/brand_splash.dart';
+import '../core/widget/cofit_confirm_sheet.dart';
 import '../core/widget/floating_dock.dart';
 import '../features/action/domain/entity/action_deck.dart';
 import '../features/action/domain/entity/action_source.dart';
@@ -34,6 +36,8 @@ import '../features/room/presentation/room_browser_provider.dart';
 import '../features/room/presentation/view/report_sheet_view.dart';
 import '../features/room/presentation/view/room_members_sheet_view.dart';
 import '../features/room/presentation/widget/room_actions_sheet.dart';
+import '../features/room/presentation/widget/room_connection_banner.dart';
+import '../features/room/provider/room_connection_status_provider.dart';
 import '../features/room/provider/member_nickname_provider.dart';
 import '../features/room/provider/room_info_provider.dart';
 import '../features/room/domain/entity/user_activity_status_entity.dart';
@@ -71,6 +75,27 @@ class CoFitWidgetbook extends StatelessWidget {
         ]),
       ],
       directories: [
+        WidgetbookFolder(
+          name: 'core',
+          children: [
+            WidgetbookComponent(
+              name: 'CoFitConfirmSheet',
+              useCases: [
+                WidgetbookUseCase(name: 'danger', builder: _confirmDanger),
+                WidgetbookUseCase(name: 'normal', builder: _confirmNormal),
+              ],
+            ),
+            WidgetbookComponent(
+              name: 'BrandSplash',
+              useCases: [
+                WidgetbookUseCase(
+                  name: 'default',
+                  builder: (_) => const BrandSplash(),
+                ),
+              ],
+            ),
+          ],
+        ),
         WidgetbookFolder(
           name: 'action',
           children: [
@@ -135,6 +160,12 @@ class CoFitWidgetbook extends StatelessWidget {
               useCases: [
                 WidgetbookUseCase(name: 'owner', builder: _roomMembersOwner),
                 WidgetbookUseCase(name: 'member', builder: _roomMembersMember),
+              ],
+            ),
+            WidgetbookComponent(
+              name: 'RoomConnectionBanner',
+              useCases: [
+                WidgetbookUseCase(name: 'all', builder: _connectionBanners),
               ],
             ),
             WidgetbookComponent(
@@ -476,6 +507,50 @@ Widget _reportSheet(BuildContext context) {
       roomId: _wbRoomId,
       roomName: '晨练小队',
       reporterId: 'alice',
+    ),
+  );
+}
+
+Widget _confirmDanger(BuildContext context) {
+  return const Scaffold(
+    body: Align(
+      alignment: Alignment.bottomCenter,
+      child: CoFitConfirmSheet(
+        title: '退出「考研自习室」?',
+        message: '退出后需要重新受邀或输入房间 ID 才能回来。',
+        confirmLabel: '退出房间',
+        danger: true,
+        icon: Icons.logout_rounded,
+      ),
+    ),
+  );
+}
+
+Widget _confirmNormal(BuildContext context) {
+  return const Scaffold(
+    body: Align(
+      alignment: Alignment.bottomCenter,
+      child: CoFitConfirmSheet(
+        title: '设为当前牌组?',
+        message: '房间里的扇形手牌会切换到这一组。',
+        confirmLabel: '设为当前',
+        icon: Icons.style_rounded,
+      ),
+    ),
+  );
+}
+
+Widget _connectionBanners(BuildContext context) {
+  return Scaffold(
+    body: Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        spacing: 12,
+        children: [
+          for (final status in RoomConnectionStatus.values)
+            RoomConnectionBanner(status: status),
+        ],
+      ),
     ),
   );
 }

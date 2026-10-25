@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/cofit_colors.dart';
 import '../../../../core/theme/cofit_dimens.dart';
+import '../../../../core/widget/cofit_confirm_sheet.dart';
 import '../../domain/entity/action_deck.dart';
 import '../../domain/entity/action_source.dart';
 import '../../domain/entity/action_template_card.dart';
@@ -96,7 +97,6 @@ class CardDetailSheetView extends ConsumerWidget {
   }
 
   Future<void> _delete(BuildContext context, WidgetRef ref) async {
-    final colors = Theme.of(context).extension<CoFitColors>()!;
     final decks =
         ref.read(actionDecksProvider).value ?? const <ActionDeck>[];
     final affected = _decksContaining(decks);
@@ -105,22 +105,13 @@ class CardDetailSheetView extends ConsumerWidget {
         : '该卡将同时从 ${affected.length} 个牌组'
             '(${affected.map((d) => d.name).join('、')})中移除全部引用。';
 
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text('删除「${card.name}」?'),
-        content: Text('$affectedLabel此操作不可撤销。'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: Text('取消', style: TextStyle(color: colors.textSecondary)),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text('删除', style: TextStyle(color: colors.statusDanger)),
-          ),
-        ],
-      ),
+    final confirmed = await showCoFitConfirmSheet(
+      context,
+      title: '删除「${card.name}」?',
+      message: '$affectedLabel此操作不可撤销。',
+      confirmLabel: '删除',
+      danger: true,
+      icon: Icons.delete_outline_rounded,
     );
     if (confirmed != true || !context.mounted) {
       return;

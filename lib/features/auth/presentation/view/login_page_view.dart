@@ -294,7 +294,6 @@ class _LoginPageViewState extends ConsumerState<LoginPageView> {
             keyboardType: TextInputType.emailAddress,
             decoration: const InputDecoration(
               labelText: '邮箱',
-              border: OutlineInputBorder(),
             ),
             validator: (value) {
               final text = (value ?? '').trim();
@@ -314,7 +313,6 @@ class _LoginPageViewState extends ConsumerState<LoginPageView> {
             obscureText: true,
             decoration: const InputDecoration(
               labelText: '密码',
-              border: OutlineInputBorder(),
             ),
             validator: (value) {
               final text = (value ?? '').trim();

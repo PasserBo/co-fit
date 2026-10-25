@@ -113,7 +113,6 @@ class _RoomEditSheetViewState extends ConsumerState<RoomEditSheetView> {
                 onChanged: (_) => setState(() {}),
                 decoration: const InputDecoration(
                   labelText: '房间名(必填)',
-                  border: OutlineInputBorder(),
                 ),
               ),
               const SizedBox(height: CoFitDimens.spacingMd),
@@ -124,7 +123,6 @@ class _RoomEditSheetViewState extends ConsumerState<RoomEditSheetView> {
                 maxLines: 4,
                 decoration: const InputDecoration(
                   labelText: '描述(可空)',
-                  border: OutlineInputBorder(),
                 ),
               ),
               const SizedBox(height: CoFitDimens.spacingMd),

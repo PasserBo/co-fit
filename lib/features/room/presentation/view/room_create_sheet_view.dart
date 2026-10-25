@@ -137,31 +137,13 @@ class _RoomCreateSheetViewState extends ConsumerState<RoomCreateSheetView> {
           onChanged: notifier.updateName,
           decoration: const InputDecoration(
             labelText: '房间名(必填)',
-            border: OutlineInputBorder(),
           ),
         ),
         const SizedBox(height: CoFitDimens.spacingMd),
-        DropdownButtonFormField<String>(
-          initialValue: state.visibility,
-          items: RoomVisibility.allowed
-              .map(
-                (value) => DropdownMenuItem(
-                  value: value,
-                  child: Text(value == RoomVisibility.public ? '公开' : '仅邀请'),
-                ),
-              )
-              .toList(growable: false),
-          onChanged: state.isSubmitting
-              ? null
-              : (value) {
-                  if (value != null) {
-                    notifier.updateVisibility(value);
-                  }
-                },
-          decoration: const InputDecoration(
-            labelText: '可见性',
-            border: OutlineInputBorder(),
-          ),
+        _VisibilityPicker(
+          value: state.visibility,
+          enabled: !state.isSubmitting,
+          onChanged: notifier.updateVisibility,
         ),
         const SizedBox(height: CoFitDimens.spacingMd),
         TextField(
@@ -171,7 +153,6 @@ class _RoomCreateSheetViewState extends ConsumerState<RoomCreateSheetView> {
           maxLines: 4,
           decoration: const InputDecoration(
             labelText: '描述',
-            border: OutlineInputBorder(),
           ),
         ),
         const SizedBox(height: CoFitDimens.spacingLg),
@@ -201,6 +182,50 @@ class _RoomCreateSheetViewState extends ConsumerState<RoomCreateSheetView> {
             style: TextStyle(color: colors.statusDanger),
           ),
         ],
+      ],
+    );
+  }
+}
+
+/// 可见性二选一(公开 / 仅邀请),ChoiceChip 走全局 chipTheme。
+class _VisibilityPicker extends StatelessWidget {
+  const _VisibilityPicker({
+    required this.value,
+    required this.enabled,
+    required this.onChanged,
+  });
+
+  final String value;
+  final bool enabled;
+  final ValueChanged<String> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<CoFitColors>()!;
+    final textTheme = Theme.of(context).textTheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      spacing: CoFitDimens.spacingSm,
+      children: [
+        Text(
+          '可见性',
+          style: textTheme.labelSmall?.copyWith(color: colors.textTertiary),
+        ),
+        Wrap(
+          spacing: CoFitDimens.spacingSm,
+          children: [
+            for (final (v, label, icon) in const [
+              (RoomVisibility.unlisted, '仅邀请', Icons.link_rounded),
+              (RoomVisibility.public, '公开', Icons.public_rounded),
+            ])
+              ChoiceChip(
+                avatar: Icon(icon, size: CoFitDimens.sizeCardIcon),
+                label: Text(label),
+                selected: value == v,
+                onSelected: enabled ? (_) => onChanged(v) : null,
+              ),
+          ],
+        ),
       ],
     );
   }

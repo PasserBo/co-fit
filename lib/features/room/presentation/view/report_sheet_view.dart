@@ -147,21 +147,7 @@ class _ReportSheetViewState extends ConsumerState<ReportSheetView> {
               style: textTheme.labelSmall?.copyWith(color: colors.textDisabled),
             ),
             const SizedBox(height: CoFitDimens.spacingSm),
-            // ChipTheme 全局未定义,这里按 token 给选中态(lime subtle + 描边)
-            ChipTheme(
-              data: ChipTheme.of(context).copyWith(
-                selectedColor: colors.primarySubtle,
-                backgroundColor: colors.bgSurface,
-                checkmarkColor: colors.primaryMain,
-                side: BorderSide(
-                  color: colors.borderStrong,
-                  width: CoFitDimens.borderWidthHairline,
-                ),
-                labelStyle: textTheme.labelMedium?.copyWith(
-                  color: colors.textPrimary,
-                ),
-              ),
-              child: Wrap(
+            Wrap(
                 spacing: CoFitDimens.spacingSm,
                 runSpacing: CoFitDimens.spacingSm,
                 children: [
@@ -182,7 +168,6 @@ class _ReportSheetViewState extends ConsumerState<ReportSheetView> {
                           : () => setState(() => _targetUserId = uid),
                     ),
                 ],
-              ),
             ),
             const SizedBox(height: CoFitDimens.spacingLg),
             TextField(
@@ -195,7 +180,6 @@ class _ReportSheetViewState extends ConsumerState<ReportSheetView> {
                 labelText: '原因',
                 hintText: '发生了什么?',
                 alignLabelWithHint: true,
-                border: OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: CoFitDimens.spacingMd),

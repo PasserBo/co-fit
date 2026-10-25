@@ -534,7 +534,6 @@ class _ManualJoinSheetState extends ConsumerState<_ManualJoinSheet> {
               autofocus: true,
               decoration: const InputDecoration(
                 labelText: '房间 ID',
-                border: OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: CoFitDimens.spacingLg),

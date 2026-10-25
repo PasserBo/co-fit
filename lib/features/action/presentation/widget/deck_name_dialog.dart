@@ -72,7 +72,6 @@ class _DeckNameDialogState extends State<_DeckNameDialog> {
             onChanged: (_) => setState(() {}),
             decoration: InputDecoration(
               labelText: '牌组名',
-              border: const OutlineInputBorder(),
               enabledBorder: _isOverLimit
                   ? OutlineInputBorder(
                       borderSide: BorderSide(

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/navigation/app_shell.dart';
+import '../../../core/widget/brand_splash.dart';
 import '../../action/presentation/view/card_library_page.dart';
 import '../../invite/presentation/invite_link_gate.dart';
 import '../../profile/presentation/view/onboarding_page_view.dart';
@@ -33,9 +34,7 @@ class _AuthGatePageState extends ConsumerState<AuthGatePage> {
   String? _bootstrappedUserId;
   bool _isClearScheduled = false;
 
-  static const _splash = Scaffold(
-    body: Center(child: CircularProgressIndicator()),
-  );
+  static const _splash = BrandSplash();
 
   void _scheduleClear() {
     _bootstrappedUserId = null;

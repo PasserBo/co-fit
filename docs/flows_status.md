@@ -63,6 +63,7 @@ AppShell[房间]
 | 成员退出 | ✅ | rules 禁止房主退出 |
 | 房主移出成员(踢人) | ⛔→✅ | UGC 合规(指南 1.2)必需。本次新增 `RemoveRoomMemberUsecase` + 成员管理 sheet;被移出者靠懒清理感知 |
 | 举报房间/成员 | ⛔→✅ | 本次新增 `reports` 集合 + 举报 sheet(房主与成员都可用) |
+| 房间页连接状态(断网/未配置/重连) | ⛔→✅ | 2026-10-26 新增提示条,live 时不显示 |
 | 房主移交 | ⬜ | v2,首版靠解散 |
 | 能量爆发粒子 / 飞卡动画 | ⬜ | 润色项 |
 
@@ -144,7 +145,7 @@ AppShell[我的]
 
 ## 4. 上架前仍需补的(非代码)
 
-1. App 图标与启动图(仍是 Flutter 默认,审核必拒)。
+1. ~~App 图标与启动图~~ → 2026-10-26 已换成临时品牌版(bob 小人);正式图标待设计。
 2. 隐私政策 + 用户协议页面(需要一个域名;同时托管 AASA 解锁 Universal Links)。
 3. `PrivacyInfo.xcprivacy`(Firebase/Ably SDK 的 Required Reason API 声明)。
 4. App Store Connect:演示账号(邮箱账号,预先进好一个有人的房间)、截图、数据收集声明。

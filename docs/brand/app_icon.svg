@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <radialGradient id="g" cx="50%" cy="38%" r="60%">
+      <stop offset="0" stop-color="#2A3320"/>
+      <stop offset="1" stop-color="#181B22"/>
+    </radialGradient>
+  </defs>
+  <rect width="1024" height="1024" fill="url(#g)"/>
+  <ellipse cx="512" cy="840" rx="230" ry="40" fill="#C8F24B" fill-opacity="0.22"/>
+  <!-- two cards flanking (coral/blue like login brand block) -->
+  <rect x="150" y="560" width="150" height="210" rx="24" transform="rotate(-14 225 665)" fill="#22252E" stroke="#FF7A59" stroke-width="10"/>
+  <rect x="724" y="560" width="150" height="210" rx="24" transform="rotate(14 799 665)" fill="#22252E" stroke="#8FBAFF" stroke-width="10"/>
+  <!-- figure -->
+  <circle cx="512" cy="300" r="128" fill="none" stroke="#C8F24B" stroke-width="26"/>
+  <circle cx="512" cy="300" r="90" fill="#F4F3EF"/>
+  <rect x="400" y="450" width="224" height="330" rx="112" fill="#F4F3EF"/>
+  <rect x="430" y="780" width="60" height="110" rx="30" fill="#F4F3EF"/>
+  <rect x="534" y="780" width="60" height="110" rx="30" fill="#F4F3EF"/>
+</svg>

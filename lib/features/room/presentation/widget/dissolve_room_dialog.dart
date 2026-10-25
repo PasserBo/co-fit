@@ -71,7 +71,6 @@ class _DissolveRoomDialogState extends State<_DissolveRoomDialog> {
             onChanged: (_) => setState(() {}),
             decoration: InputDecoration(
               hintText: widget.roomName,
-              border: const OutlineInputBorder(),
               enabledBorder: OutlineInputBorder(
                 borderSide: BorderSide(
                   color: colors.statusDanger

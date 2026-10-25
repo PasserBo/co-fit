@@ -6,6 +6,7 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../../../core/theme/cofit_colors.dart';
 import '../../../../core/theme/cofit_dimens.dart';
+import '../../../../core/widget/cofit_confirm_sheet.dart';
 import '../../../../core/widget/floating_dock.dart';
 import '../../../action/domain/entity/action_deck.dart';
 import '../../../action/domain/entity/action_template_card.dart';
@@ -21,12 +22,14 @@ import '../../../avatar/provider/avatar_renderer_provider.dart';
 import '../../../../firestore/ably_state_machine.dart';
 import '../../domain/entity/room_presence_member.dart';
 import '../../domain/entity/user_activity_status_entity.dart';
+import '../../provider/room_connection_status_provider.dart';
 import '../../provider/room_info_provider.dart';
 import '../../../invite/provider/invite_usecase_providers.dart';
 import '../join_room_provider.dart';
 import '../room_browser_provider.dart';
 import '../widget/dissolve_room_dialog.dart';
 import '../widget/room_actions_sheet.dart';
+import '../widget/room_connection_banner.dart';
 import '../widget/room_scene.dart';
 import '../widget/room_top_bar.dart';
 import 'my_rooms_page_view.dart';
@@ -277,23 +280,13 @@ class _RoomMainViewState extends ConsumerState<RoomMainView> {
     required String roomId,
     required String roomName,
   }) async {
-    final colors = Theme.of(context).extension<CoFitColors>()!;
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('退出房间?'),
-        content: Text('退出「$roomName」后,需要重新受邀或输入房间 ID 才能回来。'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('取消'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text('退出', style: TextStyle(color: colors.statusDanger)),
-          ),
-        ],
-      ),
+    final confirmed = await showCoFitConfirmSheet(
+      context,
+      title: '退出「$roomName」?',
+      message: '退出后需要重新受邀或输入房间 ID 才能回来。',
+      confirmLabel: '退出房间',
+      danger: true,
+      icon: Icons.logout_rounded,
     );
     if (confirmed != true || !mounted) {
       return;
@@ -396,6 +389,8 @@ class _RoomMainViewState extends ConsumerState<RoomMainView> {
         )
         .length;
     final roomInfo = ref.watch(roomInfoProvider(focusedRoomId)).value;
+    final connection = ref.watch(roomConnectionStatusProvider(focusedRoomId));
+    final hasBanner = connection != RoomConnectionStatus.live;
     if (wasRemovedFromRoom(roomInfo, widget.userId)) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
@@ -487,14 +482,27 @@ class _RoomMainViewState extends ConsumerState<RoomMainView> {
             ),
           ),
 
-          // HUD:自己运动中
+          // 连接状态提示(live 时为空),悬浮在顶栏下方
+          if (hasBanner)
+            Positioned(
+              top:
+                  safeTop +
+                  CoFitDimens.sizeMinTapTarget +
+                  CoFitDimens.spacingXl,
+              left: 0,
+              right: 0,
+              child: Center(child: RoomConnectionBanner(status: connection)),
+            ),
+
+          // HUD:自己运动中(有提示条时往下让一格)
           if (self != null &&
               self.activityStatus.activityState == UserActivityState.active)
             Positioned(
               top:
                   safeTop +
                   CoFitDimens.sizeMinTapTarget +
-                  CoFitDimens.spacingXl,
+                  CoFitDimens.spacingXl +
+                  (hasBanner ? CoFitDimens.sizeMinTapTarget : 0),
               left: 0,
               right: 0,
               child: Center(child: _ActivityHud(status: self.activityStatus)),

@@ -68,6 +68,85 @@ abstract class CoFitTheme {
           ),
         ),
       ),
+      // 统一表单/弹层/按钮外观:各 feature 不再逐处写 OutlineInputBorder 等。
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: cofitColors.bgDeep,
+        labelStyle: textTheme.bodySmall?.copyWith(color: cofitColors.textTertiary),
+        hintStyle: textTheme.bodyMedium?.copyWith(color: cofitColors.textDisabled),
+        helperStyle: textTheme.labelSmall?.copyWith(color: cofitColors.textTertiary),
+        counterStyle: textTheme.labelSmall?.copyWith(color: cofitColors.textDisabled),
+        errorStyle: textTheme.labelSmall?.copyWith(color: cofitColors.statusDanger),
+        border: _inputBorder(cofitColors.borderSubtle),
+        enabledBorder: _inputBorder(cofitColors.borderSubtle),
+        focusedBorder: _inputBorder(
+          cofitColors.primaryBorder,
+          width: CoFitDimens.borderWidthFocus,
+        ),
+        errorBorder: _inputBorder(cofitColors.statusDanger),
+        focusedErrorBorder: _inputBorder(
+          cofitColors.statusDanger,
+          width: CoFitDimens.borderWidthFocus,
+        ),
+        disabledBorder: _inputBorder(
+          cofitColors.borderSubtle.withValues(alpha: CoFitOpacities.border),
+        ),
+      ),
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: cofitColors.bgSurface,
+        surfaceTintColor: Colors.transparent,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(CoFitDimens.radiusLg),
+          ),
+        ),
+      ),
+      dialogTheme: DialogThemeData(
+        backgroundColor: cofitColors.bgSurface,
+        surfaceTintColor: Colors.transparent,
+        titleTextStyle: textTheme.titleMedium,
+        contentTextStyle:
+            textTheme.bodySmall?.copyWith(color: cofitColors.textSecondary),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(CoFitDimens.radiusLg),
+        ),
+      ),
+      chipTheme: ChipThemeData(
+        backgroundColor: cofitColors.bgSurface,
+        selectedColor: cofitColors.primarySubtle,
+        checkmarkColor: cofitColors.primaryMain,
+        labelStyle: textTheme.labelMedium?.copyWith(color: cofitColors.textPrimary),
+        side: BorderSide(
+          color: cofitColors.borderStrong,
+          width: CoFitDimens.borderWidthHairline,
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(CoFitDimens.radiusMd),
+        ),
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          minimumSize: const Size.fromHeight(CoFitDimens.sizeMinTapTarget),
+          textStyle: textTheme.labelLarge,
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          minimumSize: const Size.fromHeight(CoFitDimens.sizeMinTapTarget),
+          foregroundColor: cofitColors.textPrimary,
+          textStyle: textTheme.labelLarge,
+          side: BorderSide(
+            color: cofitColors.borderStrong,
+            width: CoFitDimens.borderWidthHairline,
+          ),
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: cofitColors.textSecondary,
+          textStyle: textTheme.labelLarge,
+        ),
+      ),
       snackBarTheme: SnackBarThemeData(
         backgroundColor: cofitColors.bgSurface,
         contentTextStyle: textTheme.bodyMedium,
@@ -75,6 +154,16 @@ abstract class CoFitTheme {
           borderRadius: BorderRadius.circular(CoFitDimens.radiusMd),
         ),
       ),
+    );
+  }
+
+  static OutlineInputBorder _inputBorder(
+    Color color, {
+    double width = CoFitDimens.borderWidthHairline,
+  }) {
+    return OutlineInputBorder(
+      borderRadius: BorderRadius.circular(CoFitDimens.radiusMd),
+      borderSide: BorderSide(color: color, width: width),
     );
   }
 

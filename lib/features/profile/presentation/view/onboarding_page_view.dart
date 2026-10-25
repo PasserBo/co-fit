@@ -131,7 +131,6 @@ class _OnboardingPageViewState extends ConsumerState<OnboardingPageView> {
                       maxLength: UserProfileEntity.nicknameMaxLength,
                       decoration: const InputDecoration(
                         labelText: '昵称',
-                        border: OutlineInputBorder(),
                       ),
                       validator: (value) {
                         final text = (value ?? '').trim();

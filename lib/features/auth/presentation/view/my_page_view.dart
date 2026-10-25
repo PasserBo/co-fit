@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/theme/cofit_colors.dart';
+import '../../../../core/widget/cofit_confirm_sheet.dart';
 
 import '../../../action/presentation/action_template_usecase_provider.dart';
 import '../../../action/provider/action_decks_provider.dart';
@@ -47,35 +47,13 @@ class MyPageView extends ConsumerWidget {
     WidgetRef ref,
     UserProfileEntity profile,
   ) async {
-    final controller = TextEditingController(text: profile.nickname);
-    final newNickname = await showDialog<String>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('编辑昵称'),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          maxLength: UserProfileEntity.nicknameMaxLength,
-          decoration: const InputDecoration(
-            labelText: '昵称',
-            border: OutlineInputBorder(),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('取消'),
-          ),
-          FilledButton(
-            onPressed: () =>
-                Navigator.of(dialogContext).pop(controller.text.trim()),
-            child: const Text('保存'),
-          ),
-        ],
-      ),
+    final newNickname = await showCoFitTextInputSheet(
+      context,
+      title: '编辑昵称',
+      label: '昵称',
+      initialValue: profile.nickname,
+      maxLength: UserProfileEntity.nicknameMaxLength,
     );
-    controller.dispose();
-
     if (newNickname == null ||
         newNickname.isEmpty ||
         newNickname == profile.nickname) {
@@ -99,29 +77,14 @@ class MyPageView extends ConsumerWidget {
 
   /// 删除账号(Apple 上架要求)。二次确认 → 重认证 → 清数据 → 注销。
   Future<void> _deleteAccount(BuildContext context, WidgetRef ref) async {
-    final colors = Theme.of(context).extension<CoFitColors>()!;
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('删除账号?'),
-        content: const Text(
-          '将永久删除:你的资料与昵称、全部牌组与自建卡、运动历史记录,'
-          '并退出所有房间(你创建的房间会被解散)。\n\n此操作不可撤销。',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: Text('取消', style: TextStyle(color: colors.textSecondary)),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text(
-              '删除账号',
-              style: TextStyle(color: colors.statusDanger),
-            ),
-          ),
-        ],
-      ),
+    final confirmed = await showCoFitConfirmSheet(
+      context,
+      title: '删除账号?',
+      message: '将永久删除:你的资料与昵称、全部牌组与自建卡、运动历史记录,'
+          '并退出所有房间(你创建的房间会被解散)。此操作不可撤销。',
+      confirmLabel: '删除账号',
+      danger: true,
+      icon: Icons.delete_forever_outlined,
     );
     if (confirmed != true || !context.mounted) {
       return;

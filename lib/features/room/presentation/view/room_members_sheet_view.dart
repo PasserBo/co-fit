@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/cofit_colors.dart';
 import '../../../../core/theme/cofit_dimens.dart';
+import '../../../../core/widget/cofit_confirm_sheet.dart';
 import '../../../../firestore/ably_state_machine.dart';
 import '../../../auth/presentation/user_bootstrap_provider.dart';
 import '../../../avatar/presentation/idle_avatar_figure.dart';
@@ -51,23 +52,13 @@ class RoomMembersSheetView extends ConsumerWidget {
     required String memberUserId,
     required String displayName,
   }) async {
-    final colors = Theme.of(context).extension<CoFitColors>()!;
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text('移出「$displayName」?'),
-        content: const Text('对方将离开本房间;持有邀请链接或房间 ID 仍可重新加入。'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('取消'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text('移出', style: TextStyle(color: colors.statusDanger)),
-          ),
-        ],
-      ),
+    final confirmed = await showCoFitConfirmSheet(
+      context,
+      title: '移出「$displayName」?',
+      message: '对方将离开本房间;持有邀请链接或房间 ID 仍可重新加入。',
+      confirmLabel: '移出',
+      danger: true,
+      icon: Icons.person_remove_outlined,
     );
     if (confirmed != true || !context.mounted) {
       return;

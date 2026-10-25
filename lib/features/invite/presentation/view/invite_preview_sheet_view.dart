@@ -12,7 +12,7 @@ import '../../domain/entity/invite_link_entity.dart';
 import '../../provider/invite_usecase_providers.dart';
 import '../../usecase/resolve_invite_usecase.dart';
 
-/// 邀请预览 sheet(stub 协议:无定稿设计,功能优先)。
+/// 邀请预览 sheet(#20a 正式视觉,2026-09-03;原 stub 注释已过期)。
 /// 打开即解析链接:无效 → 错误态;有效 → 房间信息 + 加入 CTA。
 /// 加入成功后:刷新已加入列表 → 聚焦该房间 → 切回房间 tab。
 class InvitePreviewSheetView extends ConsumerStatefulWidget {

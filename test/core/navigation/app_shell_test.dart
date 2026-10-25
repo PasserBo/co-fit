@@ -9,8 +9,9 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         child: MaterialApp(
-          theme: ThemeData(brightness: Brightness.dark)
-              .copyWith(extensions: [CoFitColors.dark]),
+          theme: ThemeData(
+            brightness: Brightness.dark,
+          ).copyWith(extensions: [CoFitColors.dark]),
           home: AppShell(
             pages: const [
               Center(child: Text('房间页')),
@@ -24,10 +25,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // IndexedStack 下所有页面都在树里,但只有当前页可见
-    expect(
-      tester.getSemantics(find.text('房间页')),
-      isNotNull,
-    );
+    expect(tester.getSemantics(find.text('房间页')), isNotNull);
 
     // 展开 dock(当前=房间图标),切到牌库
     await tester.tap(find.byIcon(Icons.home_rounded));

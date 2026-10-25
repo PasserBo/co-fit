@@ -1,11 +1,14 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../room/data/room_repository_provider.dart';
 import '../../room/presentation/room_browser_provider.dart';
 import '../../room/provider/own_activity_status_provider.dart';
 import '../../../firestore/ably_state_machine.dart';
+import '../../action/presentation/action_template_usecase_provider.dart';
+import '../../action/provider/own_action_session_notifier.dart';
 
 class UserBootstrapState {
   const UserBootstrapState({
@@ -90,6 +93,16 @@ class UserBootstrapNotifier extends Notifier<UserBootstrapState> {
       await ref
           .read(roomBrowserProvider.notifier)
           .syncJoinedRooms(joinedRoomIds, userId: userId);
+
+      // 上次会话中被杀的补记/恢复;失败不阻塞 bootstrap。
+      try {
+        final cards = await ref.read(templateCardsProvider.future);
+        await ref
+            .read(ownActionSessionProvider.notifier)
+            .recoverPending(userId: userId, cards: cards);
+      } catch (error) {
+        debugPrint('recoverPending failed: $error');
+      }
       state = state.copyWith(
         userId: userId,
         joinedRoomIds: joinedRoomIds,

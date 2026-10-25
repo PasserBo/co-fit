@@ -23,6 +23,8 @@ import '../../../../firestore/ably_state_machine.dart';
 import '../../domain/entity/room_presence_member.dart';
 import '../../domain/entity/user_activity_status_entity.dart';
 import '../../provider/room_connection_status_provider.dart';
+import '../../provider/own_activity_status_provider.dart';
+import '../../provider/own_nickname_provider.dart';
 import '../../provider/room_info_provider.dart';
 import '../../../invite/provider/invite_usecase_providers.dart';
 import '../join_room_provider.dart';
@@ -85,8 +87,12 @@ class _RoomMainViewState extends ConsumerState<RoomMainView> {
     String roomId,
     DateTime now,
   ) {
-    final members =
-        browser.presenceByRoom[roomId] ?? const <RoomPresenceMember>[];
+    final members = withSelfPresent(
+      browser.presenceByRoom[roomId] ?? const <RoomPresenceMember>[],
+      selfUserId: widget.userId,
+      nickname: ref.read(ownNicknameProvider),
+      activityStatus: ref.read(ownActivityStatusProvider),
+    );
     final snapshot = browser.activityByRoom[roomId];
     if (snapshot == null || snapshot.isEmpty) {
       return members;

@@ -6,7 +6,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../firestore/ably_state_machine.dart';
 import '../../room/domain/entity/user_activity_status_entity.dart';
 import '../../room/provider/own_activity_status_provider.dart';
-import '../../room/provider/own_nickname_provider.dart';
 import '../domain/entity/action_template_card.dart';
 import '../domain/entity/pending_session_snapshot.dart';
 import '../domain/entity/template_card_session.dart';
@@ -203,17 +202,9 @@ class OwnActionSessionNotifier extends Notifier<TemplateCardSession?> {
     ref
         .read(ownActivityStatusProvider.notifier)
         .set(status.activityState == UserActivityState.idle ? null : status);
-    final nickname = ref.read(ownNicknameProvider);
-    return ref
-        .read(ablyRuntimeProvider.notifier)
-        .updatePresenceData(
-          roomId: roomId,
-          data: {
-            'userId': userId,
-            'nickname': ?nickname,
-            'activity': userActivityStatusEntityToMap(status),
-          },
-        );
+    // 广播到所有已订阅房间:同一个人同时在几个房间,运动状态处处一致
+    // (事件流只发到打牌的那间;其余房间靠 presence 快照反哺折叠)。
+    return ref.read(ablyRuntimeProvider.notifier).reassertPresence();
   }
 }
 

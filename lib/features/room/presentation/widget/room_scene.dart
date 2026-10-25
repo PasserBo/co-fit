@@ -3,7 +3,33 @@ import 'package:flutter/material.dart';
 import '../../../action/domain/entity/action_type.dart';
 import '../../../avatar/presentation/renderer/avatar_renderer.dart';
 import '../../domain/entity/room_presence_member.dart';
+import '../../domain/entity/user_activity_status_entity.dart';
 import 'avatar_bubble.dart';
+
+/// 本地兜底:presence 里还没有自己(enter 回显未到 / 离线)时,
+/// 用本地状态补一个自己,保证场景里永远能看到自己的小人。
+/// presence 已含自己则原样返回。
+List<RoomPresenceMember> withSelfPresent(
+  List<RoomPresenceMember> members, {
+  required String selfUserId,
+  String? nickname,
+  UserActivityStatusEntity? activityStatus,
+}) {
+  for (final member in members) {
+    if (member.userId == selfUserId) {
+      return members;
+    }
+  }
+  return [
+    ...members,
+    RoomPresenceMember(
+      clientId: 'local-$selfUserId',
+      userId: selfUserId,
+      nickname: nickname,
+      activityStatus: activityStatus ?? UserActivityStatusEntity.idle(),
+    ),
+  ];
+}
 
 /// 漂浮气泡空间(#6b):好友小人散布在场景锚点上,自己固定在中下方。
 /// 纯展示:presence 列表与动画渲染器由外部注入。

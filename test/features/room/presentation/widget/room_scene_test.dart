@@ -34,6 +34,7 @@ Future<void> _pump(WidgetTester tester, Widget child) {
 }
 
 void main() {
+  _withSelfPresentTests();
   testWidgets('renders friends with truncated names and self as 你',
       (tester) async {
     await _pump(
@@ -85,5 +86,38 @@ void main() {
     await tester.pump();
 
     expect(find.text('挂机'), findsOneWidget);
+  });
+}
+
+void _withSelfPresentTests() {
+  group('withSelfPresent', () {
+    const self = RoomPresenceMember(clientId: 'c-me', userId: 'me');
+    const other = RoomPresenceMember(clientId: 'c-o', userId: 'other');
+
+    test('returns the same list when self already present', () {
+      final result = withSelfPresent([other, self], selfUserId: 'me');
+      expect(result, [other, self]);
+    });
+
+    test('appends a local self with nickname/status when missing', () {
+      final result = withSelfPresent(
+        [other],
+        selfUserId: 'me',
+        nickname: '我',
+        activityStatus: const UserActivityStatusEntity(
+          activityState: UserActivityState.active,
+        ),
+      );
+      expect(result.length, 2);
+      expect(result.last.userId, 'me');
+      expect(result.last.nickname, '我');
+      expect(result.last.activityStatus.activityState, UserActivityState.active);
+    });
+
+    test('empty presence still yields self (idle)', () {
+      final result = withSelfPresent(const [], selfUserId: 'me');
+      expect(result.single.userId, 'me');
+      expect(result.single.activityStatus.activityState, UserActivityState.idle);
+    });
   });
 }

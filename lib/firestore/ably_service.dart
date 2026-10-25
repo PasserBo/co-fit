@@ -1,5 +1,7 @@
-import 'package:ably_flutter/ably_flutter.dart' as ably;
+import 'dart:async';
 import 'dart:convert';
+
+import 'package:ably_flutter/ably_flutter.dart' as ably;
 
 class AblyService {
   AblyService({
@@ -106,17 +108,41 @@ class AblyService {
     await channel.presence.update(data);
   }
 
+  /// 顺序必须是 **先订阅、后取快照**:自己 enter 的回显若落在
+  /// `presence.get()` 与 `subscribe()` 之间,会被丢掉且之后无人再触发,
+  /// 表现为「进房后看不到自己」。每次变更后重新 get 整表(顺序串行)。
   Stream<List<Map<String, dynamic>>> watchPresence({
     required String roomId,
   }) {
     final channel = _getRoomChannel(roomId);
-    final updates = channel.presence.subscribe();
-    return (() async* {
-      yield await _getPresenceMembers(roomId);
-      await for (final _ in updates) {
-        yield await _getPresenceMembers(roomId);
-      }
-    })();
+    late final StreamController<List<Map<String, dynamic>>> controller;
+    StreamSubscription<ably.PresenceMessage>? updates;
+    var chain = Future<void>.value();
+
+    void refresh() {
+      chain = chain.then((_) async {
+        if (controller.isClosed) {
+          return;
+        }
+        try {
+          controller.add(await _getPresenceMembers(roomId));
+        } catch (error, stack) {
+          controller.addError(error, stack);
+        }
+      });
+    }
+
+    controller = StreamController<List<Map<String, dynamic>>>(
+      onListen: () {
+        updates = channel.presence.subscribe().listen((_) => refresh());
+        refresh();
+      },
+      onCancel: () async {
+        await updates?.cancel();
+        await controller.close();
+      },
+    );
+    return controller.stream;
   }
 
   Future<List<Map<String, dynamic>>> _getPresenceMembers(String roomId) async {

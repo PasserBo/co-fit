@@ -221,6 +221,10 @@ class AblyRuntimeNotifier extends Notifier<AblyRuntimeState> {
     await _reassertPresence();
   }
 
+  /// 把 ownActivityStatusProvider 当前值广播到**所有**已订阅房间
+  /// (打牌 / 完成时调用:人在多个房间里,运动状态必须处处一致)。
+  Future<void> reassertPresence() => _reassertPresence();
+
   /// 回前台后对所有已订阅房间重申 presence:
   /// - 运动中:activity 刷新 updatedAtEpochMs(接收端严格更新检查,旧时间戳会被丢弃);
   ///   已到点则重申 idle(本地计时器随后会补发 completed 事件)。

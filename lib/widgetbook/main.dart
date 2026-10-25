@@ -478,7 +478,7 @@ const _wbPresence = [
 Widget _withRoomOverrides(Widget child) {
   return ProviderScope(
     overrides: [
-      roomInfoProvider(_wbRoomId).overrideWith((ref) async => _wbRoom),
+      roomInfoProvider(_wbRoomId).overrideWith((ref) => Stream.value(_wbRoom)),
       roomPresenceByIdProvider(_wbRoomId).overrideWithValue(_wbPresence),
       memberNicknameProvider('bob').overrideWith((ref) => Stream.value('鲍勃')),
       memberNicknameProvider('carol').overrideWith((ref) => Stream.value(null)),

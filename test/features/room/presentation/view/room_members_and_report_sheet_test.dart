@@ -38,7 +38,7 @@ Future<void> _pump(WidgetTester tester, Widget child) {
   return tester.pumpWidget(
     ProviderScope(
       overrides: [
-        roomInfoProvider(_roomId).overrideWith((ref) async => _room),
+        roomInfoProvider(_roomId).overrideWith((ref) => Stream.value(_room)),
         roomPresenceByIdProvider(_roomId).overrideWithValue(_presence),
         // 离线成员 bob 的昵称走 profile
         memberNicknameProvider('bob').overrideWith((ref) => Stream.value('鲍勃')),

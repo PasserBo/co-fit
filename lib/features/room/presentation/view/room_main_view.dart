@@ -316,17 +316,38 @@ class _RoomMainViewState extends ConsumerState<RoomMainView> {
     }
   }
 
-  /// 被房主移出后的懒清理(每房间只跑一次)。
-  final Set<String> _removedCleanupStarted = {};
+  /// 被房主移出 / 房间被解散 的实时清理(每房间只跑一次)。
+  /// roomInfoProvider 是 Firestore 快照流,变更秒级到达,不必等重启。
+  final Set<String> _goneCleanupStarted = {};
 
-  void _handleRemovedRoom(String roomId) {
-    if (!_removedCleanupStarted.add(roomId)) {
+  void _handleGoneRoom(String roomId, {required bool dissolved}) {
+    if (!_goneCleanupStarted.add(roomId)) {
       return;
     }
+    final name = ref.read(roomInfoProvider(roomId)).value?.name;
+    final label = (name == null || name.isEmpty) ? '该房间' : '「$name」';
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
-      ..showSnackBar(const SnackBar(content: Text('你已被移出该房间')));
+      ..showSnackBar(
+        SnackBar(content: Text(dissolved ? '$label已解散' : '你已被移出$label')),
+      );
     unawaited(cleanupRemovedRoom(ref, roomId: roomId, userId: widget.userId));
+  }
+
+  /// 对**所有**已加入房间做检测(不只当前聚焦的那间)。
+  void _watchGoneRooms(List<String> joinedRoomIds) {
+    for (final roomId in joinedRoomIds) {
+      final info = ref.watch(roomInfoProvider(roomId));
+      final dissolved = info.hasValue && info.value == null;
+      final removed = wasRemovedFromRoom(info.value, widget.userId);
+      if (dissolved || removed) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            _handleGoneRoom(roomId, dissolved: dissolved);
+          }
+        });
+      }
+    }
   }
 
   Future<void> _createFirstRoom() async {
@@ -391,13 +412,7 @@ class _RoomMainViewState extends ConsumerState<RoomMainView> {
     final roomInfo = ref.watch(roomInfoProvider(focusedRoomId)).value;
     final connection = ref.watch(roomConnectionStatusProvider(focusedRoomId));
     final hasBanner = connection != RoomConnectionStatus.live;
-    if (wasRemovedFromRoom(roomInfo, widget.userId)) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          _handleRemovedRoom(focusedRoomId);
-        }
-      });
-    }
+    _watchGoneRooms(joinedRoomIds);
 
     final decks = ref.watch(actionDecksProvider).value ?? const <ActionDeck>[];
     final activeDeckId = ref.watch(activeDeckIdProvider).value;

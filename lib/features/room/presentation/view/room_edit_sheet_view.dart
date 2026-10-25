@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/cofit_colors.dart';
 import '../../../../core/theme/cofit_dimens.dart';
 import '../../domain/entity/room_info_entity.dart';
-import '../../provider/room_info_provider.dart';
 import '../join_room_provider.dart';
 
 /// 编辑房间信息 sheet(#17b,布局复用建房表单):
@@ -61,7 +60,6 @@ class _RoomEditSheetViewState extends ConsumerState<RoomEditSheetView> {
             description: _descriptionController.text,
             visibility: _visibility,
           );
-      ref.invalidate(roomInfoProvider(widget.room.roomId));
       if (!mounted) {
         return;
       }

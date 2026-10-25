@@ -18,7 +18,7 @@ import '../widget/room_scene.dart';
 /// 成员管理 sheet(stub 协议:无定稿设计,功能优先;UGC 合规必需)。
 /// 成员列表 = Firestore `members`(memberIds)∪ presence 在线成员;
 /// 房主可「移出」非房主成员(二次确认);被移出者靠懒清理感知。
-class RoomMembersSheetView extends ConsumerWidget {
+class RoomMembersSheetView extends ConsumerStatefulWidget {
   const RoomMembersSheetView({
     required this.roomId,
     required this.viewerId,
@@ -46,9 +46,20 @@ class RoomMembersSheetView extends ConsumerWidget {
     );
   }
 
-  Future<void> _confirmAndRemove(
-    BuildContext context,
-    WidgetRef ref, {
+  @override
+  ConsumerState<RoomMembersSheetView> createState() =>
+      _RoomMembersSheetViewState();
+}
+
+class _RoomMembersSheetViewState extends ConsumerState<RoomMembersSheetView> {
+  String get roomId => widget.roomId;
+  String get viewerId => widget.viewerId;
+
+  /// 操作反馈走 sheet 内联(SnackBar 会被本 sheet 挡住)。
+  String? _errorMessage;
+  String? _removingUserId;
+
+  Future<void> _confirmAndRemove({
     required String memberUserId,
     required String displayName,
   }) async {
@@ -60,9 +71,13 @@ class RoomMembersSheetView extends ConsumerWidget {
       danger: true,
       icon: Icons.person_remove_outlined,
     );
-    if (confirmed != true || !context.mounted) {
+    if (confirmed != true || !mounted) {
       return;
     }
+    setState(() {
+      _errorMessage = null;
+      _removingUserId = memberUserId;
+    });
     try {
       await ref
           .read(removeRoomMemberUsecaseProvider)
@@ -71,25 +86,20 @@ class RoomMembersSheetView extends ConsumerWidget {
             ownerId: viewerId,
             memberUserId: memberUserId,
           );
-      ref.invalidate(roomInfoProvider(roomId));
-      if (!context.mounted) {
-        return;
-      }
-      ScaffoldMessenger.of(context)
-        ..hideCurrentSnackBar()
-        ..showSnackBar(SnackBar(content: Text('已移出「$displayName」')));
+      // 成功反馈 = 列表实时少一行(roomInfoProvider 为快照流),无需 toast。
     } catch (error) {
-      if (!context.mounted) {
-        return;
+      if (mounted) {
+        setState(() => _errorMessage = '移出「$displayName」失败:$error');
       }
-      ScaffoldMessenger.of(context)
-        ..hideCurrentSnackBar()
-        ..showSnackBar(SnackBar(content: Text('移出失败:$error')));
+    } finally {
+      if (mounted) {
+        setState(() => _removingUserId = null);
+      }
     }
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<CoFitColors>()!;
     final textTheme = Theme.of(context).textTheme;
     final roomInfoAsync = ref.watch(roomInfoProvider(roomId));
@@ -147,9 +157,8 @@ class RoomMembersSheetView extends ConsumerWidget {
                           isViewerOwner &&
                           uid != viewerId &&
                           uid != roomInfo?.ownerId,
+                      isRemoving: _removingUserId == uid,
                       onRemove: (name) => _confirmAndRemove(
-                        context,
-                        ref,
                         memberUserId: uid,
                         displayName: name,
                       ),
@@ -157,6 +166,16 @@ class RoomMembersSheetView extends ConsumerWidget {
                   },
                 ),
               ),
+            if (_errorMessage != null) ...[
+              const SizedBox(height: CoFitDimens.spacingSm),
+              Text(
+                _errorMessage!,
+                textAlign: TextAlign.center,
+                style: textTheme.labelSmall?.copyWith(
+                  color: colors.statusDanger,
+                ),
+              ),
+            ],
           ],
         ),
       ),
@@ -171,6 +190,7 @@ class _MemberRow extends ConsumerWidget {
     required this.isOwner,
     required this.presenceMember,
     required this.canRemove,
+    required this.isRemoving,
     required this.onRemove,
   });
 
@@ -179,6 +199,7 @@ class _MemberRow extends ConsumerWidget {
   final bool isOwner;
   final RoomPresenceMember? presenceMember;
   final bool canRemove;
+  final bool isRemoving;
   final ValueChanged<String> onRemove;
 
   @override
@@ -255,13 +276,22 @@ class _MemberRow extends ConsumerWidget {
             SizedBox(
               height: CoFitDimens.sizeMinTapTarget,
               child: TextButton(
-                onPressed: () => onRemove(name),
-                child: Text(
-                  '移出',
-                  style: textTheme.labelMedium?.copyWith(
-                    color: colors.statusDanger,
-                  ),
-                ),
+                onPressed: isRemoving ? null : () => onRemove(name),
+                child: isRemoving
+                    ? SizedBox(
+                        width: CoFitDimens.sizeCardIcon,
+                        height: CoFitDimens.sizeCardIcon,
+                        child: CircularProgressIndicator(
+                          strokeWidth: CoFitDimens.borderWidthFocus,
+                          color: colors.statusDanger,
+                        ),
+                      )
+                    : Text(
+                        '移出',
+                        style: textTheme.labelMedium?.copyWith(
+                          color: colors.statusDanger,
+                        ),
+                      ),
               ),
             ),
         ],

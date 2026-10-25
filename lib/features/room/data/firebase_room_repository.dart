@@ -85,6 +85,25 @@ class FirebaseRoomRepository {
     return RoomInfoEntity.fromMap({...data, 'roomId': trimmed});
   }
 
+  /// 实时订阅房间文档:成员被移出 / 房间被解散 / 改名都即时下发
+  /// (rules 对登录用户放开 read,被移出者仍能收到最后一次变更)。
+  /// 房间不存在或被删除时流出 null。
+  Stream<RoomInfoEntity?> watchRoomInfo({required String roomId}) {
+    final trimmed = roomId.trim();
+    if (trimmed.isEmpty) {
+      return Stream.value(null);
+    }
+    return _firestore.collection('rooms').doc(trimmed).snapshots().map((
+      snapshot,
+    ) {
+      final data = snapshot.data();
+      if (!snapshot.exists || data == null) {
+        return null;
+      }
+      return RoomInfoEntity.fromMap({...data, 'roomId': trimmed});
+    });
+  }
+
   Future<void> joinRoom({
     required String roomId,
     required String userId,

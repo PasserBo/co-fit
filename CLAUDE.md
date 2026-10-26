@@ -40,7 +40,9 @@ fvm flutter analyze
   - ⚠️ **Apple 凭证必须带 `accessToken: appleCredential.authorizationCode`**,只传 `idToken` + `rawNonce` 会报 `invalid-credential / Invalid OAuth response from apple.com`——该文案会把排查引向 Firebase/Apple provider 配置,**实为客户端漏传授权码**(flutterfire#18289 / #13235)。改 `signInWithApple` 时勿删。
   - Apple 侧已配:Services ID、Sign in with Apple 私钥(`.p8` 存本地 `keys/`,已 gitignore)、邮件转发源 `noreply@cofit-lmdyd.firebaseapp.com`。私钥同时是上架「账号删除需 token revocation」的前提。
   - ⚠️ **Apple 登录产生独立 Firebase uid**,与既有 Google/邮箱账号不互通;账号关联(linkWithCredential)待产品决议。
-- Firestore 集合(rules 全部显式声明,末尾全局 deny):`rooms`、`users/{uid}`(profile,可选键 `activeDeckId`)、`users/{uid}/memberships`、`users/{uid}/decks`、`users/{uid}/sessions`(只追加打卡日志)、`card_templates`(只读)。
+- Firestore 集合(rules 全部显式声明,末尾全局 deny):`rooms`(含 `members{uid}` map,owner 可移出成员)、`users/{uid}`(profile,可选键 `activeDeckId`)、`users/{uid}/memberships`、`users/{uid}/decks`、`users/{uid}/cards`、`users/{uid}/sessions`(只追加打卡日志)、`card_templates`(只读)、`reports`(举报,仅本人 create,客户端不可读)。
+- ⚠️ **Firestore `snapshots()` 第一帧可能来自本地缓存**。`RoomInfoEntity.fromCache == true` 的帧只能展示,**不得**据此判定「被移出/已解散」并做清理(2026-10-26 曾因此把刚加入的用户自己踢出房间)。
+- ⚠️ **Ably presence**:`watchPresence` 必须先 `subscribe()` 再 `get()`;presence update 是整包替换,永远带 `userId`;自己的运动状态经 `AblyRuntimeNotifier.reassertPresence()` 广播到**所有**已订阅房间,不要只写当前房间。
 - Ably key 走 `--dart-define`(`ABLY_API_KEY` / `ABLY_CLIENT_ID_PREFIX`);仓库根 `.env`(gitignored,含真实 key)配合 `.vscode/launch.json` 的 `--dart-define-from-file` 使用。**不要把 key 写进任何被提交的文件。**
 - 深链:自定义 scheme **`cofit://room/<roomId>?h=<shareLinkHash>`**(拼装/解析唯一事实源 `lib/features/invite/domain/invite_link_format.dart`;Info.plist 已注册 `cofit` 与 Google 回跳两条 scheme)。本期无 Universal Links。
 - **账号删除**(Apple 上架强制):`profile/usecase/delete_account_usecase.dart`。⚠️ 顺序不可调换——Firestore 清理必须在注销 Auth 用户**之前**,uid 失效后 rules 会拒绝一切写入、数据永久残留(已有单测锁住顺序)。Apple 账号会重新授权取新鲜 authorizationCode 用于 `revokeTokenWithAuthorizationCode`;邮箱账号无法静默重认证 → 抛 `ReauthenticationRequiredException`,UI 引导重登。
@@ -55,7 +57,11 @@ fvm flutter analyze
 - entity 用 `@freezed`;repository 接口在 domain,实现在 infrastructure。
 - 现状约定:repository 实现实际放各 feature 的 `data/`(历史沿用,不迁移);action 特性旧 usecase 在 `domain/` 下(遗留,不迁移),新 usecase 一律放 `usecase/`。
 
-已实现 feature:`room`(房间/Presence/事件/退出房间)、`auth`(Google+邮箱登录)、`profile`(用户资料/onboarding)、`invite`(邀请深链)、`action`(动作卡模板/牌组云端化/打卡历史)、`avatar`(占位小人动作集)。`social` 仍是空目录。
+已实现 feature:`room`(房间 CRUD/presence/事件折叠/成员管理/举报/实时感知被移出与解散)、`auth`(Apple+Google+邮箱登录、bootstrap)、`profile`(资料/onboarding/账号删除)、`invite`(邀请深链)、`action`(动作卡模板/自建卡/牌组云端化/打卡历史/会话被杀恢复)、`avatar`(占位小人动作集)。`social` 仍是空目录。
+
+**架构总览(现状)与踩坑清单:[docs/project_overview.md](docs/project_overview.md);用户流程与页面完成度:[docs/flows_status.md](docs/flows_status.md)。** 跨 feature 纯 UI 组件放 `lib/core/widget/`(确认弹窗一律用 `showCoFitConfirmSheet`,不要再写原生 AlertDialog)。
+
+- `dart format` 只跑在自己改的文件上,整目录 format 会把大量未格式化的历史文件卷进 diff。
 
 ## UI 大改造(进行中)
 

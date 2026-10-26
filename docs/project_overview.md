@@ -19,6 +19,8 @@ Flutter(iOS-only)App:好友以小人形式出现在共享「房间」里,打出�
 | 持久数据 | Cloud Firestore | rules 显式声明每个集合,末尾全局 deny;rules 改动由 CI 部署 |
 | 实时 | Ably Realtime | 每房间一个频道 `room:{roomId}:events`,presence + 事件两条通道 |
 | 本地 | shared_preferences | 只存「进行中的运动会话快照」(被杀后恢复) |
+| 开关 | Firebase Remote Config | `core/flags/FeatureFlags`,目前一个:`auth_google_enabled`(默认 false) |
+| 法律文档 | GitHub Pages(GitSpec) | `docs/legal/*.md` → `https://passerbo.github.io/co-fit/docs-legal-{privacy,terms}` |
 | 动画 | 占位几何小人(`avatar`) | Rive 范围外;`AvatarRenderer` 接口留给将来替换 |
 
 ## 3. 目录与分层
@@ -29,6 +31,8 @@ lib/
 ├── core/
 │   ├── navigation/                # AppShell(IndexedStack + 悬浮 dock,三槽位:房间/牌库/我的)
 │   ├── theme/                     # token JSON、CoFitColors(ThemeExtension)、CoFitDimens、CoFitTheme
+│   ├── flags/                     # Remote Config 功能开关(FeatureFlags + repository + provider)
+│   ├── legal/                     # 法律文档 URL 与外开
 │   └── widget/                    # 跨 feature 纯 UI:FloatingDock、BrandSplash、CoFitConfirmSheet
 ├── firestore/                     # (历史命名)Ably 接入层:AblyService、AblyRuntimeNotifier
 └── features/<name>/
@@ -115,4 +119,4 @@ room:{roomId}:events
 
 ## 8. 上架前仍缺(非代码)
 
-隐私政策 + 用户协议 URL(需域名,顺带可托管 AASA 做 Universal Links)、`PrivacyInfo.xcprivacy`、正式 App 图标(现为临时版)、App Store Connect 演示账号与截图、Release 构建传 `--dart-define-from-file=.env` 的脚本化。
+`PrivacyInfo.xcprivacy`、正式 App 图标(现为临时版)、App Store Connect 演示账号与截图、Release 构建传 `--dart-define-from-file=.env` 的脚本化。Universal Links 仍需自有域名托管 AASA(隐私政策已在 GitHub Pages,但项目站点路径不能做 AASA)。

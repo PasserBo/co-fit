@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/legal/legal_links.dart';
 import '../../../../core/widget/cofit_confirm_sheet.dart';
 
 import '../../../action/presentation/action_template_usecase_provider.dart';
@@ -72,6 +73,15 @@ class MyPageView extends ConsumerWidget {
           ..hideCurrentSnackBar()
           ..showSnackBar(const SnackBar(content: Text('昵称保存失败,请重试')));
       }
+    }
+  }
+
+  Future<void> _openLegal(BuildContext context, Uri uri) async {
+    final opened = await LegalLinks.open(uri);
+    if (!opened && context.mounted) {
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text('无法打开:$uri')));
     }
   }
 
@@ -160,6 +170,8 @@ class MyPageView extends ConsumerWidget {
             await signOutUsecase.execute();
           },
           onDeleteAccount: () => _deleteAccount(context, ref),
+          onOpenPrivacyPolicy: () => _openLegal(context, LegalLinks.privacyPolicy),
+          onOpenTerms: () => _openLegal(context, LegalLinks.termsOfService),
         ),
       ),
     );

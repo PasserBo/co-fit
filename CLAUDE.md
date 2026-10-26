@@ -44,6 +44,8 @@ fvm flutter analyze
 - ⚠️ **Firestore `snapshots()` 第一帧可能来自本地缓存**。`RoomInfoEntity.fromCache == true` 的帧只能展示,**不得**据此判定「被移出/已解散」并做清理(2026-10-26 曾因此把刚加入的用户自己踢出房间)。
 - ⚠️ **Ably presence**:`watchPresence` 必须先 `subscribe()` 再 `get()`;presence update 是整包替换,永远带 `userId`;自己的运动状态经 `AblyRuntimeNotifier.reassertPresence()` 广播到**所有**已订阅房间,不要只写当前房间。
 - Ably key 走 `--dart-define`(`ABLY_API_KEY` / `ABLY_CLIENT_ID_PREFIX`);仓库根 `.env`(gitignored,含真实 key)配合 `.vscode/launch.json` 的 `--dart-define-from-file` 使用。**不要把 key 写进任何被提交的文件。**
+- **功能开关走 Firebase Remote Config**(`lib/core/flags/`):`FeatureFlags` 的字段默认值 = 远端未配置时的行为;Google 登录由 `auth_google_enabled` 控制,**默认关**(2026-10-26 决议:代码保留不删)。要打开:console 新建同名布尔参数并发布。
+- **法律文档**在 `docs/legal/`,随 main 推送由 GitSpec 工作流发布到 GitHub Pages;App 内地址只在 `lib/core/legal/legal_links.dart`(GitSpec slug 规则 `docs/legal/privacy.md` → `/co-fit/docs-legal-privacy`,改文件名必须同步改这里)。
 - 深链:自定义 scheme **`cofit://room/<roomId>?h=<shareLinkHash>`**(拼装/解析唯一事实源 `lib/features/invite/domain/invite_link_format.dart`;Info.plist 已注册 `cofit` 与 Google 回跳两条 scheme)。本期无 Universal Links。
 - **账号删除**(Apple 上架强制):`profile/usecase/delete_account_usecase.dart`。⚠️ 顺序不可调换——Firestore 清理必须在注销 Auth 用户**之前**,uid 失效后 rules 会拒绝一切写入、数据永久残留(已有单测锁住顺序)。Apple 账号会重新授权取新鲜 authorizationCode 用于 `revokeTokenWithAuthorizationCode`;邮箱账号无法静默重认证 → 抛 `ReauthenticationRequiredException`,UI 引导重登。
 

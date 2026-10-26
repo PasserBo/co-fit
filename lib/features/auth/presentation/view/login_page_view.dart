@@ -3,10 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/cofit_colors.dart';
+import '../../../../core/flags/feature_flags_provider.dart';
 import '../../../../core/theme/cofit_dimens.dart';
 import '../../domain/repository/auth_repository.dart';
 import '../../provider/auth_usecase_providers.dart';
 import '../widget/auth_provider_button.dart';
+import '../widget/legal_consent_footer.dart';
 import '../widget/login_brand_block.dart';
 
 /// 登录页(#19a 定稿)。
@@ -210,17 +212,20 @@ class _LoginPageViewState extends ConsumerState<LoginPageView> {
                     isLoading: _isSubmittingApple,
                     onPressed: _isBusy ? null : _signInWithApple,
                   ),
-                  const SizedBox(height: CoFitDimens.spacingSm),
-                  AuthProviderButton(
-                    icon: Icon(
-                      Icons.g_mobiledata_rounded,
-                      color: colors.textPrimary,
-                      size: CoFitDimens.sizeBannerIcon,
+                  // Google 登录由 Remote Config `auth_google_enabled` 控制,默认关
+                  if (ref.watch(featureFlagsValueProvider).authGoogleEnabled) ...[
+                    const SizedBox(height: CoFitDimens.spacingSm),
+                    AuthProviderButton(
+                      icon: Icon(
+                        Icons.g_mobiledata_rounded,
+                        color: colors.textPrimary,
+                        size: CoFitDimens.sizeBannerIcon,
+                      ),
+                      label: '通过 Google 登录',
+                      isLoading: _isSubmittingGoogle,
+                      onPressed: _isBusy ? null : _signInWithGoogle,
                     ),
-                    label: '通过 Google 登录',
-                    isLoading: _isSubmittingGoogle,
-                    onPressed: _isBusy ? null : _signInWithGoogle,
-                  ),
+                  ],
                   const SizedBox(height: CoFitDimens.spacingXl),
                   Row(
                     children: [
@@ -272,6 +277,8 @@ class _LoginPageViewState extends ConsumerState<LoginPageView> {
                       style: TextStyle(color: colors.statusInfo),
                     ),
                   ],
+                  const SizedBox(height: CoFitDimens.spacingXl),
+                  const LegalConsentFooter(),
                 ],
               ),
             ),

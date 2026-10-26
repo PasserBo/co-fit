@@ -33,7 +33,8 @@ LoginPageView ─(Apple / Google / 邮箱)─► OnboardingPageView(昵称必填
 
 | 步骤 | 状态 | 备注 |
 |---|---|---|
-| 三种登录 | ✅ | Apple 2026-09-17 真机验证;Apple uid 与 Google/邮箱 uid 不互通(待产品决议) |
+| 三种登录 | ✅ | Apple 2026-09-17 真机验证;**Google 登录由 Remote Config `auth_google_enabled` 控制,默认关**(2026-10-26,uid 不互通问题解决前不开放) |
+| 登录页法律条款链接 | ✅ | 2026-10-26:「登录即表示同意《用户协议》与《隐私政策》」,外开 GitHub Pages |
 | 取消登录 | ✅ | `AuthCancelledException` 静默 |
 | Onboarding 起名 | ✅ | 空名禁用 CTA |
 | Onboarding 形象区 | 🟡→✅ | 原「形象定制 即将上线」角标 + toast,本次盘点已移除(审核指南 2.1 不接受占位) |
@@ -121,7 +122,7 @@ AppShell[我的]
 | 运动历史(本周小结 + 7 日微柱) | ✅ | 客户端聚合最近 100 条 |
 | 删除账号 | ✅ | 顺序由单测锁住 |
 | 「编辑形象」按钮 | 🟡→✅ | 原 toast「开发中」,本次移除 |
-| 法律条款 / 举报联系方式 | ⛔ | 需隐私政策 + 用户协议 URL(待域名);本次先加「举报」入口,条款入口待 URL 就位后加 |
+| 法律条款 / 举报联系方式 | ✅ | 2026-10-26:我的页「关于」分组 → 隐私政策 / 用户协议(GitHub Pages);联系方式为 GitHub issues |
 
 ## 3. 页面清单(按文件)
 
@@ -147,8 +148,8 @@ AppShell[我的]
 ## 4. 上架前仍需补的(非代码)
 
 1. ~~App 图标与启动图~~ → 2026-10-26 已换成临时品牌版(bob 小人);正式图标待设计。
-2. 隐私政策 + 用户协议页面(需要一个域名;同时托管 AASA 解锁 Universal Links)。
+2. ~~隐私政策 + 用户协议页面~~ → 2026-10-26 已上 GitHub Pages(`docs/legal/`)。Universal Links 的 AASA 仍需自有域名(GitHub Pages 项目站点路径带 `/co-fit/`,不能做 AASA)。
 3. `PrivacyInfo.xcprivacy`(Firebase/Ably SDK 的 Required Reason API 声明)。
 4. App Store Connect:演示账号(邮箱账号,预先进好一个有人的房间)、截图、数据收集声明。
 5. Release 构建时 `--dart-define-from-file=.env` 的传递方式(Archive 脚本)。
-6. 产品决议:Google 登录是否保留(Apple/Google uid 不互通)。
+6. ~~产品决议:Google 登录是否保留~~ → 2026-10-26 决议:保留代码,Remote Config 默认关。

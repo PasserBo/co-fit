@@ -22,6 +22,8 @@ class MyPageBody extends StatelessWidget {
     this.onOpenHistory,
     this.onSignOut,
     this.onDeleteAccount,
+    this.onOpenPrivacyPolicy,
+    this.onOpenTerms,
     super.key,
   });
 
@@ -46,6 +48,10 @@ class MyPageBody extends StatelessWidget {
 
   /// 删除账号(Apple 上架要求);null 时不显示该入口。
   final VoidCallback? onDeleteAccount;
+
+  /// 法律文档(两者都为 null 时不显示「关于」分组)。
+  final VoidCallback? onOpenPrivacyPolicy;
+  final VoidCallback? onOpenTerms;
 
   @override
   Widget build(BuildContext context) {
@@ -145,6 +151,32 @@ class MyPageBody extends StatelessWidget {
             ),
           ],
         ),
+        if (onOpenPrivacyPolicy != null || onOpenTerms != null) ...[
+          const SizedBox(height: CoFitDimens.spacingLg),
+          _GroupLabel('关于'),
+          _SettingsGroup(
+            children: [
+              if (onOpenPrivacyPolicy != null)
+                _SettingsRow(
+                  iconColor: colors.textSecondary,
+                  iconBg: colors.bgOverlay,
+                  icon: Icons.privacy_tip_outlined,
+                  label: '隐私政策',
+                  trailing: '',
+                  onTap: onOpenPrivacyPolicy,
+                ),
+              if (onOpenTerms != null)
+                _SettingsRow(
+                  iconColor: colors.textSecondary,
+                  iconBg: colors.bgOverlay,
+                  icon: Icons.description_outlined,
+                  label: '用户协议',
+                  trailing: '',
+                  onTap: onOpenTerms,
+                ),
+            ],
+          ),
+        ],
         const SizedBox(height: CoFitDimens.spacingLg),
         // 退出登录:独立 danger 卡片(README §5)
         GestureDetector(

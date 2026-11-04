@@ -13,9 +13,12 @@ if [[ $# -ge 2 ]]; then
   extra+=(--build-name="$1" --build-number="$2")
 fi
 
+# 前提:Xcode → Settings → Accounts 已登录拥有 J95TRWHWYM 团队的 Apple ID,
+# 否则导出 ipa 时报 "No Accounts / No signing certificate iOS Distribution"。
+# 归档成功但导出失败时,登录账号后只需跑 scripts/export_ipa.sh,不用重新编译。
 fvm flutter build ipa --release \
   --dart-define-from-file=.env \
-  --export-method app-store \
+  --export-options-plist=ios/ExportOptions.plist \
   "${extra[@]}"
 
 echo

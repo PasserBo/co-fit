@@ -87,10 +87,9 @@ class FirebaseAuthRepository implements AuthRepository {
     final AuthorizationCredentialAppleID appleCredential;
     try {
       appleCredential = await SignInWithApple.getAppleIDCredential(
-        scopes: [
-          AppleIDAuthorizationScopes.email,
-          AppleIDAuthorizationScopes.fullName,
-        ],
+        // 只要 email:姓名拿到也不存(App Privacy 未申报 Name),
+        // 不请求 fullName 则 Apple 授权面板不出现姓名栏。
+        scopes: [AppleIDAuthorizationScopes.email],
         nonce: hashedNonce,
       );
     } on SignInWithAppleAuthorizationException catch (error) {

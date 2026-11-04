@@ -1,8 +1,20 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="120" height="160" viewBox="0 0 120 160">
-  <ellipse cx="60" cy="150" rx="30" ry="6" fill="#C8F24B" fill-opacity="0.28"/>
-  <circle cx="60" cy="28" r="20" fill="none" stroke="#C8F24B" stroke-width="4" stroke-opacity="0.9"/>
-  <circle cx="60" cy="28" r="14" fill="#F4F3EF"/>
-  <rect x="42" y="52" width="36" height="58" rx="18" fill="#F4F3EF"/>
-  <rect x="47" y="112" width="10" height="24" rx="5" fill="#F4F3EF"/>
-  <rect x="63" y="112" width="10" height="24" rx="5" fill="#F4F3EF"/>
+  <!-- 豆豆启动图:几何来自 docs/avatar_bean_spec.md §1(80×100 视框,scale 1.5);
+       背景透明,四肢的「缝」描边用 storyboard 底色 gray-900 -->
+  <ellipse cx="60" cy="143.0" rx="25.5" ry="7.5" fill="#C8F24B" fill-opacity="0.22"/>
+  <g transform="translate(0.0 8) scale(1.5)">
+        <rect x="30" y="70.5" width="6" height="8" rx="3.0" fill="#F4F3EF" stroke="#181B22" stroke-width="1.4" paint-order="stroke"/>
+    <rect x="30" y="79.5" width="6" height="7" rx="3.0" fill="#F4F3EF" stroke="#181B22" stroke-width="1.4" paint-order="stroke"/>
+    <rect x="28" y="86" width="10" height="3" rx="1.5" fill="#F4F3EF" stroke="#181B22" stroke-width="1.4" paint-order="stroke"/>
+    <rect x="44" y="70.5" width="6" height="8" rx="3.0" fill="#F4F3EF" stroke="#181B22" stroke-width="1.4" paint-order="stroke"/>
+    <rect x="44" y="79.5" width="6" height="7" rx="3.0" fill="#F4F3EF" stroke="#181B22" stroke-width="1.4" paint-order="stroke"/>
+    <rect x="42" y="86" width="10" height="3" rx="1.5" fill="#F4F3EF" stroke="#181B22" stroke-width="1.4" paint-order="stroke"/>
+    <rect x="12.5" y="39" width="5.5" height="10" rx="2.75" fill="#F4F3EF" stroke="#181B22" stroke-width="1.4" paint-order="stroke"/>
+    <rect x="12.5" y="51" width="5.5" height="9" rx="2.75" fill="#F4F3EF" stroke="#181B22" stroke-width="1.4" paint-order="stroke"/>
+    <rect x="62" y="39" width="5.5" height="10" rx="2.75" fill="#F4F3EF" stroke="#181B22" stroke-width="1.4" paint-order="stroke"/>
+    <rect x="62" y="51" width="5.5" height="9" rx="2.75" fill="#F4F3EF" stroke="#181B22" stroke-width="1.4" paint-order="stroke"/>
+    <path d="M40 7 C 59 7, 61 29, 60 48 C 59 63, 50 68, 40 68 C 30 68, 21 63, 20 48 C 19 29, 21 7, 40 7 Z" fill="#F4F3EF"/>
+    <path d="M40 7 C 59 7, 61 29, 60 48 C 59 63, 50 68, 40 68 C 30 68, 21 63, 20 48 C 19 29, 21 7, 40 7 Z" fill="none" stroke="#C8F24B" stroke-opacity="0.9" stroke-width="2.4"/>
+    <circle cx="34" cy="29" r="1.7" fill="#181B22"/><circle cx="46" cy="29" r="1.7" fill="#181B22"/>
+  </g>
 </svg>

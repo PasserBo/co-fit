@@ -18,7 +18,7 @@
 | 0.7 | `pubspec.yaml` 的 `description` | 一句话产品描述 | 不影响上架,顺手改 |
 
 已经 OK、不用动的:
-- 1024 图标无 alpha、尺寸正确(临时版 bob 小人,可先用它上 TestFlight,正式图标出来再换)。
+- 1024 图标无 alpha、尺寸正确(2026-11-05 已换成豆豆形象,源文件 `docs/brand/app_icon.svg`)。
 - Bundle id `com.passerbo.cofitapp`、Team `J95TRWHWYM`、自动签名、Sign in with Apple entitlement。
 - 账号删除、举报、房主踢人、登录页法律条款链接(审核 1.2 / 5.1.1(v) 的硬要求)都已实现。
 - 隐私政策 / 用户协议两条 GitHub Pages 链接本次 curl 均 200。
@@ -54,7 +54,8 @@
 
 ### 2.1 一次性准备
 
-1. Xcode → Settings → Accounts 里登录 Apple ID,确认 `J95TRWHWYM` 团队在列(TestFlight 上传用 Xcode 签名即可,不需要 App Store Connect API key)。
+1. **Xcode → Settings → Accounts 里登录拥有 `J95TRWHWYM` 团队的 Apple ID**(TestFlight 上传用 Xcode 签名即可,不需要 App Store Connect API key)。
+   ⚠️ 2026-11-05 实测:本机没登录账号、也没有该团队的 Apple Distribution 证书时,归档成功但导出 ipa 报 `exportArchive No Accounts / No signing certificate "iOS Distribution" found`。登录后 `-allowProvisioningUpdates` 会自动申请 Distribution 证书与 App Store profile,不需要手动去开发者网站建。
 2. `.env` 里有真实 `ABLY_API_KEY` / `ABLY_CLIENT_ID_PREFIX`(gitignored)。
 3. 版本号:`pubspec.yaml` 当前 `1.0.0+1`。**每次上传 build number 必须递增**(`+2`、`+3`…),同一 `1.0.0` 下可以传多个 build。
 
@@ -64,7 +65,13 @@
 scripts/build_ipa.sh
 ```
 
-脚本等价于 `fvm flutter build ipa --release --dart-define-from-file=.env --export-method app-store`;要覆盖版本号用 `scripts/build_ipa.sh 1.0.0 3`(build-name build-number)。
+脚本等价于 `fvm flutter build ipa --release --dart-define-from-file=.env --export-options-plist=ios/ExportOptions.plist`;要覆盖版本号用 `scripts/build_ipa.sh 1.0.0 3`(build-name build-number)。导出配置在 `ios/ExportOptions.plist`(method `app-store-connect`、自动签名、上传符号)。
+
+归档成功但导出失败(签名问题)时,修好签名后**只导出、不重编**:
+
+```bash
+scripts/export_ipa.sh
+```
 
 产物:`build/ios/ipa/*.ipa`(同时生成 `build/ios/archive/Runner.xcarchive`)。
 

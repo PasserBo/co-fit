@@ -147,7 +147,7 @@ AppShell[我的]
 
 ## 4. 上架前仍需补的(非代码)
 
-1. ~~App 图标与启动图~~ → 2026-10-26 已换成临时品牌版(bob 小人);正式图标待设计。
+1. ~~App 图标与启动图~~ → 2026-10-26 临时品牌版;2026-11-05 图标与启动图都换成豆豆形象。
 2. ~~隐私政策 + 用户协议页面~~ → 2026-10-26 已上 GitHub Pages(`docs/legal/`)。Universal Links 的 AASA 仍需自有域名(GitHub Pages 项目站点路径带 `/co-fit/`,不能做 AASA)。
 3. ~~`PrivacyInfo.xcprivacy`~~ → 2026-11-04 已加 App 级清单(`ios/Runner/PrivacyInfo.xcprivacy`),与 App Privacy 表对应。
 4. App Store Connect:演示账号(邮箱账号,预先进好一个有人的房间)、截图、数据收集声明 → 资料包见 [release/app_store_connect_testflight.md](release/app_store_connect_testflight.md)。

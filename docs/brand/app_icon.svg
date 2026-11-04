@@ -1,19 +1,31 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <!-- 豆豆 app 图标:几何来自 docs/avatar_bean_spec.md §1(80×100 视框,scale 8.0) -->
   <defs>
-    <radialGradient id="g" cx="50%" cy="38%" r="60%">
-      <stop offset="0" stop-color="#2A3320"/>
-      <stop offset="1" stop-color="#181B22"/>
+    <radialGradient id="glow" cx="50%" cy="35%" r="60%">
+      <stop offset="0" stop-color="#C8F24B" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#C8F24B" stop-opacity="0"/>
     </radialGradient>
   </defs>
-  <rect width="1024" height="1024" fill="url(#g)"/>
-  <ellipse cx="512" cy="840" rx="230" ry="40" fill="#C8F24B" fill-opacity="0.22"/>
-  <!-- two cards flanking (coral/blue like login brand block) -->
-  <rect x="150" y="560" width="150" height="210" rx="24" transform="rotate(-14 225 665)" fill="#22252E" stroke="#FF7A59" stroke-width="10"/>
-  <rect x="724" y="560" width="150" height="210" rx="24" transform="rotate(14 799 665)" fill="#22252E" stroke="#8FBAFF" stroke-width="10"/>
-  <!-- figure -->
-  <circle cx="512" cy="300" r="128" fill="none" stroke="#C8F24B" stroke-width="26"/>
-  <circle cx="512" cy="300" r="90" fill="#F4F3EF"/>
-  <rect x="400" y="450" width="224" height="330" rx="112" fill="#F4F3EF"/>
-  <rect x="430" y="780" width="60" height="110" rx="30" fill="#F4F3EF"/>
-  <rect x="534" y="780" width="60" height="110" rx="30" fill="#F4F3EF"/>
+  <rect width="1024" height="1024" fill="#181B22"/>
+  <rect width="1024" height="1024" fill="url(#glow)"/>
+  <!-- two action cards flanking (coral = strength, blue = flexibility) -->
+  <rect x="112" y="540" width="170" height="236" rx="26" transform="rotate(-14 197 658)" fill="#22252E" stroke="#FF7A59" stroke-width="12"/>
+  <rect x="742" y="540" width="170" height="236" rx="26" transform="rotate(14 827 658)" fill="#22252E" stroke="#8FBAFF" stroke-width="12"/>
+  <!-- ground aura(主体色 @18,rx 17) -->
+  <ellipse cx="512" cy="840" rx="136" ry="40" fill="#F4F3EF" fill-opacity="0.18"/>
+  <g transform="translate(192 120) scale(8.0)">
+    <rect x="30" y="70.5" width="6" height="8" rx="3.0" fill="#F4F3EF" stroke="#181B22" stroke-width="1.4" paint-order="stroke"/>
+    <rect x="30" y="79.5" width="6" height="7" rx="3.0" fill="#F4F3EF" stroke="#181B22" stroke-width="1.4" paint-order="stroke"/>
+    <rect x="28" y="86" width="10" height="3" rx="1.5" fill="#F4F3EF" stroke="#181B22" stroke-width="1.4" paint-order="stroke"/>
+    <rect x="44" y="70.5" width="6" height="8" rx="3.0" fill="#F4F3EF" stroke="#181B22" stroke-width="1.4" paint-order="stroke"/>
+    <rect x="44" y="79.5" width="6" height="7" rx="3.0" fill="#F4F3EF" stroke="#181B22" stroke-width="1.4" paint-order="stroke"/>
+    <rect x="42" y="86" width="10" height="3" rx="1.5" fill="#F4F3EF" stroke="#181B22" stroke-width="1.4" paint-order="stroke"/>
+    <rect x="12.5" y="39" width="5.5" height="10" rx="2.75" fill="#F4F3EF" stroke="#181B22" stroke-width="1.4" paint-order="stroke"/>
+    <rect x="12.5" y="51" width="5.5" height="9" rx="2.75" fill="#F4F3EF" stroke="#181B22" stroke-width="1.4" paint-order="stroke"/>
+    <rect x="62" y="39" width="5.5" height="10" rx="2.75" fill="#F4F3EF" stroke="#181B22" stroke-width="1.4" paint-order="stroke"/>
+    <rect x="62" y="51" width="5.5" height="9" rx="2.75" fill="#F4F3EF" stroke="#181B22" stroke-width="1.4" paint-order="stroke"/>
+    <path d="M40 7 C 59 7, 61 29, 60 48 C 59 63, 50 68, 40 68 C 30 68, 21 63, 20 48 C 19 29, 21 7, 40 7 Z" fill="#F4F3EF"/>
+    <path d="M40 7 C 59 7, 61 29, 60 48 C 59 63, 50 68, 40 68 C 30 68, 21 63, 20 48 C 19 29, 21 7, 40 7 Z" fill="none" stroke="#C8F24B" stroke-opacity="0.9" stroke-width="2.4"/>
+    <circle cx="34" cy="29" r="1.7" fill="#181B22"/><circle cx="46" cy="29" r="1.7" fill="#181B22"/>
+  </g>
 </svg>

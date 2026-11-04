@@ -11,6 +11,8 @@ class ActionTemplateCard {
     required this.defaultDurationSec,
     this.source = ActionSource.official,
     this.intensityBaseline = const <String, dynamic>{},
+    this.motionId,
+    this.order = 0,
   });
 
   final String id;
@@ -24,6 +26,12 @@ class ActionTemplateCard {
   final String ablyActionId;
   final int defaultDurationSec;
   final Map<String, dynamic> intensityBaseline;
+
+  /// 小人动作 clip id(P2):null 或未知 id → 按 [type] 的类型原型兜底。
+  final String? motionId;
+
+  /// 牌库排序(SSOT `firestore/card_templates.json` 的 order;自建卡 0)。
+  final int order;
 
   String get intensityLabel {
     final label = intensityBaseline['label'];
@@ -39,6 +47,9 @@ class ActionTemplateCard {
     String? ablyActionId,
     int? defaultDurationSec,
     Map<String, dynamic>? intensityBaseline,
+    String? motionId,
+    bool clearMotionId = false,
+    int? order,
   }) {
     return ActionTemplateCard(
       id: id ?? this.id,
@@ -49,6 +60,8 @@ class ActionTemplateCard {
       ablyActionId: ablyActionId ?? this.ablyActionId,
       defaultDurationSec: defaultDurationSec ?? this.defaultDurationSec,
       intensityBaseline: intensityBaseline ?? this.intensityBaseline,
+      motionId: clearMotionId ? null : (motionId ?? this.motionId),
+      order: order ?? this.order,
     );
   }
 }

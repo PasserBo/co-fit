@@ -284,6 +284,7 @@ service cloud.firestore {
           'ablyActionId',
           'defaultDurationSec',
           'intensityBaseline',
+          'motionId',
           'createdAt',
           'updatedAt',
         ]);
@@ -296,7 +297,9 @@ service cloud.firestore {
         isNonEmptyString(data.ablyActionId) &&
         data.defaultDurationSec is int &&
         data.defaultDurationSec > 0 &&
-        data.intensityBaseline is map;
+        data.intensityBaseline is map &&
+        // motionId(P2 小人动作)可选;给了必须是非空字符串
+        (!data.keys().hasAny(['motionId']) || isNonEmptyString(data.motionId));
     }
 
     match /users/{userId}/cards/{cardId} {
@@ -380,7 +383,10 @@ service cloud.firestore {
           'startedAt',
           'completedAt',
           'status',
-        ]);
+          'motionId',
+        ]) &&
+        // motionId(P2)可选;给了必须是非空字符串
+        (!data.keys().hasAny(['motionId']) || isNonEmptyString(data.motionId));
     }
 
     match /users/{userId}/sessions/{sessionId} {

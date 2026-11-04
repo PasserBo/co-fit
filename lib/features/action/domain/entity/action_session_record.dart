@@ -24,6 +24,9 @@ abstract class ActionSessionRecord with _$ActionSessionRecord {
     required DateTime startedAt,
     required DateTime completedAt,
     @Default(ActionSessionRecordStatus.completed) String status,
+
+    /// 做过哪个动作(P2,可选;rules 放行可选键)。
+    String? motionId,
   }) = _ActionSessionRecord;
 
   Map<String, dynamic> toMap() {
@@ -38,6 +41,7 @@ abstract class ActionSessionRecord with _$ActionSessionRecord {
       'startedAt': startedAt,
       'completedAt': completedAt,
       'status': status,
+      if (motionId != null) 'motionId': motionId,
     };
   }
 
@@ -54,6 +58,9 @@ abstract class ActionSessionRecord with _$ActionSessionRecord {
       completedAt: _asDateTime(source['completedAt']) ?? DateTime.now(),
       status:
           (source['status'] ?? ActionSessionRecordStatus.completed).toString(),
+      motionId: (source['motionId']?.toString().trim().isEmpty ?? true)
+          ? null
+          : source['motionId'].toString().trim(),
     );
   }
 

@@ -29,6 +29,27 @@ void main() {
       expect(await repository.getCustomCards(), hasLength(1));
     });
 
+    test('stores a trimmed motionId and treats blank as none', () async {
+      final repository = InMemoryCustomCardRepository();
+      final usecase = CreateCustomCardUsecase(repository);
+
+      final withMotion = await usecase.execute(
+        name: '弓步',
+        rawType: 'strength',
+        durationSec: 45,
+        motionId: ' lunge ',
+      );
+      final withoutMotion = await usecase.execute(
+        name: '自由',
+        rawType: 'strength',
+        durationSec: 45,
+        motionId: '  ',
+      );
+
+      expect(withMotion.motionId, 'lunge');
+      expect(withoutMotion.motionId, isNull);
+    });
+
     test('rejects invalid inputs', () async {
       final usecase = CreateCustomCardUsecase(InMemoryCustomCardRepository());
 

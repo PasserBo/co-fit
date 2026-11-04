@@ -1,0 +1,9 @@
+{
+  "name": "cofit-tools",
+  "private": true,
+  "type": "module",
+  "description": "CoFit 运维脚本(Node 20+):默认卡片模板播种等。",
+  "dependencies": {
+    "firebase-admin": "^13.0.0"
+  }
+}

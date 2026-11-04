@@ -17,6 +17,7 @@ abstract class PendingSessionSnapshot with _$PendingSessionSnapshot {
     required String actionKey,
     required int durationSec,
     required DateTime startedAt,
+    String? motionId,
   }) = _PendingSessionSnapshot;
 
   DateTime get endsAt => startedAt.add(Duration(seconds: durationSec));
@@ -37,7 +38,13 @@ abstract class PendingSessionSnapshot with _$PendingSessionSnapshot {
     'actionKey': actionKey,
     'durationSec': durationSec,
     'startedAt': startedAt.toUtc().toIso8601String(),
+    if (motionId != null) 'motionId': motionId,
   };
+
+  static String? _optional(Object? value) {
+    final text = value?.toString().trim();
+    return (text == null || text.isEmpty) ? null : text;
+  }
 
   static PendingSessionSnapshot? fromMap(Object? source) {
     if (source is! Map) {
@@ -58,6 +65,7 @@ abstract class PendingSessionSnapshot with _$PendingSessionSnapshot {
       actionKey: '${source['actionKey'] ?? ''}',
       durationSec: durationSec,
       startedAt: startedAt.toLocal(),
+      motionId: _optional(source['motionId']),
     );
   }
 }

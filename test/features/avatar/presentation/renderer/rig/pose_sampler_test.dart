@@ -1,3 +1,5 @@
+import 'package:cofit/features/action/domain/entity/action_type.dart';
+import 'package:cofit/features/avatar/domain/entity/avatar_motion.dart';
 import 'package:cofit/features/avatar/presentation/renderer/clips/core_states.dart';
 import 'package:cofit/features/avatar/presentation/renderer/motion_clip_library.dart';
 import 'package:cofit/features/avatar/presentation/renderer/rig/bone.dart';
@@ -120,8 +122,49 @@ void main() {
 
     test('byId finds clips and ignores unknown ids', () {
       expect(MotionClipLibrary.byId('squat'), CoreStateClips.squat);
+      expect(MotionClipLibrary.byId('lunge'), isNotNull);
       expect(MotionClipLibrary.byId('nope'), isNull);
       expect(MotionClipLibrary.byId(null), isNull);
+    });
+
+    test('exercises exclude state clips and are fully labelled', () {
+      final exercises = MotionClipLibrary.exercises;
+      expect(
+        exercises.map((c) => c.id),
+        isNot(contains(anyOf('idle', 'windup', 'paused', 'finish'))),
+      );
+      for (final clip in exercises) {
+        expect(
+          MotionClipLibrary.typeOf,
+          contains(clip.id),
+          reason: '${clip.id} 缺类型',
+        );
+        expect(
+          MotionClipLibrary.nameOf,
+          contains(clip.id),
+          reason: '${clip.id} 缺中文名',
+        );
+      }
+      expect(exercises.length, 12);
+    });
+
+    test('resolve prefers motionId over the type prototype', () {
+      final byId = MotionClipLibrary.resolve(
+        const AvatarMotion(
+          state: AvatarMotionState.exercise,
+          actionType: ActionType.strength,
+          motionId: 'lunge',
+        ),
+      );
+      final fallback = MotionClipLibrary.resolve(
+        const AvatarMotion(
+          state: AvatarMotionState.exercise,
+          actionType: ActionType.strength,
+          motionId: 'unknown_clip',
+        ),
+      );
+      expect(byId.id, 'lunge');
+      expect(fallback, CoreStateClips.squat);
     });
   });
 }

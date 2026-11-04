@@ -35,12 +35,13 @@ fvm flutter analyze
 
 - Firebase 项目 `cofit-lmdyd`,**iOS-only**(无 `android/` 目录,`firebase_options.dart` 仅 iOS 配置)。
 - Bundle id **`com.passerbo.cofitapp`**、团队 **`J95TRWHWYM`**(付费,证书 `Apple Development: Yiyang Xu`)。2026-09-16 从旧免费账号的 `com.passerbo.cofit` 迁移——显式 App ID 跨团队全局唯一,旧 id 无法在新团队注册。Firebase iOS app 已换新(`1:154412755372:ios:cfd018…`),旧 app 注册可由用户在 console 删除。
+- **上架配置(2026-11-04)**:仅 iPhone(`TARGETED_DEVICE_FAMILY = 1`)+ 仅竖屏;`ITSAppUsesNonExemptEncryption=false`;App 级 `ios/Runner/PrivacyInfo.xcprivacy` 与 App Store Connect 的 App Privacy 表必须一致(改一处同步另一处)。打 TestFlight/App Store 包用 `scripts/build_ipa.sh`(内置 `--dart-define-from-file=.env`)。资料包与文案:[docs/release/app_store_connect_testflight.md](docs/release/app_store_connect_testflight.md)。
 - **iOS 插件集成已切到 Swift Package Manager**(`enable-swift-package-manager: true`):8 个插件走 SPM,仅 `ably_flutter` / `sign_in_with_apple` / `Flutter` 走 CocoaPods。所以 `pod install` 显示「3 依赖 / 6 pod」是**正常的**,不是装残。`flutter clean` 后必须先 `flutter build ios --config-only` 再 `pod install`,否则插件列表为空。
 - Auth 已启用 provider:**Apple + Google + Email/Password**(Apple 于 2026-09-17 真机验证通过)。
   - ⚠️ **Apple 凭证必须带 `accessToken: appleCredential.authorizationCode`**,只传 `idToken` + `rawNonce` 会报 `invalid-credential / Invalid OAuth response from apple.com`——该文案会把排查引向 Firebase/Apple provider 配置,**实为客户端漏传授权码**(flutterfire#18289 / #13235)。改 `signInWithApple` 时勿删。
   - Apple 侧已配:Services ID、Sign in with Apple 私钥(`.p8` 存本地 `keys/`,已 gitignore)、邮件转发源 `noreply@cofit-lmdyd.firebaseapp.com`。私钥同时是上架「账号删除需 token revocation」的前提。
   - ⚠️ **Apple 登录产生独立 Firebase uid**,与既有 Google/邮箱账号不互通;账号关联(linkWithCredential)待产品决议。
-- Firestore 集合(rules 全部显式声明,末尾全局 deny):`rooms`(含 `members{uid}` map,owner 可移出成员)、`users/{uid}`(profile,可选键 `activeDeckId`)、`users/{uid}/memberships`、`users/{uid}/decks`、`users/{uid}/cards`、`users/{uid}/sessions`(只追加打卡日志)、`card_templates`(只读)、`reports`(举报,仅本人 create,客户端不可读)。
+- Firestore 集合(rules 全部显式声明,末尾全局 deny):`rooms`(含 `members{uid}` map,owner 可移出成员)、`users/{uid}`(profile,可选键 `activeDeckId`)、`users/{uid}/memberships`、`users/{uid}/decks`、`users/{uid}/cards`、`users/{uid}/sessions`(只追加打卡日志)、`card_templates`(只读;**SSOT 在 `firestore/card_templates.json`**,push main 由 `deploy-card-templates.yml` upsert,删多余文档需 workflow_dispatch 开 prune)、`reports`(举报,仅本人 create,客户端不可读)。
 - ⚠️ **Firestore `snapshots()` 第一帧可能来自本地缓存**。`RoomInfoEntity.fromCache == true` 的帧只能展示,**不得**据此判定「被移出/已解散」并做清理(2026-10-26 曾因此把刚加入的用户自己踢出房间)。
 - ⚠️ **Ably presence**:`watchPresence` 必须先 `subscribe()` 再 `get()`;presence update 是整包替换,永远带 `userId`;自己的运动状态经 `AblyRuntimeNotifier.reassertPresence()` 广播到**所有**已订阅房间,不要只写当前房间。
 - Ably key 走 `--dart-define`(`ABLY_API_KEY` / `ABLY_CLIENT_ID_PREFIX`);仓库根 `.env`(gitignored,含真实 key)配合 `.vscode/launch.json` 的 `--dart-define-from-file` 使用。**不要把 key 写进任何被提交的文件。**

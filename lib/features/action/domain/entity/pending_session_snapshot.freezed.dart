@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$PendingSessionSnapshot {
 
- String get sessionId; String get roomId; String get userId; String get templateId; String get templateName; String get actionKey; int get durationSec; DateTime get startedAt;
+ String get sessionId; String get roomId; String get userId; String get templateId; String get templateName; String get actionKey; int get durationSec; DateTime get startedAt; String? get motionId;
 /// Create a copy of PendingSessionSnapshot
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $PendingSessionSnapshotCopyWith<PendingSessionSnapshot> get copyWith => _$Pendin
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is PendingSessionSnapshot&&(identical(other.sessionId, sessionId) || other.sessionId == sessionId)&&(identical(other.roomId, roomId) || other.roomId == roomId)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.templateId, templateId) || other.templateId == templateId)&&(identical(other.templateName, templateName) || other.templateName == templateName)&&(identical(other.actionKey, actionKey) || other.actionKey == actionKey)&&(identical(other.durationSec, durationSec) || other.durationSec == durationSec)&&(identical(other.startedAt, startedAt) || other.startedAt == startedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is PendingSessionSnapshot&&(identical(other.sessionId, sessionId) || other.sessionId == sessionId)&&(identical(other.roomId, roomId) || other.roomId == roomId)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.templateId, templateId) || other.templateId == templateId)&&(identical(other.templateName, templateName) || other.templateName == templateName)&&(identical(other.actionKey, actionKey) || other.actionKey == actionKey)&&(identical(other.durationSec, durationSec) || other.durationSec == durationSec)&&(identical(other.startedAt, startedAt) || other.startedAt == startedAt)&&(identical(other.motionId, motionId) || other.motionId == motionId));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,sessionId,roomId,userId,templateId,templateName,actionKey,durationSec,startedAt);
+int get hashCode => Object.hash(runtimeType,sessionId,roomId,userId,templateId,templateName,actionKey,durationSec,startedAt,motionId);
 
 @override
 String toString() {
-  return 'PendingSessionSnapshot(sessionId: $sessionId, roomId: $roomId, userId: $userId, templateId: $templateId, templateName: $templateName, actionKey: $actionKey, durationSec: $durationSec, startedAt: $startedAt)';
+  return 'PendingSessionSnapshot(sessionId: $sessionId, roomId: $roomId, userId: $userId, templateId: $templateId, templateName: $templateName, actionKey: $actionKey, durationSec: $durationSec, startedAt: $startedAt, motionId: $motionId)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $PendingSessionSnapshotCopyWith<$Res>  {
   factory $PendingSessionSnapshotCopyWith(PendingSessionSnapshot value, $Res Function(PendingSessionSnapshot) _then) = _$PendingSessionSnapshotCopyWithImpl;
 @useResult
 $Res call({
- String sessionId, String roomId, String userId, String templateId, String templateName, String actionKey, int durationSec, DateTime startedAt
+ String sessionId, String roomId, String userId, String templateId, String templateName, String actionKey, int durationSec, DateTime startedAt, String? motionId
 });
 
 
@@ -62,7 +62,7 @@ class _$PendingSessionSnapshotCopyWithImpl<$Res>
 
 /// Create a copy of PendingSessionSnapshot
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? sessionId = null,Object? roomId = null,Object? userId = null,Object? templateId = null,Object? templateName = null,Object? actionKey = null,Object? durationSec = null,Object? startedAt = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? sessionId = null,Object? roomId = null,Object? userId = null,Object? templateId = null,Object? templateName = null,Object? actionKey = null,Object? durationSec = null,Object? startedAt = null,Object? motionId = freezed,}) {
   return _then(_self.copyWith(
 sessionId: null == sessionId ? _self.sessionId : sessionId // ignore: cast_nullable_to_non_nullable
 as String,roomId: null == roomId ? _self.roomId : roomId // ignore: cast_nullable_to_non_nullable
@@ -72,7 +72,8 @@ as String,templateName: null == templateName ? _self.templateName : templateName
 as String,actionKey: null == actionKey ? _self.actionKey : actionKey // ignore: cast_nullable_to_non_nullable
 as String,durationSec: null == durationSec ? _self.durationSec : durationSec // ignore: cast_nullable_to_non_nullable
 as int,startedAt: null == startedAt ? _self.startedAt : startedAt // ignore: cast_nullable_to_non_nullable
-as DateTime,
+as DateTime,motionId: freezed == motionId ? _self.motionId : motionId // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 
@@ -157,10 +158,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String sessionId,  String roomId,  String userId,  String templateId,  String templateName,  String actionKey,  int durationSec,  DateTime startedAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String sessionId,  String roomId,  String userId,  String templateId,  String templateName,  String actionKey,  int durationSec,  DateTime startedAt,  String? motionId)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _PendingSessionSnapshot() when $default != null:
-return $default(_that.sessionId,_that.roomId,_that.userId,_that.templateId,_that.templateName,_that.actionKey,_that.durationSec,_that.startedAt);case _:
+return $default(_that.sessionId,_that.roomId,_that.userId,_that.templateId,_that.templateName,_that.actionKey,_that.durationSec,_that.startedAt,_that.motionId);case _:
   return orElse();
 
 }
@@ -178,10 +179,10 @@ return $default(_that.sessionId,_that.roomId,_that.userId,_that.templateId,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String sessionId,  String roomId,  String userId,  String templateId,  String templateName,  String actionKey,  int durationSec,  DateTime startedAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String sessionId,  String roomId,  String userId,  String templateId,  String templateName,  String actionKey,  int durationSec,  DateTime startedAt,  String? motionId)  $default,) {final _that = this;
 switch (_that) {
 case _PendingSessionSnapshot():
-return $default(_that.sessionId,_that.roomId,_that.userId,_that.templateId,_that.templateName,_that.actionKey,_that.durationSec,_that.startedAt);case _:
+return $default(_that.sessionId,_that.roomId,_that.userId,_that.templateId,_that.templateName,_that.actionKey,_that.durationSec,_that.startedAt,_that.motionId);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -198,10 +199,10 @@ return $default(_that.sessionId,_that.roomId,_that.userId,_that.templateId,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String sessionId,  String roomId,  String userId,  String templateId,  String templateName,  String actionKey,  int durationSec,  DateTime startedAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String sessionId,  String roomId,  String userId,  String templateId,  String templateName,  String actionKey,  int durationSec,  DateTime startedAt,  String? motionId)?  $default,) {final _that = this;
 switch (_that) {
 case _PendingSessionSnapshot() when $default != null:
-return $default(_that.sessionId,_that.roomId,_that.userId,_that.templateId,_that.templateName,_that.actionKey,_that.durationSec,_that.startedAt);case _:
+return $default(_that.sessionId,_that.roomId,_that.userId,_that.templateId,_that.templateName,_that.actionKey,_that.durationSec,_that.startedAt,_that.motionId);case _:
   return null;
 
 }
@@ -213,7 +214,7 @@ return $default(_that.sessionId,_that.roomId,_that.userId,_that.templateId,_that
 
 
 class _PendingSessionSnapshot extends PendingSessionSnapshot {
-  const _PendingSessionSnapshot({required this.sessionId, required this.roomId, required this.userId, required this.templateId, required this.templateName, required this.actionKey, required this.durationSec, required this.startedAt}): super._();
+  const _PendingSessionSnapshot({required this.sessionId, required this.roomId, required this.userId, required this.templateId, required this.templateName, required this.actionKey, required this.durationSec, required this.startedAt, this.motionId}): super._();
   
 
 @override final  String sessionId;
@@ -224,6 +225,7 @@ class _PendingSessionSnapshot extends PendingSessionSnapshot {
 @override final  String actionKey;
 @override final  int durationSec;
 @override final  DateTime startedAt;
+@override final  String? motionId;
 
 /// Create a copy of PendingSessionSnapshot
 /// with the given fields replaced by the non-null parameter values.
@@ -235,16 +237,16 @@ _$PendingSessionSnapshotCopyWith<_PendingSessionSnapshot> get copyWith => __$Pen
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PendingSessionSnapshot&&(identical(other.sessionId, sessionId) || other.sessionId == sessionId)&&(identical(other.roomId, roomId) || other.roomId == roomId)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.templateId, templateId) || other.templateId == templateId)&&(identical(other.templateName, templateName) || other.templateName == templateName)&&(identical(other.actionKey, actionKey) || other.actionKey == actionKey)&&(identical(other.durationSec, durationSec) || other.durationSec == durationSec)&&(identical(other.startedAt, startedAt) || other.startedAt == startedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PendingSessionSnapshot&&(identical(other.sessionId, sessionId) || other.sessionId == sessionId)&&(identical(other.roomId, roomId) || other.roomId == roomId)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.templateId, templateId) || other.templateId == templateId)&&(identical(other.templateName, templateName) || other.templateName == templateName)&&(identical(other.actionKey, actionKey) || other.actionKey == actionKey)&&(identical(other.durationSec, durationSec) || other.durationSec == durationSec)&&(identical(other.startedAt, startedAt) || other.startedAt == startedAt)&&(identical(other.motionId, motionId) || other.motionId == motionId));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,sessionId,roomId,userId,templateId,templateName,actionKey,durationSec,startedAt);
+int get hashCode => Object.hash(runtimeType,sessionId,roomId,userId,templateId,templateName,actionKey,durationSec,startedAt,motionId);
 
 @override
 String toString() {
-  return 'PendingSessionSnapshot(sessionId: $sessionId, roomId: $roomId, userId: $userId, templateId: $templateId, templateName: $templateName, actionKey: $actionKey, durationSec: $durationSec, startedAt: $startedAt)';
+  return 'PendingSessionSnapshot(sessionId: $sessionId, roomId: $roomId, userId: $userId, templateId: $templateId, templateName: $templateName, actionKey: $actionKey, durationSec: $durationSec, startedAt: $startedAt, motionId: $motionId)';
 }
 
 
@@ -255,7 +257,7 @@ abstract mixin class _$PendingSessionSnapshotCopyWith<$Res> implements $PendingS
   factory _$PendingSessionSnapshotCopyWith(_PendingSessionSnapshot value, $Res Function(_PendingSessionSnapshot) _then) = __$PendingSessionSnapshotCopyWithImpl;
 @override @useResult
 $Res call({
- String sessionId, String roomId, String userId, String templateId, String templateName, String actionKey, int durationSec, DateTime startedAt
+ String sessionId, String roomId, String userId, String templateId, String templateName, String actionKey, int durationSec, DateTime startedAt, String? motionId
 });
 
 
@@ -272,7 +274,7 @@ class __$PendingSessionSnapshotCopyWithImpl<$Res>
 
 /// Create a copy of PendingSessionSnapshot
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? sessionId = null,Object? roomId = null,Object? userId = null,Object? templateId = null,Object? templateName = null,Object? actionKey = null,Object? durationSec = null,Object? startedAt = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? sessionId = null,Object? roomId = null,Object? userId = null,Object? templateId = null,Object? templateName = null,Object? actionKey = null,Object? durationSec = null,Object? startedAt = null,Object? motionId = freezed,}) {
   return _then(_PendingSessionSnapshot(
 sessionId: null == sessionId ? _self.sessionId : sessionId // ignore: cast_nullable_to_non_nullable
 as String,roomId: null == roomId ? _self.roomId : roomId // ignore: cast_nullable_to_non_nullable
@@ -282,7 +284,8 @@ as String,templateName: null == templateName ? _self.templateName : templateName
 as String,actionKey: null == actionKey ? _self.actionKey : actionKey // ignore: cast_nullable_to_non_nullable
 as String,durationSec: null == durationSec ? _self.durationSec : durationSec // ignore: cast_nullable_to_non_nullable
 as int,startedAt: null == startedAt ? _self.startedAt : startedAt // ignore: cast_nullable_to_non_nullable
-as DateTime,
+as DateTime,motionId: freezed == motionId ? _self.motionId : motionId // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 

@@ -26,6 +26,7 @@ class RecordCompletedSessionUsecase {
       templateId: session.templateId,
       templateName: card.name,
       actionKey: card.rawType,
+      motionId: card.motionId,
       durationSec: card.defaultDurationSec,
       startedAt: session.startedAt,
       completedAt: _now(),

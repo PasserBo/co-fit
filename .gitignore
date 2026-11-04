@@ -54,3 +54,4 @@ app.*.map.json
 
 # 签名密钥 / 机密文件(Apple Sign in .p8、service account 等,永不入库)
 /keys/
+tool/node_modules/

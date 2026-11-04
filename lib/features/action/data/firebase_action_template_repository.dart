@@ -41,7 +41,26 @@ class FirebaseActionTemplateRepository implements ActionTemplateRepository {
         templateId: doc.id,
       ),
       intensityBaseline: _readMap(data['intensityBaseline']),
+      motionId: _readOptionalString(data['motionId']),
+      order: _readOptionalInt(data['order']) ?? 0,
     );
+  }
+
+  String? _readOptionalString(Object? value) {
+    if (value is String && value.trim().isNotEmpty) {
+      return value.trim();
+    }
+    return null;
+  }
+
+  int? _readOptionalInt(Object? value) {
+    if (value is int) {
+      return value;
+    }
+    if (value is num) {
+      return value.toInt();
+    }
+    return null;
   }
 
   String _readRequiredString(

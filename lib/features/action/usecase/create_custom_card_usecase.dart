@@ -21,6 +21,7 @@ class CreateCustomCardUsecase {
     required int durationSec,
     String? ablyActionId,
     Map<String, dynamic> intensityBaseline = const {},
+    String? motionId,
   }) async {
     final trimmedName = name.trim();
     final trimmedRawType = rawType.trim();
@@ -54,6 +55,8 @@ class CreateCustomCardUsecase {
           : ablyActionId!.trim(),
       defaultDurationSec: durationSec,
       intensityBaseline: intensityBaseline,
+      // 动作由 UI 的动作选择器限定在 clip 库内;空字符串视为「按类型原型」。
+      motionId: (motionId ?? '').trim().isEmpty ? null : motionId!.trim(),
     );
     await _repository.createCard(card);
     return card;

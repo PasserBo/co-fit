@@ -36,8 +36,11 @@ abstract class AvatarMotion with _$AvatarMotion {
   const factory AvatarMotion({
     required AvatarMotionState state,
 
-    /// exercise 时按 4 类型走通用原型;其他状态可为 null。
+    /// exercise 时的类型(clip 未命中时的原型兜底);其他状态可为 null。
     ActionType? actionType,
+
+    /// exercise 时的具体动作 clip id(P2);null/未知 → 类型原型。
+    String? motionId,
     @Default(AvatarTempo.standard) AvatarTempo tempo,
   }) = _AvatarMotion;
 

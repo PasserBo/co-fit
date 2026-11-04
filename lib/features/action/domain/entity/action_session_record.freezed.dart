@@ -14,7 +14,8 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ActionSessionRecord {
 
- String get sessionId; String get roomId; String get userId; String get templateId; String get templateName; String get actionKey; int get durationSec; DateTime get startedAt; DateTime get completedAt; String get status;
+ String get sessionId; String get roomId; String get userId; String get templateId; String get templateName; String get actionKey; int get durationSec; DateTime get startedAt; DateTime get completedAt; String get status;/// 做过哪个动作(P2,可选;rules 放行可选键)。
+ String? get motionId;
 /// Create a copy of ActionSessionRecord
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +26,16 @@ $ActionSessionRecordCopyWith<ActionSessionRecord> get copyWith => _$ActionSessio
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ActionSessionRecord&&(identical(other.sessionId, sessionId) || other.sessionId == sessionId)&&(identical(other.roomId, roomId) || other.roomId == roomId)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.templateId, templateId) || other.templateId == templateId)&&(identical(other.templateName, templateName) || other.templateName == templateName)&&(identical(other.actionKey, actionKey) || other.actionKey == actionKey)&&(identical(other.durationSec, durationSec) || other.durationSec == durationSec)&&(identical(other.startedAt, startedAt) || other.startedAt == startedAt)&&(identical(other.completedAt, completedAt) || other.completedAt == completedAt)&&(identical(other.status, status) || other.status == status));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ActionSessionRecord&&(identical(other.sessionId, sessionId) || other.sessionId == sessionId)&&(identical(other.roomId, roomId) || other.roomId == roomId)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.templateId, templateId) || other.templateId == templateId)&&(identical(other.templateName, templateName) || other.templateName == templateName)&&(identical(other.actionKey, actionKey) || other.actionKey == actionKey)&&(identical(other.durationSec, durationSec) || other.durationSec == durationSec)&&(identical(other.startedAt, startedAt) || other.startedAt == startedAt)&&(identical(other.completedAt, completedAt) || other.completedAt == completedAt)&&(identical(other.status, status) || other.status == status)&&(identical(other.motionId, motionId) || other.motionId == motionId));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,sessionId,roomId,userId,templateId,templateName,actionKey,durationSec,startedAt,completedAt,status);
+int get hashCode => Object.hash(runtimeType,sessionId,roomId,userId,templateId,templateName,actionKey,durationSec,startedAt,completedAt,status,motionId);
 
 @override
 String toString() {
-  return 'ActionSessionRecord(sessionId: $sessionId, roomId: $roomId, userId: $userId, templateId: $templateId, templateName: $templateName, actionKey: $actionKey, durationSec: $durationSec, startedAt: $startedAt, completedAt: $completedAt, status: $status)';
+  return 'ActionSessionRecord(sessionId: $sessionId, roomId: $roomId, userId: $userId, templateId: $templateId, templateName: $templateName, actionKey: $actionKey, durationSec: $durationSec, startedAt: $startedAt, completedAt: $completedAt, status: $status, motionId: $motionId)';
 }
 
 
@@ -45,7 +46,7 @@ abstract mixin class $ActionSessionRecordCopyWith<$Res>  {
   factory $ActionSessionRecordCopyWith(ActionSessionRecord value, $Res Function(ActionSessionRecord) _then) = _$ActionSessionRecordCopyWithImpl;
 @useResult
 $Res call({
- String sessionId, String roomId, String userId, String templateId, String templateName, String actionKey, int durationSec, DateTime startedAt, DateTime completedAt, String status
+ String sessionId, String roomId, String userId, String templateId, String templateName, String actionKey, int durationSec, DateTime startedAt, DateTime completedAt, String status, String? motionId
 });
 
 
@@ -62,7 +63,7 @@ class _$ActionSessionRecordCopyWithImpl<$Res>
 
 /// Create a copy of ActionSessionRecord
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? sessionId = null,Object? roomId = null,Object? userId = null,Object? templateId = null,Object? templateName = null,Object? actionKey = null,Object? durationSec = null,Object? startedAt = null,Object? completedAt = null,Object? status = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? sessionId = null,Object? roomId = null,Object? userId = null,Object? templateId = null,Object? templateName = null,Object? actionKey = null,Object? durationSec = null,Object? startedAt = null,Object? completedAt = null,Object? status = null,Object? motionId = freezed,}) {
   return _then(_self.copyWith(
 sessionId: null == sessionId ? _self.sessionId : sessionId // ignore: cast_nullable_to_non_nullable
 as String,roomId: null == roomId ? _self.roomId : roomId // ignore: cast_nullable_to_non_nullable
@@ -74,7 +75,8 @@ as String,durationSec: null == durationSec ? _self.durationSec : durationSec // 
 as int,startedAt: null == startedAt ? _self.startedAt : startedAt // ignore: cast_nullable_to_non_nullable
 as DateTime,completedAt: null == completedAt ? _self.completedAt : completedAt // ignore: cast_nullable_to_non_nullable
 as DateTime,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
-as String,
+as String,motionId: freezed == motionId ? _self.motionId : motionId // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 
@@ -159,10 +161,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String sessionId,  String roomId,  String userId,  String templateId,  String templateName,  String actionKey,  int durationSec,  DateTime startedAt,  DateTime completedAt,  String status)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String sessionId,  String roomId,  String userId,  String templateId,  String templateName,  String actionKey,  int durationSec,  DateTime startedAt,  DateTime completedAt,  String status,  String? motionId)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ActionSessionRecord() when $default != null:
-return $default(_that.sessionId,_that.roomId,_that.userId,_that.templateId,_that.templateName,_that.actionKey,_that.durationSec,_that.startedAt,_that.completedAt,_that.status);case _:
+return $default(_that.sessionId,_that.roomId,_that.userId,_that.templateId,_that.templateName,_that.actionKey,_that.durationSec,_that.startedAt,_that.completedAt,_that.status,_that.motionId);case _:
   return orElse();
 
 }
@@ -180,10 +182,10 @@ return $default(_that.sessionId,_that.roomId,_that.userId,_that.templateId,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String sessionId,  String roomId,  String userId,  String templateId,  String templateName,  String actionKey,  int durationSec,  DateTime startedAt,  DateTime completedAt,  String status)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String sessionId,  String roomId,  String userId,  String templateId,  String templateName,  String actionKey,  int durationSec,  DateTime startedAt,  DateTime completedAt,  String status,  String? motionId)  $default,) {final _that = this;
 switch (_that) {
 case _ActionSessionRecord():
-return $default(_that.sessionId,_that.roomId,_that.userId,_that.templateId,_that.templateName,_that.actionKey,_that.durationSec,_that.startedAt,_that.completedAt,_that.status);case _:
+return $default(_that.sessionId,_that.roomId,_that.userId,_that.templateId,_that.templateName,_that.actionKey,_that.durationSec,_that.startedAt,_that.completedAt,_that.status,_that.motionId);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -200,10 +202,10 @@ return $default(_that.sessionId,_that.roomId,_that.userId,_that.templateId,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String sessionId,  String roomId,  String userId,  String templateId,  String templateName,  String actionKey,  int durationSec,  DateTime startedAt,  DateTime completedAt,  String status)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String sessionId,  String roomId,  String userId,  String templateId,  String templateName,  String actionKey,  int durationSec,  DateTime startedAt,  DateTime completedAt,  String status,  String? motionId)?  $default,) {final _that = this;
 switch (_that) {
 case _ActionSessionRecord() when $default != null:
-return $default(_that.sessionId,_that.roomId,_that.userId,_that.templateId,_that.templateName,_that.actionKey,_that.durationSec,_that.startedAt,_that.completedAt,_that.status);case _:
+return $default(_that.sessionId,_that.roomId,_that.userId,_that.templateId,_that.templateName,_that.actionKey,_that.durationSec,_that.startedAt,_that.completedAt,_that.status,_that.motionId);case _:
   return null;
 
 }
@@ -215,7 +217,7 @@ return $default(_that.sessionId,_that.roomId,_that.userId,_that.templateId,_that
 
 
 class _ActionSessionRecord extends ActionSessionRecord {
-  const _ActionSessionRecord({required this.sessionId, required this.roomId, required this.userId, required this.templateId, required this.templateName, required this.actionKey, required this.durationSec, required this.startedAt, required this.completedAt, this.status = ActionSessionRecordStatus.completed}): super._();
+  const _ActionSessionRecord({required this.sessionId, required this.roomId, required this.userId, required this.templateId, required this.templateName, required this.actionKey, required this.durationSec, required this.startedAt, required this.completedAt, this.status = ActionSessionRecordStatus.completed, this.motionId}): super._();
   
 
 @override final  String sessionId;
@@ -228,6 +230,8 @@ class _ActionSessionRecord extends ActionSessionRecord {
 @override final  DateTime startedAt;
 @override final  DateTime completedAt;
 @override@JsonKey() final  String status;
+/// 做过哪个动作(P2,可选;rules 放行可选键)。
+@override final  String? motionId;
 
 /// Create a copy of ActionSessionRecord
 /// with the given fields replaced by the non-null parameter values.
@@ -239,16 +243,16 @@ _$ActionSessionRecordCopyWith<_ActionSessionRecord> get copyWith => __$ActionSes
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ActionSessionRecord&&(identical(other.sessionId, sessionId) || other.sessionId == sessionId)&&(identical(other.roomId, roomId) || other.roomId == roomId)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.templateId, templateId) || other.templateId == templateId)&&(identical(other.templateName, templateName) || other.templateName == templateName)&&(identical(other.actionKey, actionKey) || other.actionKey == actionKey)&&(identical(other.durationSec, durationSec) || other.durationSec == durationSec)&&(identical(other.startedAt, startedAt) || other.startedAt == startedAt)&&(identical(other.completedAt, completedAt) || other.completedAt == completedAt)&&(identical(other.status, status) || other.status == status));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ActionSessionRecord&&(identical(other.sessionId, sessionId) || other.sessionId == sessionId)&&(identical(other.roomId, roomId) || other.roomId == roomId)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.templateId, templateId) || other.templateId == templateId)&&(identical(other.templateName, templateName) || other.templateName == templateName)&&(identical(other.actionKey, actionKey) || other.actionKey == actionKey)&&(identical(other.durationSec, durationSec) || other.durationSec == durationSec)&&(identical(other.startedAt, startedAt) || other.startedAt == startedAt)&&(identical(other.completedAt, completedAt) || other.completedAt == completedAt)&&(identical(other.status, status) || other.status == status)&&(identical(other.motionId, motionId) || other.motionId == motionId));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,sessionId,roomId,userId,templateId,templateName,actionKey,durationSec,startedAt,completedAt,status);
+int get hashCode => Object.hash(runtimeType,sessionId,roomId,userId,templateId,templateName,actionKey,durationSec,startedAt,completedAt,status,motionId);
 
 @override
 String toString() {
-  return 'ActionSessionRecord(sessionId: $sessionId, roomId: $roomId, userId: $userId, templateId: $templateId, templateName: $templateName, actionKey: $actionKey, durationSec: $durationSec, startedAt: $startedAt, completedAt: $completedAt, status: $status)';
+  return 'ActionSessionRecord(sessionId: $sessionId, roomId: $roomId, userId: $userId, templateId: $templateId, templateName: $templateName, actionKey: $actionKey, durationSec: $durationSec, startedAt: $startedAt, completedAt: $completedAt, status: $status, motionId: $motionId)';
 }
 
 
@@ -259,7 +263,7 @@ abstract mixin class _$ActionSessionRecordCopyWith<$Res> implements $ActionSessi
   factory _$ActionSessionRecordCopyWith(_ActionSessionRecord value, $Res Function(_ActionSessionRecord) _then) = __$ActionSessionRecordCopyWithImpl;
 @override @useResult
 $Res call({
- String sessionId, String roomId, String userId, String templateId, String templateName, String actionKey, int durationSec, DateTime startedAt, DateTime completedAt, String status
+ String sessionId, String roomId, String userId, String templateId, String templateName, String actionKey, int durationSec, DateTime startedAt, DateTime completedAt, String status, String? motionId
 });
 
 
@@ -276,7 +280,7 @@ class __$ActionSessionRecordCopyWithImpl<$Res>
 
 /// Create a copy of ActionSessionRecord
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? sessionId = null,Object? roomId = null,Object? userId = null,Object? templateId = null,Object? templateName = null,Object? actionKey = null,Object? durationSec = null,Object? startedAt = null,Object? completedAt = null,Object? status = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? sessionId = null,Object? roomId = null,Object? userId = null,Object? templateId = null,Object? templateName = null,Object? actionKey = null,Object? durationSec = null,Object? startedAt = null,Object? completedAt = null,Object? status = null,Object? motionId = freezed,}) {
   return _then(_ActionSessionRecord(
 sessionId: null == sessionId ? _self.sessionId : sessionId // ignore: cast_nullable_to_non_nullable
 as String,roomId: null == roomId ? _self.roomId : roomId // ignore: cast_nullable_to_non_nullable
@@ -288,7 +292,8 @@ as String,durationSec: null == durationSec ? _self.durationSec : durationSec // 
 as int,startedAt: null == startedAt ? _self.startedAt : startedAt // ignore: cast_nullable_to_non_nullable
 as DateTime,completedAt: null == completedAt ? _self.completedAt : completedAt // ignore: cast_nullable_to_non_nullable
 as DateTime,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
-as String,
+as String,motionId: freezed == motionId ? _self.motionId : motionId // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 

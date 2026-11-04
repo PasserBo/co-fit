@@ -119,4 +119,4 @@ room:{roomId}:events
 
 ## 8. 上架前仍缺(非代码)
 
-`PrivacyInfo.xcprivacy`、正式 App 图标(现为临时版)、App Store Connect 演示账号与截图、Release 构建传 `--dart-define-from-file=.env` 的脚本化。Universal Links 仍需自有域名托管 AASA(隐私政策已在 GitHub Pages,但项目站点路径不能做 AASA)。
+正式 App 图标(现为临时版)、App Store Connect 演示账号与截图(资料包与文案见 [release/app_store_connect_testflight.md](release/app_store_connect_testflight.md))。2026-11-04 已落地:App 级 `PrivacyInfo.xcprivacy`、`ITSAppUsesNonExemptEncryption=false`、仅 iPhone + 竖屏、`scripts/build_ipa.sh`。Universal Links 仍需自有域名托管 AASA(隐私政策已在 GitHub Pages,但项目站点路径不能做 AASA)。

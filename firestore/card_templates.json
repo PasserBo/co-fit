@@ -1,0 +1,403 @@
+{
+  "$schema": "./card_templates.schema.json",
+  "$comment": "默认卡片模板 SSOT(docs/default_card_templates.md)。push main 由 .github/workflows/deploy-card-templates.yml 写入 Firestore card_templates;motionId 缺省 = 按 type 的类型原型动画;order 为牌库排序。",
+  "templates": [
+    {
+      "id": "squat",
+      "name": "深蹲",
+      "type": "strength",
+      "ablyActionId": "squat",
+      "defaultDurationSec": 60,
+      "intensityBaseline": {
+        "label": "中等"
+      },
+      "equipment": "none",
+      "order": 10,
+      "motionId": "squat"
+    },
+    {
+      "id": "lunge",
+      "name": "弓步蹲",
+      "type": "strength",
+      "ablyActionId": "lunge",
+      "defaultDurationSec": 60,
+      "intensityBaseline": {
+        "label": "中等"
+      },
+      "equipment": "none",
+      "order": 20,
+      "motionId": "lunge"
+    },
+    {
+      "id": "pushup",
+      "name": "俯卧撑",
+      "type": "strength",
+      "ablyActionId": "pushup",
+      "defaultDurationSec": 45,
+      "intensityBaseline": {
+        "label": "挑战"
+      },
+      "equipment": "mat",
+      "order": 30,
+      "motionId": "pushup"
+    },
+    {
+      "id": "glute_bridge",
+      "name": "臀桥",
+      "type": "strength",
+      "ablyActionId": "glute_bridge",
+      "defaultDurationSec": 60,
+      "intensityBaseline": {
+        "label": "轻松"
+      },
+      "equipment": "mat",
+      "order": 40
+    },
+    {
+      "id": "wall_sit",
+      "name": "靠墙静蹲",
+      "type": "strength",
+      "ablyActionId": "wall_sit",
+      "defaultDurationSec": 45,
+      "intensityBaseline": {
+        "label": "挑战"
+      },
+      "equipment": "none",
+      "order": 50
+    },
+    {
+      "id": "biceps_curl",
+      "name": "哑铃弯举",
+      "type": "strength",
+      "ablyActionId": "biceps_curl",
+      "defaultDurationSec": 60,
+      "intensityBaseline": {
+        "label": "中等"
+      },
+      "equipment": "dumbbell",
+      "order": 60
+    },
+    {
+      "id": "shoulder_press",
+      "name": "肩上推举",
+      "type": "strength",
+      "ablyActionId": "shoulder_press",
+      "defaultDurationSec": 60,
+      "intensityBaseline": {
+        "label": "中等"
+      },
+      "equipment": "dumbbell",
+      "order": 70
+    },
+    {
+      "id": "calf_raise",
+      "name": "提踵",
+      "type": "strength",
+      "ablyActionId": "calf_raise",
+      "defaultDurationSec": 60,
+      "intensityBaseline": {
+        "label": "轻松"
+      },
+      "equipment": "none",
+      "order": 80
+    },
+    {
+      "id": "jumping_jack",
+      "name": "开合跳",
+      "type": "cardio",
+      "ablyActionId": "jumping_jack",
+      "defaultDurationSec": 45,
+      "intensityBaseline": {
+        "label": "中等"
+      },
+      "equipment": "none",
+      "order": 90,
+      "motionId": "jumping_jack"
+    },
+    {
+      "id": "run_in_place",
+      "name": "原地跑",
+      "type": "cardio",
+      "ablyActionId": "run_in_place",
+      "defaultDurationSec": 60,
+      "intensityBaseline": {
+        "label": "中等"
+      },
+      "equipment": "none",
+      "order": 100,
+      "motionId": "run_in_place"
+    },
+    {
+      "id": "high_knees",
+      "name": "高抬腿",
+      "type": "cardio",
+      "ablyActionId": "high_knees",
+      "defaultDurationSec": 30,
+      "intensityBaseline": {
+        "label": "挑战"
+      },
+      "equipment": "none",
+      "order": 110,
+      "motionId": "high_knees"
+    },
+    {
+      "id": "burpee",
+      "name": "波比跳",
+      "type": "cardio",
+      "ablyActionId": "burpee",
+      "defaultDurationSec": 30,
+      "intensityBaseline": {
+        "label": "挑战"
+      },
+      "equipment": "none",
+      "order": 120
+    },
+    {
+      "id": "mountain_climber",
+      "name": "登山跑",
+      "type": "cardio",
+      "ablyActionId": "mountain_climber",
+      "defaultDurationSec": 30,
+      "intensityBaseline": {
+        "label": "挑战"
+      },
+      "equipment": "mat",
+      "order": 130
+    },
+    {
+      "id": "jump_rope",
+      "name": "跳绳",
+      "type": "cardio",
+      "ablyActionId": "jump_rope",
+      "defaultDurationSec": 60,
+      "intensityBaseline": {
+        "label": "中等"
+      },
+      "equipment": "rope",
+      "order": 140
+    },
+    {
+      "id": "skater",
+      "name": "滑冰步",
+      "type": "cardio",
+      "ablyActionId": "skater",
+      "defaultDurationSec": 45,
+      "intensityBaseline": {
+        "label": "中等"
+      },
+      "equipment": "none",
+      "order": 150
+    },
+    {
+      "id": "march",
+      "name": "原地踏步",
+      "type": "cardio",
+      "ablyActionId": "march",
+      "defaultDurationSec": 90,
+      "intensityBaseline": {
+        "label": "轻松"
+      },
+      "equipment": "none",
+      "order": 160,
+      "motionId": "run_in_place"
+    },
+    {
+      "id": "plank",
+      "name": "平板支撑",
+      "type": "core",
+      "ablyActionId": "plank",
+      "defaultDurationSec": 45,
+      "intensityBaseline": {
+        "label": "挑战"
+      },
+      "equipment": "mat",
+      "order": 170,
+      "motionId": "plank"
+    },
+    {
+      "id": "side_plank",
+      "name": "侧平板",
+      "type": "core",
+      "ablyActionId": "side_plank",
+      "defaultDurationSec": 30,
+      "intensityBaseline": {
+        "label": "挑战"
+      },
+      "equipment": "mat",
+      "order": 180
+    },
+    {
+      "id": "crunch",
+      "name": "卷腹",
+      "type": "core",
+      "ablyActionId": "crunch",
+      "defaultDurationSec": 45,
+      "intensityBaseline": {
+        "label": "中等"
+      },
+      "equipment": "mat",
+      "order": 190,
+      "motionId": "crunch"
+    },
+    {
+      "id": "bicycle_crunch",
+      "name": "空中单车",
+      "type": "core",
+      "ablyActionId": "bicycle_crunch",
+      "defaultDurationSec": 45,
+      "intensityBaseline": {
+        "label": "中等"
+      },
+      "equipment": "mat",
+      "order": 200
+    },
+    {
+      "id": "russian_twist",
+      "name": "俄罗斯转体",
+      "type": "core",
+      "ablyActionId": "russian_twist",
+      "defaultDurationSec": 45,
+      "intensityBaseline": {
+        "label": "中等"
+      },
+      "equipment": "mat",
+      "order": 210
+    },
+    {
+      "id": "dead_bug",
+      "name": "死虫式",
+      "type": "core",
+      "ablyActionId": "dead_bug",
+      "defaultDurationSec": 60,
+      "intensityBaseline": {
+        "label": "轻松"
+      },
+      "equipment": "mat",
+      "order": 220
+    },
+    {
+      "id": "bird_dog",
+      "name": "鸟狗式",
+      "type": "core",
+      "ablyActionId": "bird_dog",
+      "defaultDurationSec": 60,
+      "intensityBaseline": {
+        "label": "轻松"
+      },
+      "equipment": "mat",
+      "order": 230
+    },
+    {
+      "id": "leg_raise",
+      "name": "仰卧举腿",
+      "type": "core",
+      "ablyActionId": "leg_raise",
+      "defaultDurationSec": 45,
+      "intensityBaseline": {
+        "label": "中等"
+      },
+      "equipment": "mat",
+      "order": 240,
+      "motionId": "leg_raise"
+    },
+    {
+      "id": "neck_stretch",
+      "name": "肩颈拉伸",
+      "type": "flexibility",
+      "ablyActionId": "neck_stretch",
+      "defaultDurationSec": 60,
+      "intensityBaseline": {
+        "label": "轻松"
+      },
+      "equipment": "none",
+      "order": 250
+    },
+    {
+      "id": "cat_cow",
+      "name": "猫牛式",
+      "type": "flexibility",
+      "ablyActionId": "cat_cow",
+      "defaultDurationSec": 60,
+      "intensityBaseline": {
+        "label": "轻松"
+      },
+      "equipment": "mat",
+      "order": 260,
+      "motionId": "cat_cow"
+    },
+    {
+      "id": "downward_dog",
+      "name": "下犬式",
+      "type": "flexibility",
+      "ablyActionId": "downward_dog",
+      "defaultDurationSec": 45,
+      "intensityBaseline": {
+        "label": "轻松"
+      },
+      "equipment": "mat",
+      "order": 270
+    },
+    {
+      "id": "child_pose",
+      "name": "婴儿式",
+      "type": "flexibility",
+      "ablyActionId": "child_pose",
+      "defaultDurationSec": 60,
+      "intensityBaseline": {
+        "label": "轻松"
+      },
+      "equipment": "mat",
+      "order": 280
+    },
+    {
+      "id": "forward_fold",
+      "name": "站立前屈",
+      "type": "flexibility",
+      "ablyActionId": "forward_fold",
+      "defaultDurationSec": 45,
+      "intensityBaseline": {
+        "label": "轻松"
+      },
+      "equipment": "none",
+      "order": 290,
+      "motionId": "forward_fold"
+    },
+    {
+      "id": "hip_stretch",
+      "name": "髋部拉伸",
+      "type": "flexibility",
+      "ablyActionId": "hip_stretch",
+      "defaultDurationSec": 60,
+      "intensityBaseline": {
+        "label": "轻松"
+      },
+      "equipment": "mat",
+      "order": 300
+    },
+    {
+      "id": "side_bend",
+      "name": "站立体侧屈",
+      "type": "flexibility",
+      "ablyActionId": "side_bend",
+      "defaultDurationSec": 45,
+      "intensityBaseline": {
+        "label": "轻松"
+      },
+      "equipment": "none",
+      "order": 310,
+      "motionId": "side_stretch"
+    },
+    {
+      "id": "breathing",
+      "name": "深呼吸放松",
+      "type": "flexibility",
+      "ablyActionId": "breathing",
+      "defaultDurationSec": 90,
+      "intensityBaseline": {
+        "label": "轻松"
+      },
+      "equipment": "none",
+      "order": 320
+    }
+  ]
+}

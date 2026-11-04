@@ -30,6 +30,9 @@ abstract class UserActivityStatusEntity with _$UserActivityStatusEntity {
     String? sessionId,
     String? templateId,
     String? templateName,
+
+    /// 小人动作 clip id(P2);旧客户端不发,接收端按 actionKey 类型原型兜底。
+    String? motionId,
     int? updatedAtEpochMs,
   }) = _UserActivityStatusEntity;
 
@@ -46,6 +49,7 @@ abstract class UserActivityStatusEntity with _$UserActivityStatusEntity {
       sessionId: _readString(map['sessionId']),
       templateId: _readString(map['templateId']),
       templateName: _readString(map['templateName']),
+      motionId: _readString(map['motionId']),
       updatedAtEpochMs: _readInt(map['updatedAtEpochMs']),
     );
   }
@@ -76,6 +80,7 @@ Map<String, dynamic> userActivityStatusEntityToMap(
     if (entity.sessionId != null) 'sessionId': entity.sessionId,
     if (entity.templateId != null) 'templateId': entity.templateId,
     if (entity.templateName != null) 'templateName': entity.templateName,
+    if (entity.motionId != null) 'motionId': entity.motionId,
     if (entity.updatedAtEpochMs != null) 'updatedAtEpochMs': entity.updatedAtEpochMs,
   };
 }

@@ -1,6 +1,6 @@
 # 默认卡片(card_templates)扩充提案(v0 · 2026-11-04 · 待决议)
 
-> 状态:**提案,未实施**。与 [avatar_system_design.md](avatar_system_design.md) §4 配套:每张默认卡指定一个 `motionId`。
+> 状态:**2026-11-04 已落地为 SSOT**:`firestore/card_templates.json`(本文 §3 的 32 张)+ `tool/seed_card_templates.mjs` + `.github/workflows/deploy-card-templates.yml`。有 clip 的卡才填 `motionId`,其余按类型原型。与 [avatar_system_design.md](avatar_system_design.md) §4 配套:每张默认卡指定一个 `motionId`。
 > 决议后:① 仓库内建立模板 SSOT 并走 CI 部署;② 按下表写入 Firestore;③ 调整首启种子牌组。
 
 ---

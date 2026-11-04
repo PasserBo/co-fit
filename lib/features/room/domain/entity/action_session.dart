@@ -25,6 +25,7 @@ abstract class ActionSession with _$ActionSession {
     required String actionKey,
     String? templateId,
     String? templateName,
+    String? motionId,
     required int durationSec,
     required DateTime startedAt,
     required ActionSessionStatus status,
@@ -87,6 +88,7 @@ abstract class ActionSession with _$ActionSession {
       sessionId: sessionId.isEmpty ? null : sessionId,
       templateId: templateId,
       templateName: templateName,
+      motionId: motionId,
       updatedAtEpochMs: lastEventAt.millisecondsSinceEpoch,
     );
   }

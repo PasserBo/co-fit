@@ -11,6 +11,9 @@ import '../../provider/action_deck_repository_provider.dart';
 import '../../provider/action_decks_provider.dart';
 import '../../provider/custom_card_providers.dart';
 import '../action_template_usecase_provider.dart';
+import '../../../avatar/presentation/renderer/motion_clip_library.dart';
+import '../../../avatar/presentation/widget/motion_preview_figure.dart';
+import '../widget/action_type_style.dart';
 import '../widget/card_face_preview.dart';
 import 'custom_card_form_sheet_view.dart';
 
@@ -154,16 +157,39 @@ class CardDetailSheetView extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Center(
-              child: CardFacePreview(
-                name: card.name,
-                type: card.type,
-                durationSec: card.defaultDurationSec,
-                intensityLabel:
-                    card.intensityLabel.isEmpty ? null : card.intensityLabel,
-                source: card.source,
-                large: true,
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                CardFacePreview(
+                  name: card.name,
+                  type: card.type,
+                  durationSec: card.defaultDurationSec,
+                  intensityLabel:
+                      card.intensityLabel.isEmpty ? null : card.intensityLabel,
+                  source: card.source,
+                  large: true,
+                ),
+                const SizedBox(width: CoFitDimens.spacingLg),
+                // 打出这张卡时小人做的动作(P2):null → 类型原型
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    MotionPreviewFigure(
+                      type: card.type,
+                      motionId: card.motionId,
+                      figureHeight: CoFitDimens.sizeFigureHero,
+                    ),
+                    const SizedBox(height: CoFitDimens.spacingXs),
+                    Text(
+                      MotionClipLibrary.nameOf[card.motionId] ??
+                          '${card.type.label}原型',
+                      style: textTheme.labelSmall
+                          ?.copyWith(color: colors.textTertiary),
+                    ),
+                  ],
+                ),
+              ],
             ),
             const SizedBox(height: CoFitDimens.spacingMd),
             Text(

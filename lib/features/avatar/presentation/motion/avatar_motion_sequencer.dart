@@ -18,6 +18,7 @@ class AvatarMotionSequencer {
   AvatarMotion _current;
   UserActivityState _logical = UserActivityState.idle;
   ActionType? _actionType;
+  String? _motionId;
   AvatarTempo _tempo = AvatarTempo.standard;
   bool _pendingResolve = false;
 
@@ -27,13 +28,16 @@ class AvatarMotionSequencer {
   bool onLogicalState(
     UserActivityState state, {
     ActionType? actionType,
+    String? motionId,
     AvatarTempo tempo = AvatarTempo.standard,
   }) {
     final changed = state != _logical ||
         actionType != _actionType ||
+        motionId != _motionId ||
         tempo != _tempo;
     _logical = state;
     _actionType = actionType ?? _actionType;
+    _motionId = motionId;
     _tempo = tempo;
     if (!changed) {
       return false;
@@ -76,12 +80,14 @@ class AvatarMotionSequencer {
         _current = AvatarMotion(
           state: AvatarMotionState.exercise,
           actionType: _actionType,
+          motionId: _motionId,
           tempo: _tempo,
         );
       case UserActivityState.paused:
         _current = AvatarMotion(
           state: AvatarMotionState.paused,
           actionType: _actionType,
+          motionId: _motionId,
           tempo: _tempo,
         );
       case UserActivityState.idle:
@@ -101,6 +107,7 @@ class AvatarMotionSequencer {
           _current = AvatarMotion(
             state: AvatarMotionState.windup,
             actionType: _actionType,
+            motionId: _motionId,
             tempo: _tempo,
           );
         } else {
@@ -108,6 +115,7 @@ class AvatarMotionSequencer {
           _current = AvatarMotion(
             state: AvatarMotionState.exercise,
             actionType: _actionType,
+            motionId: _motionId,
             tempo: _tempo,
           );
         }
@@ -115,6 +123,7 @@ class AvatarMotionSequencer {
         _current = AvatarMotion(
           state: AvatarMotionState.paused,
           actionType: _actionType,
+          motionId: _motionId,
           tempo: _tempo,
         );
       case UserActivityState.idle:

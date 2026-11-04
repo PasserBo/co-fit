@@ -94,6 +94,7 @@ class StartTemplateCardActionUsecase {
           'templateName': card.name,
           'ablyActionId': card.ablyActionId,
           'intensityLabel': card.intensityLabel,
+          if (card.motionId != null) 'motionId': card.motionId,
         },
       ),
     );

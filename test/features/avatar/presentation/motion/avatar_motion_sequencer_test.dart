@@ -5,6 +5,7 @@ import 'package:cofit/features/room/domain/entity/user_activity_status_entity.da
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  _motionIdTests();
   test('idle → active plays windup first, then enters exercise loop', () {
     final seq = AvatarMotionSequencer();
 
@@ -82,5 +83,35 @@ void main() {
     expect(AvatarTempo.fromIntensityLabel('高强度'), AvatarTempo.fast);
     expect(AvatarTempo.fromIntensityLabel('标准'), AvatarTempo.standard);
     expect(AvatarTempo.fromIntensityLabel(null), AvatarTempo.standard);
+  });
+}
+
+void _motionIdTests() {
+  test('same state with a different motionId restarts the exercise loop', () {
+    final seq = AvatarMotionSequencer()
+      ..onLogicalState(UserActivityState.active,
+          actionType: ActionType.strength, motionId: 'squat')
+      ..onOneShotComplete();
+    expect(seq.current.motionId, 'squat');
+
+    final changed = seq.onLogicalState(UserActivityState.active,
+        actionType: ActionType.strength, motionId: 'lunge');
+    expect(changed, isTrue);
+    expect(seq.current.state, AvatarMotionState.exercise);
+    expect(seq.current.motionId, 'lunge');
+  });
+
+  test('motionId survives pause and resume', () {
+    final seq = AvatarMotionSequencer()
+      ..onLogicalState(UserActivityState.active,
+          actionType: ActionType.core, motionId: 'crunch')
+      ..onOneShotComplete()
+      ..onLogicalState(UserActivityState.paused,
+          actionType: ActionType.core, motionId: 'crunch');
+    expect(seq.current.motionId, 'crunch');
+    seq.onLogicalState(UserActivityState.active,
+        actionType: ActionType.core, motionId: 'crunch');
+    expect(seq.current.state, AvatarMotionState.exercise);
+    expect(seq.current.motionId, 'crunch');
   });
 }

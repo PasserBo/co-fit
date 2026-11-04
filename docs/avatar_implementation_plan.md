@@ -147,7 +147,10 @@ class MotionClipLibrary { MotionClip resolve({String? motionId, ActionType? type
 
 ---
 
-## P2 动作贯通 + 32 个 clip + 卡片 SSOT(4–6 天)
+## P2 动作贯通 + 32 个 clip + 卡片 SSOT(4–6 天)— 🟡 2026-11-04 第一批完成
+
+> 已做:2.1 贯通(含 pending 快照、打卡日志、事件折叠)、2.2 rules、2.3 SSOT(JSON + 脚本 + 工作流 + 种子牌组按 id + 牌库排序)、2.4 批次 1 的 8 个 clip(每类型 2 个:lunge/pushup、jumping_jack/high_knees、crunch/leg_raise、cat_cow/forward_fold)、2.5 自建卡动作选择 + 卡详情预览、2.6 测试。
+> 未做:其余 20 个 clip(glute_bridge、wall_sit、biceps_curl🏋、shoulder_press🏋、calf_raise、burpee、mountain_climber、jump_rope、skater、side_plank、bicycle_crunch、russian_twist、dead_bug、bird_dog、downward_dog、child_pose、hip_stretch、breathing;道具 Prop 系统随哑铃/跳绳一起做)、剪影测试、卡面上的动作预览(性能顾虑,暂不做)。
 
 ### 2.1 `motionId` 数据流(逐文件)
 

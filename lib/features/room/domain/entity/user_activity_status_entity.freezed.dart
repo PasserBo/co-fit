@@ -14,7 +14,8 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$UserActivityStatusEntity {
 
- UserActivityState get activityState; String? get actionKey; int? get durationSec; int? get remainingSec; String? get sessionId; String? get templateId; String? get templateName; int? get updatedAtEpochMs;
+ UserActivityState get activityState; String? get actionKey; int? get durationSec; int? get remainingSec; String? get sessionId; String? get templateId; String? get templateName;/// 小人动作 clip id(P2);旧客户端不发,接收端按 actionKey 类型原型兜底。
+ String? get motionId; int? get updatedAtEpochMs;
 /// Create a copy of UserActivityStatusEntity
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +26,16 @@ $UserActivityStatusEntityCopyWith<UserActivityStatusEntity> get copyWith => _$Us
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is UserActivityStatusEntity&&(identical(other.activityState, activityState) || other.activityState == activityState)&&(identical(other.actionKey, actionKey) || other.actionKey == actionKey)&&(identical(other.durationSec, durationSec) || other.durationSec == durationSec)&&(identical(other.remainingSec, remainingSec) || other.remainingSec == remainingSec)&&(identical(other.sessionId, sessionId) || other.sessionId == sessionId)&&(identical(other.templateId, templateId) || other.templateId == templateId)&&(identical(other.templateName, templateName) || other.templateName == templateName)&&(identical(other.updatedAtEpochMs, updatedAtEpochMs) || other.updatedAtEpochMs == updatedAtEpochMs));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is UserActivityStatusEntity&&(identical(other.activityState, activityState) || other.activityState == activityState)&&(identical(other.actionKey, actionKey) || other.actionKey == actionKey)&&(identical(other.durationSec, durationSec) || other.durationSec == durationSec)&&(identical(other.remainingSec, remainingSec) || other.remainingSec == remainingSec)&&(identical(other.sessionId, sessionId) || other.sessionId == sessionId)&&(identical(other.templateId, templateId) || other.templateId == templateId)&&(identical(other.templateName, templateName) || other.templateName == templateName)&&(identical(other.motionId, motionId) || other.motionId == motionId)&&(identical(other.updatedAtEpochMs, updatedAtEpochMs) || other.updatedAtEpochMs == updatedAtEpochMs));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,activityState,actionKey,durationSec,remainingSec,sessionId,templateId,templateName,updatedAtEpochMs);
+int get hashCode => Object.hash(runtimeType,activityState,actionKey,durationSec,remainingSec,sessionId,templateId,templateName,motionId,updatedAtEpochMs);
 
 @override
 String toString() {
-  return 'UserActivityStatusEntity(activityState: $activityState, actionKey: $actionKey, durationSec: $durationSec, remainingSec: $remainingSec, sessionId: $sessionId, templateId: $templateId, templateName: $templateName, updatedAtEpochMs: $updatedAtEpochMs)';
+  return 'UserActivityStatusEntity(activityState: $activityState, actionKey: $actionKey, durationSec: $durationSec, remainingSec: $remainingSec, sessionId: $sessionId, templateId: $templateId, templateName: $templateName, motionId: $motionId, updatedAtEpochMs: $updatedAtEpochMs)';
 }
 
 
@@ -45,7 +46,7 @@ abstract mixin class $UserActivityStatusEntityCopyWith<$Res>  {
   factory $UserActivityStatusEntityCopyWith(UserActivityStatusEntity value, $Res Function(UserActivityStatusEntity) _then) = _$UserActivityStatusEntityCopyWithImpl;
 @useResult
 $Res call({
- UserActivityState activityState, String? actionKey, int? durationSec, int? remainingSec, String? sessionId, String? templateId, String? templateName, int? updatedAtEpochMs
+ UserActivityState activityState, String? actionKey, int? durationSec, int? remainingSec, String? sessionId, String? templateId, String? templateName, String? motionId, int? updatedAtEpochMs
 });
 
 
@@ -62,7 +63,7 @@ class _$UserActivityStatusEntityCopyWithImpl<$Res>
 
 /// Create a copy of UserActivityStatusEntity
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? activityState = null,Object? actionKey = freezed,Object? durationSec = freezed,Object? remainingSec = freezed,Object? sessionId = freezed,Object? templateId = freezed,Object? templateName = freezed,Object? updatedAtEpochMs = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? activityState = null,Object? actionKey = freezed,Object? durationSec = freezed,Object? remainingSec = freezed,Object? sessionId = freezed,Object? templateId = freezed,Object? templateName = freezed,Object? motionId = freezed,Object? updatedAtEpochMs = freezed,}) {
   return _then(_self.copyWith(
 activityState: null == activityState ? _self.activityState : activityState // ignore: cast_nullable_to_non_nullable
 as UserActivityState,actionKey: freezed == actionKey ? _self.actionKey : actionKey // ignore: cast_nullable_to_non_nullable
@@ -71,6 +72,7 @@ as int?,remainingSec: freezed == remainingSec ? _self.remainingSec : remainingSe
 as int?,sessionId: freezed == sessionId ? _self.sessionId : sessionId // ignore: cast_nullable_to_non_nullable
 as String?,templateId: freezed == templateId ? _self.templateId : templateId // ignore: cast_nullable_to_non_nullable
 as String?,templateName: freezed == templateName ? _self.templateName : templateName // ignore: cast_nullable_to_non_nullable
+as String?,motionId: freezed == motionId ? _self.motionId : motionId // ignore: cast_nullable_to_non_nullable
 as String?,updatedAtEpochMs: freezed == updatedAtEpochMs ? _self.updatedAtEpochMs : updatedAtEpochMs // ignore: cast_nullable_to_non_nullable
 as int?,
   ));
@@ -157,10 +159,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( UserActivityState activityState,  String? actionKey,  int? durationSec,  int? remainingSec,  String? sessionId,  String? templateId,  String? templateName,  int? updatedAtEpochMs)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( UserActivityState activityState,  String? actionKey,  int? durationSec,  int? remainingSec,  String? sessionId,  String? templateId,  String? templateName,  String? motionId,  int? updatedAtEpochMs)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _UserActivityStatusEntity() when $default != null:
-return $default(_that.activityState,_that.actionKey,_that.durationSec,_that.remainingSec,_that.sessionId,_that.templateId,_that.templateName,_that.updatedAtEpochMs);case _:
+return $default(_that.activityState,_that.actionKey,_that.durationSec,_that.remainingSec,_that.sessionId,_that.templateId,_that.templateName,_that.motionId,_that.updatedAtEpochMs);case _:
   return orElse();
 
 }
@@ -178,10 +180,10 @@ return $default(_that.activityState,_that.actionKey,_that.durationSec,_that.rema
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( UserActivityState activityState,  String? actionKey,  int? durationSec,  int? remainingSec,  String? sessionId,  String? templateId,  String? templateName,  int? updatedAtEpochMs)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( UserActivityState activityState,  String? actionKey,  int? durationSec,  int? remainingSec,  String? sessionId,  String? templateId,  String? templateName,  String? motionId,  int? updatedAtEpochMs)  $default,) {final _that = this;
 switch (_that) {
 case _UserActivityStatusEntity():
-return $default(_that.activityState,_that.actionKey,_that.durationSec,_that.remainingSec,_that.sessionId,_that.templateId,_that.templateName,_that.updatedAtEpochMs);case _:
+return $default(_that.activityState,_that.actionKey,_that.durationSec,_that.remainingSec,_that.sessionId,_that.templateId,_that.templateName,_that.motionId,_that.updatedAtEpochMs);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -198,10 +200,10 @@ return $default(_that.activityState,_that.actionKey,_that.durationSec,_that.rema
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( UserActivityState activityState,  String? actionKey,  int? durationSec,  int? remainingSec,  String? sessionId,  String? templateId,  String? templateName,  int? updatedAtEpochMs)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( UserActivityState activityState,  String? actionKey,  int? durationSec,  int? remainingSec,  String? sessionId,  String? templateId,  String? templateName,  String? motionId,  int? updatedAtEpochMs)?  $default,) {final _that = this;
 switch (_that) {
 case _UserActivityStatusEntity() when $default != null:
-return $default(_that.activityState,_that.actionKey,_that.durationSec,_that.remainingSec,_that.sessionId,_that.templateId,_that.templateName,_that.updatedAtEpochMs);case _:
+return $default(_that.activityState,_that.actionKey,_that.durationSec,_that.remainingSec,_that.sessionId,_that.templateId,_that.templateName,_that.motionId,_that.updatedAtEpochMs);case _:
   return null;
 
 }
@@ -213,7 +215,7 @@ return $default(_that.activityState,_that.actionKey,_that.durationSec,_that.rema
 
 
 class _UserActivityStatusEntity implements UserActivityStatusEntity {
-  const _UserActivityStatusEntity({required this.activityState, this.actionKey, this.durationSec, this.remainingSec, this.sessionId, this.templateId, this.templateName, this.updatedAtEpochMs});
+  const _UserActivityStatusEntity({required this.activityState, this.actionKey, this.durationSec, this.remainingSec, this.sessionId, this.templateId, this.templateName, this.motionId, this.updatedAtEpochMs});
   
 
 @override final  UserActivityState activityState;
@@ -223,6 +225,8 @@ class _UserActivityStatusEntity implements UserActivityStatusEntity {
 @override final  String? sessionId;
 @override final  String? templateId;
 @override final  String? templateName;
+/// 小人动作 clip id(P2);旧客户端不发,接收端按 actionKey 类型原型兜底。
+@override final  String? motionId;
 @override final  int? updatedAtEpochMs;
 
 /// Create a copy of UserActivityStatusEntity
@@ -235,16 +239,16 @@ _$UserActivityStatusEntityCopyWith<_UserActivityStatusEntity> get copyWith => __
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _UserActivityStatusEntity&&(identical(other.activityState, activityState) || other.activityState == activityState)&&(identical(other.actionKey, actionKey) || other.actionKey == actionKey)&&(identical(other.durationSec, durationSec) || other.durationSec == durationSec)&&(identical(other.remainingSec, remainingSec) || other.remainingSec == remainingSec)&&(identical(other.sessionId, sessionId) || other.sessionId == sessionId)&&(identical(other.templateId, templateId) || other.templateId == templateId)&&(identical(other.templateName, templateName) || other.templateName == templateName)&&(identical(other.updatedAtEpochMs, updatedAtEpochMs) || other.updatedAtEpochMs == updatedAtEpochMs));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _UserActivityStatusEntity&&(identical(other.activityState, activityState) || other.activityState == activityState)&&(identical(other.actionKey, actionKey) || other.actionKey == actionKey)&&(identical(other.durationSec, durationSec) || other.durationSec == durationSec)&&(identical(other.remainingSec, remainingSec) || other.remainingSec == remainingSec)&&(identical(other.sessionId, sessionId) || other.sessionId == sessionId)&&(identical(other.templateId, templateId) || other.templateId == templateId)&&(identical(other.templateName, templateName) || other.templateName == templateName)&&(identical(other.motionId, motionId) || other.motionId == motionId)&&(identical(other.updatedAtEpochMs, updatedAtEpochMs) || other.updatedAtEpochMs == updatedAtEpochMs));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,activityState,actionKey,durationSec,remainingSec,sessionId,templateId,templateName,updatedAtEpochMs);
+int get hashCode => Object.hash(runtimeType,activityState,actionKey,durationSec,remainingSec,sessionId,templateId,templateName,motionId,updatedAtEpochMs);
 
 @override
 String toString() {
-  return 'UserActivityStatusEntity(activityState: $activityState, actionKey: $actionKey, durationSec: $durationSec, remainingSec: $remainingSec, sessionId: $sessionId, templateId: $templateId, templateName: $templateName, updatedAtEpochMs: $updatedAtEpochMs)';
+  return 'UserActivityStatusEntity(activityState: $activityState, actionKey: $actionKey, durationSec: $durationSec, remainingSec: $remainingSec, sessionId: $sessionId, templateId: $templateId, templateName: $templateName, motionId: $motionId, updatedAtEpochMs: $updatedAtEpochMs)';
 }
 
 
@@ -255,7 +259,7 @@ abstract mixin class _$UserActivityStatusEntityCopyWith<$Res> implements $UserAc
   factory _$UserActivityStatusEntityCopyWith(_UserActivityStatusEntity value, $Res Function(_UserActivityStatusEntity) _then) = __$UserActivityStatusEntityCopyWithImpl;
 @override @useResult
 $Res call({
- UserActivityState activityState, String? actionKey, int? durationSec, int? remainingSec, String? sessionId, String? templateId, String? templateName, int? updatedAtEpochMs
+ UserActivityState activityState, String? actionKey, int? durationSec, int? remainingSec, String? sessionId, String? templateId, String? templateName, String? motionId, int? updatedAtEpochMs
 });
 
 
@@ -272,7 +276,7 @@ class __$UserActivityStatusEntityCopyWithImpl<$Res>
 
 /// Create a copy of UserActivityStatusEntity
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? activityState = null,Object? actionKey = freezed,Object? durationSec = freezed,Object? remainingSec = freezed,Object? sessionId = freezed,Object? templateId = freezed,Object? templateName = freezed,Object? updatedAtEpochMs = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? activityState = null,Object? actionKey = freezed,Object? durationSec = freezed,Object? remainingSec = freezed,Object? sessionId = freezed,Object? templateId = freezed,Object? templateName = freezed,Object? motionId = freezed,Object? updatedAtEpochMs = freezed,}) {
   return _then(_UserActivityStatusEntity(
 activityState: null == activityState ? _self.activityState : activityState // ignore: cast_nullable_to_non_nullable
 as UserActivityState,actionKey: freezed == actionKey ? _self.actionKey : actionKey // ignore: cast_nullable_to_non_nullable
@@ -281,6 +285,7 @@ as int?,remainingSec: freezed == remainingSec ? _self.remainingSec : remainingSe
 as int?,sessionId: freezed == sessionId ? _self.sessionId : sessionId // ignore: cast_nullable_to_non_nullable
 as String?,templateId: freezed == templateId ? _self.templateId : templateId // ignore: cast_nullable_to_non_nullable
 as String?,templateName: freezed == templateName ? _self.templateName : templateName // ignore: cast_nullable_to_non_nullable
+as String?,motionId: freezed == motionId ? _self.motionId : motionId // ignore: cast_nullable_to_non_nullable
 as String?,updatedAtEpochMs: freezed == updatedAtEpochMs ? _self.updatedAtEpochMs : updatedAtEpochMs // ignore: cast_nullable_to_non_nullable
 as int?,
   ));

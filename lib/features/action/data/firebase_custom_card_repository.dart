@@ -34,6 +34,7 @@ class FirebaseCustomCardRepository implements CustomCardRepository {
         ablyActionId: (data['ablyActionId'] ?? rawType).toString(),
         defaultDurationSec: _asInt(data['defaultDurationSec']),
         intensityBaseline: _asMap(data['intensityBaseline']),
+        motionId: _asOptionalString(data['motionId']),
       );
     }).toList(growable: false);
   }
@@ -47,6 +48,7 @@ class FirebaseCustomCardRepository implements CustomCardRepository {
       'ablyActionId': card.ablyActionId,
       'defaultDurationSec': card.defaultDurationSec,
       'intensityBaseline': card.intensityBaseline,
+      if (card.motionId != null) 'motionId': card.motionId,
       'createdAt': FieldValue.serverTimestamp(),
       'updatedAt': FieldValue.serverTimestamp(),
     });
@@ -60,6 +62,8 @@ class FirebaseCustomCardRepository implements CustomCardRepository {
       'ablyActionId': card.ablyActionId,
       'defaultDurationSec': card.defaultDurationSec,
       'intensityBaseline': card.intensityBaseline,
+      // 编辑时清掉动作要显式删键(hasOnly 白名单允许缺省)。
+      'motionId': card.motionId ?? FieldValue.delete(),
       'updatedAt': FieldValue.serverTimestamp(),
     });
   }
@@ -67,6 +71,11 @@ class FirebaseCustomCardRepository implements CustomCardRepository {
   @override
   Future<void> deleteCard(String cardId) {
     return _cardsRef.doc(cardId).delete();
+  }
+
+  static String? _asOptionalString(Object? value) {
+    final text = value?.toString().trim();
+    return (text == null || text.isEmpty) ? null : text;
   }
 
   static int _asInt(Object? value) {

@@ -7,14 +7,18 @@ import '../../../../core/theme/cofit_dimens.dart';
 import '../../domain/entity/action_template_card.dart';
 import '../../domain/entity/action_type.dart';
 import '../../provider/custom_card_providers.dart';
+import '../../../avatar/presentation/renderer/motion_clip_library.dart';
+import '../../../avatar/presentation/widget/motion_preview_figure.dart';
 import '../../usecase/create_custom_card_usecase.dart';
 import '../action_template_usecase_provider.dart';
 import '../widget/action_type_style.dart';
 import '../widget/card_face_preview.dart';
+import '../widget/motion_picker_sheet.dart';
 
 /// 创建/编辑自建卡 sheet(#16a):
 /// 顶部实时卡面预览(选类型即换色条/图标底);
-/// 字段:名称(1–20,计数)/ 类型四选一 / 时长档位 + 自定义 / 强度标签可选。
+/// 字段:名称(1–20,计数)/ 类型四选一 / 动作(P2,按类型原型为默认)/
+/// 时长档位 + 自定义 / 强度标签可选。
 class CustomCardFormSheetView extends ConsumerStatefulWidget {
   const CustomCardFormSheetView({this.editing, super.key});
 
@@ -52,6 +56,7 @@ class _CustomCardFormSheetViewState
       TextEditingController();
 
   late ActionType _type = widget.editing?.type ?? ActionType.strength;
+  late String? _motionId = widget.editing?.motionId;
   late int? _presetDurationSec = widget.editing == null
       ? _durationPresets.first
       : (_durationPresets.contains(widget.editing!.defaultDurationSec)
@@ -96,6 +101,34 @@ class _CustomCardFormSheetViewState
 
   bool get _canSubmit => _isNameValid && _durationSec > 0 && !_isSubmitting;
 
+  String get _motionLabel => _motionId == null
+      ? '按类型原型(${_type.label})'
+      : (MotionClipLibrary.nameOf[_motionId] ?? _motionId!);
+
+  void _selectType(ActionType type) {
+    setState(() {
+      _type = type;
+      // 动作不属于新类型 → 退回该类型原型
+      if (_motionId != null && MotionClipLibrary.typeOf[_motionId] != type) {
+        _motionId = null;
+      }
+    });
+  }
+
+  Future<void> _pickMotion() async {
+    final picked = await MotionPickerSheet.show(
+      context,
+      type: _type,
+      selected: _motionId,
+    );
+    if (picked == null || !mounted) {
+      return;
+    }
+    setState(() {
+      _motionId = picked == MotionPickerSheet.useTypeDefault ? null : picked;
+    });
+  }
+
   Future<void> _submit() async {
     setState(() {
       _isSubmitting = true;
@@ -110,6 +143,7 @@ class _CustomCardFormSheetViewState
               durationSec: _durationSec,
               intensityBaseline:
                   _intensity == null ? const {} : {'label': _intensity},
+              motionId: _motionId,
             );
       } else {
         await ref.read(updateCustomCardUsecaseProvider).execute(
@@ -119,6 +153,7 @@ class _CustomCardFormSheetViewState
               durationSec: _durationSec,
               intensityBaseline:
                   _intensity == null ? const {} : {'label': _intensity},
+              motionId: _motionId,
             );
       }
       ref.invalidate(templateCardsProvider);
@@ -204,10 +239,18 @@ class _CustomCardFormSheetViewState
                         selected: _type == type,
                         onTap: _isSubmitting
                             ? null
-                            : () => setState(() => _type = type),
+                            : () => _selectType(type),
                       ),
                     ),
                 ],
+              ),
+              const SizedBox(height: CoFitDimens.spacingLg),
+              _FieldLabel('动作'),
+              _MotionRow(
+                type: _type,
+                motionId: _motionId,
+                label: _motionLabel,
+                onTap: _isSubmitting ? null : _pickMotion,
               ),
               const SizedBox(height: CoFitDimens.spacingLg),
               _FieldLabel('时长'),
@@ -296,6 +339,67 @@ class _CustomCardFormSheetViewState
               ],
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// 「动作」行:左侧 loop 预览小人,中间动作名,右侧箭头;点按打开选择器。
+class _MotionRow extends StatelessWidget {
+  const _MotionRow({
+    required this.type,
+    required this.motionId,
+    required this.label,
+    this.onTap,
+  });
+
+  final ActionType type;
+  final String? motionId;
+  final String label;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<CoFitColors>()!;
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        constraints:
+            const BoxConstraints(minHeight: CoFitDimens.sizeMinTapTarget),
+        padding: const EdgeInsets.symmetric(
+          horizontal: CoFitDimens.spacingMd,
+          vertical: CoFitDimens.spacingSm,
+        ),
+        decoration: BoxDecoration(
+          color: colors.bgDeep,
+          borderRadius: BorderRadius.circular(CoFitDimens.radiusMd),
+          border: Border.all(
+            color: colors.borderStrong,
+            width: CoFitDimens.borderWidthHairline,
+          ),
+        ),
+        child: Row(
+          children: [
+            MotionPreviewFigure(
+              type: type,
+              motionId: motionId,
+              figureHeight: CoFitDimens.sizeFigureFriend,
+            ),
+            const SizedBox(width: CoFitDimens.spacingMd),
+            Expanded(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: colors.textPrimary,
+                    ),
+              ),
+            ),
+            Icon(Icons.chevron_right, color: colors.textTertiary),
+          ],
         ),
       ),
     );

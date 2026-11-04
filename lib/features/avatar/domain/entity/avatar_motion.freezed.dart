@@ -14,8 +14,9 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$AvatarMotion {
 
- AvatarMotionState get state;/// exercise 时按 4 类型走通用原型;其他状态可为 null。
- ActionType? get actionType; AvatarTempo get tempo;
+ AvatarMotionState get state;/// exercise 时的类型(clip 未命中时的原型兜底);其他状态可为 null。
+ ActionType? get actionType;/// exercise 时的具体动作 clip id(P2);null/未知 → 类型原型。
+ String? get motionId; AvatarTempo get tempo;
 /// Create a copy of AvatarMotion
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -26,16 +27,16 @@ $AvatarMotionCopyWith<AvatarMotion> get copyWith => _$AvatarMotionCopyWithImpl<A
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AvatarMotion&&(identical(other.state, state) || other.state == state)&&(identical(other.actionType, actionType) || other.actionType == actionType)&&(identical(other.tempo, tempo) || other.tempo == tempo));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AvatarMotion&&(identical(other.state, state) || other.state == state)&&(identical(other.actionType, actionType) || other.actionType == actionType)&&(identical(other.motionId, motionId) || other.motionId == motionId)&&(identical(other.tempo, tempo) || other.tempo == tempo));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,state,actionType,tempo);
+int get hashCode => Object.hash(runtimeType,state,actionType,motionId,tempo);
 
 @override
 String toString() {
-  return 'AvatarMotion(state: $state, actionType: $actionType, tempo: $tempo)';
+  return 'AvatarMotion(state: $state, actionType: $actionType, motionId: $motionId, tempo: $tempo)';
 }
 
 
@@ -46,7 +47,7 @@ abstract mixin class $AvatarMotionCopyWith<$Res>  {
   factory $AvatarMotionCopyWith(AvatarMotion value, $Res Function(AvatarMotion) _then) = _$AvatarMotionCopyWithImpl;
 @useResult
 $Res call({
- AvatarMotionState state, ActionType? actionType, AvatarTempo tempo
+ AvatarMotionState state, ActionType? actionType, String? motionId, AvatarTempo tempo
 });
 
 
@@ -63,11 +64,12 @@ class _$AvatarMotionCopyWithImpl<$Res>
 
 /// Create a copy of AvatarMotion
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? state = null,Object? actionType = freezed,Object? tempo = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? state = null,Object? actionType = freezed,Object? motionId = freezed,Object? tempo = null,}) {
   return _then(_self.copyWith(
 state: null == state ? _self.state : state // ignore: cast_nullable_to_non_nullable
 as AvatarMotionState,actionType: freezed == actionType ? _self.actionType : actionType // ignore: cast_nullable_to_non_nullable
-as ActionType?,tempo: null == tempo ? _self.tempo : tempo // ignore: cast_nullable_to_non_nullable
+as ActionType?,motionId: freezed == motionId ? _self.motionId : motionId // ignore: cast_nullable_to_non_nullable
+as String?,tempo: null == tempo ? _self.tempo : tempo // ignore: cast_nullable_to_non_nullable
 as AvatarTempo,
   ));
 }
@@ -153,10 +155,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( AvatarMotionState state,  ActionType? actionType,  AvatarTempo tempo)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( AvatarMotionState state,  ActionType? actionType,  String? motionId,  AvatarTempo tempo)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _AvatarMotion() when $default != null:
-return $default(_that.state,_that.actionType,_that.tempo);case _:
+return $default(_that.state,_that.actionType,_that.motionId,_that.tempo);case _:
   return orElse();
 
 }
@@ -174,10 +176,10 @@ return $default(_that.state,_that.actionType,_that.tempo);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( AvatarMotionState state,  ActionType? actionType,  AvatarTempo tempo)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( AvatarMotionState state,  ActionType? actionType,  String? motionId,  AvatarTempo tempo)  $default,) {final _that = this;
 switch (_that) {
 case _AvatarMotion():
-return $default(_that.state,_that.actionType,_that.tempo);case _:
+return $default(_that.state,_that.actionType,_that.motionId,_that.tempo);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -194,10 +196,10 @@ return $default(_that.state,_that.actionType,_that.tempo);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( AvatarMotionState state,  ActionType? actionType,  AvatarTempo tempo)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( AvatarMotionState state,  ActionType? actionType,  String? motionId,  AvatarTempo tempo)?  $default,) {final _that = this;
 switch (_that) {
 case _AvatarMotion() when $default != null:
-return $default(_that.state,_that.actionType,_that.tempo);case _:
+return $default(_that.state,_that.actionType,_that.motionId,_that.tempo);case _:
   return null;
 
 }
@@ -209,12 +211,14 @@ return $default(_that.state,_that.actionType,_that.tempo);case _:
 
 
 class _AvatarMotion implements AvatarMotion {
-  const _AvatarMotion({required this.state, this.actionType, this.tempo = AvatarTempo.standard});
+  const _AvatarMotion({required this.state, this.actionType, this.motionId, this.tempo = AvatarTempo.standard});
   
 
 @override final  AvatarMotionState state;
-/// exercise 时按 4 类型走通用原型;其他状态可为 null。
+/// exercise 时的类型(clip 未命中时的原型兜底);其他状态可为 null。
 @override final  ActionType? actionType;
+/// exercise 时的具体动作 clip id(P2);null/未知 → 类型原型。
+@override final  String? motionId;
 @override@JsonKey() final  AvatarTempo tempo;
 
 /// Create a copy of AvatarMotion
@@ -227,16 +231,16 @@ _$AvatarMotionCopyWith<_AvatarMotion> get copyWith => __$AvatarMotionCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AvatarMotion&&(identical(other.state, state) || other.state == state)&&(identical(other.actionType, actionType) || other.actionType == actionType)&&(identical(other.tempo, tempo) || other.tempo == tempo));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AvatarMotion&&(identical(other.state, state) || other.state == state)&&(identical(other.actionType, actionType) || other.actionType == actionType)&&(identical(other.motionId, motionId) || other.motionId == motionId)&&(identical(other.tempo, tempo) || other.tempo == tempo));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,state,actionType,tempo);
+int get hashCode => Object.hash(runtimeType,state,actionType,motionId,tempo);
 
 @override
 String toString() {
-  return 'AvatarMotion(state: $state, actionType: $actionType, tempo: $tempo)';
+  return 'AvatarMotion(state: $state, actionType: $actionType, motionId: $motionId, tempo: $tempo)';
 }
 
 
@@ -247,7 +251,7 @@ abstract mixin class _$AvatarMotionCopyWith<$Res> implements $AvatarMotionCopyWi
   factory _$AvatarMotionCopyWith(_AvatarMotion value, $Res Function(_AvatarMotion) _then) = __$AvatarMotionCopyWithImpl;
 @override @useResult
 $Res call({
- AvatarMotionState state, ActionType? actionType, AvatarTempo tempo
+ AvatarMotionState state, ActionType? actionType, String? motionId, AvatarTempo tempo
 });
 
 
@@ -264,11 +268,12 @@ class __$AvatarMotionCopyWithImpl<$Res>
 
 /// Create a copy of AvatarMotion
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? state = null,Object? actionType = freezed,Object? tempo = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? state = null,Object? actionType = freezed,Object? motionId = freezed,Object? tempo = null,}) {
   return _then(_AvatarMotion(
 state: null == state ? _self.state : state // ignore: cast_nullable_to_non_nullable
 as AvatarMotionState,actionType: freezed == actionType ? _self.actionType : actionType // ignore: cast_nullable_to_non_nullable
-as ActionType?,tempo: null == tempo ? _self.tempo : tempo // ignore: cast_nullable_to_non_nullable
+as ActionType?,motionId: freezed == motionId ? _self.motionId : motionId // ignore: cast_nullable_to_non_nullable
+as String?,tempo: null == tempo ? _self.tempo : tempo // ignore: cast_nullable_to_non_nullable
 as AvatarTempo,
   ));
 }

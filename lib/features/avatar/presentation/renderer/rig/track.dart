@@ -31,6 +31,9 @@ sealed class Track {
   /// a → b → a 的角度摆动(0→1→0 三角波 + ease-in-out,即 #14a 的 `_wave`)。
   const factory Track.swing(double fromDeg, double toDeg) = SwingTrack;
 
+  /// a → b(40%)停到 60% → a:顶点停留 20%(柔韧类,#14a 的 `_holdWave`)。
+  const factory Track.hold(double fromDeg, double toDeg) = HoldTrack;
+
   BoneTransform sample(double t);
 }
 
@@ -79,6 +82,27 @@ class SwingTrack extends Track {
   /// 0→1→0 三角波 + ease-in-out。
   static double wave(double t) =>
       Curves.easeInOut.transform(1 - (2 * t - 1).abs());
+
+  @override
+  BoneTransform sample(double t) =>
+      BoneTransform(rotDeg: fromDeg + (toDeg - fromDeg) * wave(t));
+}
+
+class HoldTrack extends Track {
+  const HoldTrack(this.fromDeg, this.toDeg);
+
+  final double fromDeg;
+  final double toDeg;
+
+  static double wave(double t) {
+    if (t < 0.4) {
+      return Curves.easeInOut.transform(t / 0.4);
+    }
+    if (t < 0.6) {
+      return 1;
+    }
+    return Curves.easeInOut.transform((1 - t) / 0.4);
+  }
 
   @override
   BoneTransform sample(double t) =>

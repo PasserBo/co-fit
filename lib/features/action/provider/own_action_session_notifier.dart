@@ -58,6 +58,7 @@ class OwnActionSessionNotifier extends Notifier<TemplateCardSession?> {
         sessionId: session.sessionId,
         templateId: card.id,
         templateName: card.name,
+        motionId: card.motionId,
         updatedAtEpochMs: session.startedAt.millisecondsSinceEpoch,
       ),
     );
@@ -80,6 +81,7 @@ class OwnActionSessionNotifier extends Notifier<TemplateCardSession?> {
               actionKey: card.rawType,
               durationSec: card.defaultDurationSec,
               startedAt: session.startedAt,
+              motionId: card.motionId,
             ),
           )
           .catchError((Object error) {
@@ -147,6 +149,7 @@ class OwnActionSessionNotifier extends Notifier<TemplateCardSession?> {
             sessionId: snapshot.sessionId,
             templateId: snapshot.templateId,
             templateName: snapshot.templateName,
+            motionId: snapshot.motionId ?? card.motionId,
             updatedAtEpochMs: now.millisecondsSinceEpoch,
           ),
         );

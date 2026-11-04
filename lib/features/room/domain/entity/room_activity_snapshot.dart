@@ -120,6 +120,7 @@ abstract class RoomActivitySnapshot with _$RoomActivitySnapshot {
           actionKey: status.actionKey ?? '',
           templateId: status.templateId,
           templateName: status.templateName,
+          motionId: status.motionId,
           durationSec: status.durationSec ?? remaining,
           startedAt: at,
           status:
@@ -135,6 +136,11 @@ abstract class RoomActivitySnapshot with _$RoomActivitySnapshot {
   }
 
   bool get isEmpty => sessionsByUser.isEmpty;
+
+  static String? _optionalString(Object? value) {
+    final text = value?.toString().trim();
+    return (text == null || text.isEmpty) ? null : text;
+  }
 
   static bool _isActionEvent(String type) {
     return type == RoomEventType.actionStarted ||
@@ -157,6 +163,7 @@ abstract class RoomActivitySnapshot with _$RoomActivitySnapshot {
         actionKey: payload.actionKey,
         templateId: payload.customData['templateId']?.toString(),
         templateName: payload.customData['templateName']?.toString(),
+        motionId: _optionalString(payload.customData['motionId']),
         durationSec: payload.durationSec,
         startedAt: event.timestamp,
         status: status,

@@ -23,6 +23,7 @@ class AvatarBubble extends StatefulWidget {
     required this.state,
     required this.renderer,
     this.actionType,
+    this.motionId,
     this.tempo = AvatarTempo.standard,
     this.chipText,
     this.isSelf = false,
@@ -36,6 +37,9 @@ class AvatarBubble extends StatefulWidget {
 
   /// 运动中的动作类型(决定 loop 原型与光圈类型色)。
   final ActionType? actionType;
+
+  /// 具体动作 clip id(P2);null/未知 → 类型原型。
+  final String? motionId;
   final AvatarTempo tempo;
 
   /// 动作说明(如「深蹲 10min」),null 时按状态显示占位文案。
@@ -54,6 +58,7 @@ class _AvatarBubbleState extends State<AvatarBubble> {
     ..onLogicalState(
       widget.state,
       actionType: widget.actionType,
+      motionId: widget.motionId,
       tempo: widget.tempo,
     );
 
@@ -63,6 +68,7 @@ class _AvatarBubbleState extends State<AvatarBubble> {
     final changed = _sequencer.onLogicalState(
       widget.state,
       actionType: widget.actionType,
+      motionId: widget.motionId,
       tempo: widget.tempo,
     );
     if (changed) {

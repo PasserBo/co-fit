@@ -17,6 +17,7 @@ class UpdateCustomCardUsecase {
     required String rawType,
     required int durationSec,
     Map<String, dynamic>? intensityBaseline,
+    String? motionId,
   }) async {
     if (card.source != ActionSource.custom) {
       throw ArgumentError.value(
@@ -54,6 +55,8 @@ class UpdateCustomCardUsecase {
       ablyActionId: trimmedRawType,
       defaultDurationSec: durationSec,
       intensityBaseline: intensityBaseline ?? card.intensityBaseline,
+      motionId: (motionId ?? '').trim().isEmpty ? null : motionId!.trim(),
+      clearMotionId: (motionId ?? '').trim().isEmpty,
     );
     await _repository.updateCard(updated);
     return updated;

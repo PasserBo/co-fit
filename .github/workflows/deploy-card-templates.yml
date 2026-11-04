@@ -1,0 +1,44 @@
+name: Deploy Card Templates
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'firestore/card_templates.json'
+      - 'tool/seed_card_templates.mjs'
+  workflow_dispatch:
+    inputs:
+      prune:
+        description: '删除线上不在 JSON 里的模板(破坏性)'
+        type: boolean
+        default: false
+      dry_run:
+        description: '只打印,不写入'
+        type: boolean
+        default: false
+
+jobs:
+  seed:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Install tool deps
+        working-directory: tool
+        run: npm install --no-audit --no-fund
+
+      - name: Seed card_templates
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          echo "$GOOGLE_APPLICATION_CREDENTIALS_JSON" > service-account.json
+          export GOOGLE_APPLICATION_CREDENTIALS=service-account.json
+          node tool/seed_card_templates.mjs --project cofit-lmdyd \
+            ${{ inputs.prune && '--prune' || '' }} \
+            ${{ inputs.dry_run && '--dry-run' || '' }}

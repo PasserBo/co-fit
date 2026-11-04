@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<title>CoFit 小人形象探索 — A 胶囊 2.0 / B 豆豆 / C 线条</title>
+<style>
+  :root{
+    --bg:#181B22; --card:#22252E; --line:rgba(255,255,255,.08);
+    --lime:#C8F24B; --coral:#FF7A59; --amber:#F2C14B; --blue:#8FBAFF;
+    --gray50:#F4F3EF; --gray500:#8B8F86; --gray900:#181B22;
+    --text:rgba(244,243,239,.92); --text2:rgba(244,243,239,.6); --text3:rgba(244,243,239,.42);
+    --body:var(--gray50); --ph:0;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font:14px/1.5 -apple-system,"PingFang SC","Hiragino Sans GB",sans-serif;padding:28px 32px 80px}
+  h1{font-size:22px;font-weight:700;letter-spacing:.2px}
+  h2{font-size:17px;margin:40px 0 6px}
+  p.sub{color:var(--text2);max-width:900px}
+  .controls{display:flex;flex-wrap:wrap;gap:18px;align-items:center;margin:18px 0 6px;padding:12px 16px;background:var(--card);border-radius:14px;position:sticky;top:10px;z-index:5;border:1px solid var(--line)}
+  .controls label{display:flex;align-items:center;gap:6px;color:var(--text2);cursor:pointer}
+  .swatches{display:flex;gap:6px;align-items:center}
+  .sw{width:22px;height:22px;border-radius:50%;border:2px solid transparent;cursor:pointer}
+  .sw.on{border-color:var(--lime)}
+  .dir{margin-top:22px;padding:20px;background:var(--card);border-radius:18px;border:1px solid var(--line)}
+  .dir header{display:flex;gap:14px;align-items:baseline;flex-wrap:wrap}
+  .dir header .tag{font-size:12px;color:var(--gray900);background:var(--lime);padding:2px 8px;border-radius:999px;font-weight:700}
+  .dir header .desc{color:var(--text2);font-size:13px}
+  .row{display:flex;gap:18px;align-items:flex-end;margin-top:16px;flex-wrap:wrap}
+  .stage{display:flex;flex-direction:column;align-items:center;gap:6px}
+  .stage .cap{font-size:12px;color:var(--text3)}
+  .stage svg{display:block}
+  .small{display:flex;gap:22px;align-items:flex-end;padding:12px 14px;border-radius:12px;background:rgba(0,0,0,.18)}
+  .small .cap{font-size:11px}
+  svg.fig{overflow:visible}
+  .b{fill:var(--body)} .s{stroke:var(--body);fill:none;stroke-linecap:round}
+  .far{opacity:.8}
+  .eye{fill:var(--gray900)}
+  .hat{fill:var(--lime);display:none} body.show-hat .hat{display:block}
+  .aura{fill:var(--lime);opacity:.18}
+  .rig{display:none} body.show-rig .rig{display:block}
+  .rig line{stroke:var(--lime);stroke-width:.8;opacity:.9}
+  .rig circle{fill:var(--coral)}
+  .rig .sock{fill:none;stroke:var(--blue);stroke-width:.8}
+  body.show-rig .b, body.show-rig .s{opacity:.35}
+  .sil .b{fill:#fff} .sil .s{stroke:#fff} .sil .eye,.sil .hat,.sil .aura{display:none}
+  .sil-strip{display:grid;grid-template-columns:repeat(13,auto);gap:10px 18px;align-items:end;justify-content:start;margin-top:10px;padding:16px;background:#000;border-radius:14px}
+  .sil-strip .lbl{color:var(--text3);font-size:12px;align-self:center}
+  .note{color:var(--text3);font-size:12px;margin-top:8px}
+
+  /* ===== 动画:每个小人一个时钟(--dur),所有骨骼从同一 t 派生;hold 模式把所有动画定在 50% ===== */
+  .fig .root,.fig .spine,.fig .head,.fig [class^="uarm"],.fig [class^="farm"],.fig [class^="thigh"],.fig [class^="shin"]{
+    animation-duration:var(--dur);animation-timing-function:ease-in-out;animation-iteration-count:infinite;
+    animation-delay:calc(var(--dur) * var(--ph));
+  }
+  body.hold .fig *{animation-play-state:paused}
+  body.hold{--ph:-0.5}
+
+  .anim-idle{--dur:2.4s}
+  .anim-idle .root{animation-name:bob}
+  .anim-idle.dirB .spine{animation-name:breathe}
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+  @keyframes breathe{0%,100%{transform:scale(1,1)}50%{transform:scale(.985,1.03)}}
+
+  .anim-jj{--dur:.7s}
+  .anim-jj .root{animation-name:jjHop}
+  .anim-jj .uarmL{animation-name:jjArmL} .anim-jj .uarmR{animation-name:jjArmR}
+  .anim-jj .farmL{animation-name:jjFarmL} .anim-jj .farmR{animation-name:jjFarmR}
+  .anim-jj .thighL{animation-name:jjThighL} .anim-jj .thighR{animation-name:jjThighR}
+  .anim-jj .shinL{animation-name:jjShinL} .anim-jj .shinR{animation-name:jjShinR}
+  @keyframes jjHop{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+  @keyframes jjArmL{0%,100%{transform:rotate(12deg)}50%{transform:rotate(160deg)}}
+  @keyframes jjArmR{0%,100%{transform:rotate(-12deg)}50%{transform:rotate(-160deg)}}
+  @keyframes jjFarmL{0%,100%{transform:rotate(0)}50%{transform:rotate(-12deg)}}
+  @keyframes jjFarmR{0%,100%{transform:rotate(0)}50%{transform:rotate(12deg)}}
+  @keyframes jjThighL{0%,100%{transform:rotate(0)}50%{transform:rotate(26deg)}}
+  @keyframes jjThighR{0%,100%{transform:rotate(0)}50%{transform:rotate(-26deg)}}
+  @keyframes jjShinL{0%,100%{transform:rotate(0)}50%{transform:rotate(-26deg)}}
+  @keyframes jjShinR{0%,100%{transform:rotate(0)}50%{transform:rotate(26deg)}}
+
+  .anim-squat{--dur:1.3s}
+  .anim-squat .root{animation-name:squatDrop}
+  .anim-squat .thighN,.anim-squat .thighF{animation-name:sqThigh}
+  .anim-squat .shinN,.anim-squat .shinF{animation-name:sqShin}
+  .anim-squat .spine{animation-name:sqSpine}
+  .anim-squat .uarmN,.anim-squat .uarmF{animation-name:sqArm}
+  .anim-squat .farmN,.anim-squat .farmF{animation-name:sqFarm}
+  .anim-squat .head{animation-name:sqHead}
+  @keyframes squatDrop{0%,100%{transform:translateY(0)}50%{transform:translateY(var(--squatDrop))}}
+  @keyframes sqThigh{0%,100%{transform:rotate(0)}50%{transform:rotate(-82deg)}}
+  @keyframes sqShin{0%,100%{transform:rotate(0)}50%{transform:rotate(88deg)}}
+  @keyframes sqSpine{0%,100%{transform:rotate(0)}50%{transform:rotate(24deg)}}
+  @keyframes sqArm{0%,100%{transform:rotate(0)}50%{transform:rotate(-95deg)}}
+  @keyframes sqFarm{0%,100%{transform:rotate(0)}50%{transform:rotate(-8deg)}}
+  @keyframes sqHead{0%,100%{transform:rotate(0)}50%{transform:rotate(-20deg)}}
+
+  .anim-pushup{--dur:1.2s}
+  .anim-pushup .plank{transform:translate(var(--plankShift),20px) rotate(90deg)}
+  .anim-pushup .root{animation-name:puBody}
+  .anim-pushup .uarmN,.anim-pushup .uarmF{animation-name:puArm}
+  .anim-pushup .farmN,.anim-pushup .farmF{animation-name:puFarm}
+  .anim-pushup .head{animation-name:puHead}
+  @keyframes puBody{0%,100%{transform:translateY(0)}50%{transform:translateY(6px)}}
+  @keyframes puArm{0%,100%{transform:rotate(-90deg)}50%{transform:rotate(-136deg)}}
+  @keyframes puFarm{0%,100%{transform:rotate(0)}50%{transform:rotate(92deg)}}
+  @keyframes puHead{0%,100%{transform:rotate(-12deg)}50%{transform:rotate(-12deg)}}
+</style>
+</head>
+<body class="show-hat">
+<h1>CoFit 小人形象探索</h1>
+<p class="sub">三个方向,同一棵骨骼树(root → pelvis → spine → head / 上臂→前臂;pelvis → 大腿→小腿),只是几何不同。每个小人一个时钟,所有骨骼从同一 t 派生,镜像肢体取反。
+看 46px 那一档和最下面的纯白剪影——那是房间里真实的样子。需求与评分见 <code>avatar_character_design.md</code>。</p>
+
+<div class="controls">
+  <label><input type="checkbox" id="rig"> 显示骨骼与挂点</label>
+  <label><input type="checkbox" id="hat" checked> 头饰挂点演示(发带)</label>
+  <label><input type="checkbox" id="hold"> 定格在动作极点(50%)</label>
+  <div class="swatches">身体色
+    <span class="sw on" data-c="#F4F3EF" style="background:#F4F3EF"></span>
+    <span class="sw" data-c="#C8F24B" style="background:#C8F24B"></span>
+    <span class="sw" data-c="#FF7A59" style="background:#FF7A59"></span>
+    <span class="sw" data-c="#F2C14B" style="background:#F2C14B"></span>
+    <span class="sw" data-c="#8FBAFF" style="background:#8FBAFF"></span>
+    <span class="sw" data-c="#8B8F86" style="background:#8B8F86"></span>
+  </div>
+</div>
+
+<div id="dirs"></div>
+
+<h2>46px 纯白剪影对比(剪影测试)</h2>
+<p class="sub">房间好友尺寸、去掉颜色/眼睛/头饰,只剩轮廓。能一眼说出动作名的方向,才算过了 R1。</p>
+<div class="sil-strip" id="sil"></div>
+<p class="note">A/B/C × 待机 / 开合跳 / 深蹲 / 俯卧撑。勾选「定格」后对比静态极点更公平。</p>
+
+<script>
+// ===== 几何工具 =====
+const cap=(x,y,w,h)=>`<rect class="b" x="${x}" y="${y}" width="${w}" height="${h}" rx="${Math.min(w,h)/2}"/>`;
+const ln=(x1,y1,x2,y2,sw)=>`<line class="s" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke-width="${sw}"/>`;
+const g=(cls,ox,oy,inner)=>`<g class="${cls}" style="transform-origin:${ox}px ${oy}px">${inner}</g>`;
+const eye=(x,y,r=1.4)=>`<circle class="eye" cx="${x}" cy="${y}" r="${r}"/>`;
+const hat=(x,y,w)=>`<rect class="hat" x="${x}" y="${y}" width="${w}" height="3.4" rx="1.7"/>`;
+const EGG='M40 7 C 59 7, 61 29, 60 48 C 59 63, 50 68, 40 68 C 30 68, 21 63, 20 48 C 19 29, 21 7, 40 7 Z';
+
+// ===== 三个方向:front()/side() 返回 {pelvis, spine};rig = 骨骼叠加(front) =====
+const DIRS = {
+  A: {
+    name:'A · 胶囊 2.0', desc:'现有形象的进化:圆头 + 胶囊躯干 + 带肘/膝的悬浮四肢 + 脚垫。品牌连续性最强;头与躯干的可穿戴面积最小。',
+    squatDrop:'9px', plankShift:'0px', ground:90,
+    front(){
+      const legL=g('thighL',35,64,cap(32,64,6,10)+g('shinL',35,75,cap(32,76,6,9)+cap(31,85.5,9,3)));
+      const legR=g('thighR',45,64,cap(42,64,6,10)+g('shinR',45,75,cap(42,76,6,9)+cap(40,85.5,9,3)));
+      const armL=g('uarmL',25,40,cap(22.5,40,5,10)+g('farmL',25,51,cap(22.5,52,5,9)));
+      const armR=g('uarmR',55,40,cap(52.5,40,5,10)+g('farmR',55,51,cap(52.5,52,5,9)));
+      const head=g('head',40,33,`<circle class="b" cx="40" cy="22" r="10"/>`+eye(36.5,22)+eye(43.5,22)+hat(29,15,22));
+      return {pelvis:legL+legR, spine:g('spine',40,62,cap(30,35,20,26)+armL+armR+head)};
+    },
+    side(){
+      const leg=(c)=>g('thigh'+c,40,64,cap(37,64,6,10)+g('shin'+c,40,75,cap(37,76,6,9)+cap(36,85.5,10,3)));
+      const arm=(c)=>g('uarm'+c,40,40,cap(37.5,40,5,10)+g('farm'+c,40,51,cap(37.5,52,5,9)));
+      const head=g('head',40,33,`<circle class="b" cx="41" cy="22" r="10"/>`+eye(46,21.5)+hat(30,15,22));
+      return {pelvis:`<g class="far">${leg('F')}</g>`+leg('N'),
+              spine:g('spine',40,62,`<g class="far">${arm('F')}</g>`+cap(31,35,18,26)+arm('N')+head)};
+    },
+    rig:{pts:[[40,33],[25,40],[55,40],[25,51],[55,51],[40,62],[35,64],[45,64],[35,75],[45,75],[40,88]],
+         bones:[[40,88,40,62],[40,62,40,33],[25,40,55,40],[25,40,25,51],[25,51,25,61],[55,40,55,51],[55,51,55,61],[35,64,45,64],[35,64,35,75],[35,75,35,86],[45,64,45,75],[45,75,45,86]],
+         socks:[[40,12],[40,22],[40,48],[25,61],[55,61],[35,86],[45,86]]}
+  },
+  B: {
+    name:'B · 豆豆', desc:'头身合一的蛋形 + 短悬浮关节四肢。连续表面最大(花纹/面罩/头饰全可见),轮廓最稳;没有脖子,脊柱动作靠整体倾斜与挤压。',
+    squatDrop:'7px', plankShift:'-3px', ground:90,
+    // 探索中发现:腿 6+5.5 太短,深蹲读不出来 → 8+7;侧视手臂贴在轴线上会整条藏进蛋体 → 肩前移 6、臂加长到 10+9。
+    front(){
+      const legL=g('thighL',33,70.5,cap(30,70.5,6,8)+g('shinL',33,79,cap(30,79.5,6,7)+cap(28,86,10,3)));
+      const legR=g('thighR',47,70.5,cap(44,70.5,6,8)+g('shinR',47,79,cap(44,79.5,6,7)+cap(42,86,10,3)));
+      const armL=g('uarmL',15.25,39,cap(12.5,39,5.5,10)+g('farmL',15.25,50,cap(12.5,51,5.5,9)));
+      const armR=g('uarmR',64.75,39,cap(62,39,5.5,10)+g('farmR',64.75,50,cap(62,51,5.5,9)));
+      const head=g('head',40,31,eye(34,29,1.7)+eye(46,29,1.7)+hat(29,14,22));
+      return {pelvis:legL+legR, spine:g('spine',40,68,`<path class="b" d="${EGG}"/>`+armL+armR+head)};
+    },
+    side(){
+      const leg=(c)=>g('thigh'+c,40,70.5,cap(37,70.5,6,8)+g('shin'+c,40,79,cap(37,79.5,6,7)+cap(36,86,11,3)));
+      const arm=(c)=>g('uarm'+c,46,39,cap(43.25,39,5.5,10)+g('farm'+c,46,50,cap(43.25,51,5.5,9)));
+      const head=g('head',40,31,eye(48,29,1.7)+hat(29,14,22));
+      return {pelvis:`<g class="far">${leg('F')}</g>`+leg('N'),
+              spine:g('spine',40,68,`<g class="far">${arm('F')}</g>`+`<path class="b" d="${EGG}"/>`+arm('N')+head)};
+    },
+    rig:{pts:[[40,31],[15.25,39],[64.75,39],[15.25,50],[64.75,50],[40,68],[33,70.5],[47,70.5],[33,79],[47,79],[40,88]],
+         bones:[[40,88,40,68],[40,68,40,31],[15.25,39,64.75,39],[15.25,39,15.25,50],[15.25,50,15.25,60],[64.75,39,64.75,50],[64.75,50,64.75,60],[33,70.5,47,70.5],[33,70.5,33,79],[33,79,33,86],[47,70.5,47,79],[47,79,47,86]],
+         socks:[[40,7],[40,29],[40,50],[15.25,60],[64.75,60],[33,87],[47,87]]}
+  },
+  C: {
+    name:'C · 线条', desc:'运动图标(pictogram)语言:圆头 + 粗线躯干与关节四肢。动作辨识度天花板,实现最简单;可穿戴表面最小,情感温度低。',
+    squatDrop:'10px', plankShift:'0px', ground:90,
+    front(){
+      const legL=g('thighL',37,61,ln(37,61,35,74,6)+g('shinL',35,74,ln(35,74,35,86,6)+ln(32,86,40,86,4)));
+      const legR=g('thighR',43,61,ln(43,61,45,74,6)+g('shinR',45,74,ln(45,74,45,86,6)+ln(40,86,48,86,4)));
+      const armL=g('uarmL',36,35,ln(36,35,30,46,5.5)+g('farmL',30,46,ln(30,46,28,56,5.5)));
+      const armR=g('uarmR',44,35,ln(44,35,50,46,5.5)+g('farmR',50,46,ln(50,46,52,56,5.5)));
+      const head=g('head',40,30,`<circle class="b" cx="40" cy="20" r="8"/>`+hat(31,12.5,18));
+      return {pelvis:legL+legR, spine:g('spine',40,60,ln(40,31,40,60,7)+armL+armR+head)};
+    },
+    side(){
+      const leg=(c)=>g('thigh'+c,40,61,ln(40,61,40,74,6)+g('shin'+c,40,74,ln(40,74,40,86,6)+ln(38,86,47,86,4)));
+      const arm=(c)=>g('uarm'+c,40,35,ln(40,35,40,46,5.5)+g('farm'+c,40,46,ln(40,46,40,56,5.5)));
+      const head=g('head',40,30,`<circle class="b" cx="41" cy="20" r="8"/>`+hat(32,12.5,18));
+      return {pelvis:`<g class="far">${leg('F')}</g>`+leg('N'),
+              spine:g('spine',40,60,`<g class="far">${arm('F')}</g>`+ln(40,31,40,60,7)+arm('N')+head)};
+    },
+    rig:{pts:[[40,30],[36,35],[44,35],[30,46],[50,46],[40,60],[37,61],[43,61],[35,74],[45,74],[40,88]],
+         bones:[[40,88,40,60],[40,60,40,30],[36,35,44,35],[36,35,30,46],[30,46,28,56],[44,35,50,46],[50,46,52,56],[37,61,43,61],[37,61,35,74],[35,74,35,86],[43,61,45,74],[45,74,45,86]],
+         socks:[[40,12],[40,20],[40,45],[28,56],[52,56],[35,86],[45,86]]}
+  }
+};
+
+const POSES=[
+  {id:'idle',   label:'待机 bob',        view:'front'},
+  {id:'jj',     label:'开合跳(正面)',    view:'front'},
+  {id:'squat',  label:'深蹲(侧面)',      view:'side'},
+  {id:'pushup', label:'俯卧撑(侧面)',    view:'side'},
+];
+
+function figure(dirKey, pose, px, extraCls=''){
+  const d=DIRS[dirKey]; const parts=d[pose.view]();
+  const rig = pose.id==='idle' ? `<g class="rig">${d.rig.bones.map(b=>`<line x1="${b[0]}" y1="${b[1]}" x2="${b[2]}" y2="${b[3]}"/>`).join('')}${d.rig.pts.map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="1.5"/>`).join('')}${d.rig.socks.map(p=>`<circle class="sock" cx="${p[0]}" cy="${p[1]}" r="2.4"/>`).join('')}</g>` : '';
+  return `<svg class="fig dir${dirKey} anim-${pose.id} ${extraCls}" viewBox="0 0 80 100" width="${px*0.8}" height="${px}" style="--squatDrop:${d.squatDrop};--plankShift:${d.plankShift}">
+    <ellipse class="aura" cx="40" cy="${d.ground}" rx="${pose.id==='pushup'?26:17}" ry="4.5"/>
+    <g class="root" style="transform-origin:40px 88px"><g class="plank" style="transform-origin:40px 50px"><g class="pelvis">${parts.pelvis}${parts.spine}</g></g></g>${rig}</svg>`;
+}
+
+const dirsEl=document.getElementById('dirs');
+for(const k of Object.keys(DIRS)){
+  const d=DIRS[k];
+  const big=POSES.map(p=>`<div class="stage">${figure(k,p,170)}<div class="cap">${p.label}</div></div>`).join('');
+  const small=POSES.map(p=>`<div class="stage">${figure(k,p,46)}<div class="cap">${p.id} 46</div></div>`).join('')
+    +`<div class="stage">${figure(k,POSES[0],60)}<div class="cap">自己 60</div></div><div class="stage">${figure(k,POSES[0],78)}<div class="cap">hero 78</div></div>`;
+  dirsEl.insertAdjacentHTML('beforeend',`<section class="dir"><header><span class="tag">${d.name}</span><span class="desc">${d.desc}</span></header>
+    <div class="row">${big}<div class="small">${small}</div></div></section>`);
+}
+const sil=document.getElementById('sil');
+for(const k of Object.keys(DIRS)){
+  sil.insertAdjacentHTML('beforeend',`<div class="lbl">${k}</div>`+POSES.map(p=>`<div class="sil">${figure(k,p,46)}</div>`).join(''));
+}
+
+// ===== 控件 =====
+document.getElementById('rig').onchange=e=>document.body.classList.toggle('show-rig',e.target.checked);
+document.getElementById('hat').onchange=e=>document.body.classList.toggle('show-hat',e.target.checked);
+document.getElementById('hold').onchange=e=>document.body.classList.toggle('hold',e.target.checked);
+document.querySelectorAll('.sw').forEach(s=>s.onclick=()=>{document.documentElement.style.setProperty('--body',s.dataset.c);document.querySelectorAll('.sw').forEach(x=>x.classList.toggle('on',x===s));});
+</script>
+</body>
+</html>

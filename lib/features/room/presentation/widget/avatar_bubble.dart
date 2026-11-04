@@ -114,6 +114,7 @@ class _AvatarBubbleState extends State<AvatarBubble> {
       headRing: widget.isSelf
           ? colors.primaryMain.withValues(alpha: CoFitOpacities.strong)
           : null,
+      ink: colors.bgApp,
     );
   }
 
@@ -126,9 +127,8 @@ class _AvatarBubbleState extends State<AvatarBubble> {
     final figureHeight = widget.isSelf
         ? CoFitDimens.sizeFigureSelf
         : CoFitDimens.sizeFigureFriend;
-    // #14a 视框里形体(头顶 y18 → 脚底 y78)占 60/100,
-    // token 定义的是形体高 → 换算出含光圈的视框高。
-    final viewboxHeight = figureHeight * (100 / 60);
+    // token 定义的是形体高 → 换算出含光圈的视框高(豆豆 82/100)。
+    final viewboxHeight = avatarViewboxHeight(figureHeight);
 
     return Column(
       mainAxisSize: MainAxisSize.min,

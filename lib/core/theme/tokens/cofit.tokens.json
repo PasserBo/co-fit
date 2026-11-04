@@ -884,38 +884,6 @@
       },
       "$description": "小人完成 ×1 (README §动画)"
     },
-    "avatarLoopStrength": {
-      "$type": "duration",
-      "$value": {
-        "value": 1300,
-        "unit": "ms"
-      },
-      "$description": "力量·蹲起 loop (README §动画)"
-    },
-    "avatarLoopCardio": {
-      "$type": "duration",
-      "$value": {
-        "value": 600,
-        "unit": "ms"
-      },
-      "$description": "有氧·原地跑 loop (README §动画)"
-    },
-    "avatarLoopCore": {
-      "$type": "duration",
-      "$value": {
-        "value": 900,
-        "unit": "ms"
-      },
-      "$description": "核心·支撑 loop (README §动画)"
-    },
-    "avatarLoopFlexibility": {
-      "$type": "duration",
-      "$value": {
-        "value": 2600,
-        "unit": "ms"
-      },
-      "$description": "柔韧·伸展 loop (README §动画)"
-    },
     "avatarLoopPaused": {
       "$type": "duration",
       "$value": {

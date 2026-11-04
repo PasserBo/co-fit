@@ -97,13 +97,10 @@ abstract class CoFitMotion {
   static const fanTransition = Duration(milliseconds: 280);
   static const playFly = Duration(milliseconds: 420);
 
-  /// 小人动作动画(README §小人动作动画 关键帧表)
+  /// 小人全局节奏(README §小人动作动画):起手/完成 ×1 与暂停摇摆。
+  /// 各运动动作的 loop 周期是 clip 数据(avatar/presentation/renderer/clips),不是 token。
   static const avatarWindup = Duration(milliseconds: 400);
   static const avatarFinish = Duration(milliseconds: 1100);
-  static const avatarLoopStrength = Duration(milliseconds: 1300);
-  static const avatarLoopCardio = Duration(milliseconds: 600);
-  static const avatarLoopCore = Duration(milliseconds: 900);
-  static const avatarLoopFlexibility = Duration(milliseconds: 2600);
   static const avatarLoopPaused = Duration(milliseconds: 3000);
 
   /// 建房成功徽章外扩光圈周期 (#20b)

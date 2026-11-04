@@ -50,6 +50,8 @@ dependencies:
   share_plus: ^12.0.1
   firebase_remote_config: ^6.7.1
   url_launcher: ^6.3.3
+  # 小人骨架的世界矩阵(Flutter 自身依赖,直接引用需显式声明)
+  vector_math: ^2.2.0
 
 dev_dependencies:
   flutter_test:

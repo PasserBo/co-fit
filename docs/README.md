@@ -108,8 +108,12 @@ CoFit 是一个「虚拟健身房」社交健身 App(Flutter + Firebase):好友�
 - dock: 点当前图标展开/收起,5s 自动收起;展开时各目的地固定槽位(肌肉记忆)。
 - 动画: 小人 bob(上下 5px 浮动)、运动中光圈 breathe(scale 1→1.055)。
 
-## 小人动作动画(Avatar Motion Set,参考稿 #14a)
-动画**只按 4 个卡牌类型走通用原型**,不细分具体动作;自建卡选类型即自动获得动画。差异化仅两个参数:节奏倍率(慢/标准/快 → 时长 ×1.3/×1/×0.75)和光圈类型色。
+## 小人动作动画(Avatar Motion Set)
+
+> **2026-11-04 更新**:形象已从 #14a 胶囊小人重设计为「豆豆」(头身合一的蛋形 + 带肘/膝的悬浮四肢),定稿与骨骼/关键帧表见 [avatar_bean_spec.md](avatar_bean_spec.md)(可动版 [avatar_bean_sheet.html](avatar_bean_sheet.html));系统设计见 [avatar_system_design.md](avatar_system_design.md)。下面 #14a 的形体描述与关键帧表**仅作历史参考**,数值以 spec 为准。「只按 4 类型走通用原型」的决议已推翻:P2 起每张卡可指定 `motionId`,类型原型只做兜底。
+> 实现:纯 Dart「骨架 + 关键帧数据」——`Rig`(14 骨骼)/ `MotionClip` / `PoseSampler` 纯函数 / `RigAvatarPainter`;动作 loop 周期是 clip 数据,不是 token。
+
+(以下为 #14a 原文)动画**只按 4 个卡牌类型走通用原型**,不细分具体动作;自建卡选类型即自动获得动画。差异化仅两个参数:节奏倍率(慢/标准/快 → 时长 ×1.3/×1/×0.75)和光圈类型色。
 
 **形体**(与房间形象一致): 白色 gray-50;圆头(带 2.5px 状态色头环)+ 胶囊躯干 + **短粗四肢、与躯干分离悬浮**(间隙 ~4px)。待机/暂停无手臂,运动时出现短臂。地面光圈 = 类型色 @16–28%。
 
@@ -135,6 +139,7 @@ CoFit 是一个「虚拟健身房」社交健身 App(Flutter + Firebase):好友�
 4. **状态切换时 controller 从 0 重启**,起手/完成的 ×1 过渡动画天然掩盖跳变。
 5. **多个小人之间不需要互相同步**;建议每个小人加 `hash(userId) % loopDuration` 的固定相位偏移,避免全房间机器人式齐步。
 6. hop 等 2 倍频子运动用同一 controller 的 `Interval`/频率映射实现,不另开时钟。
+7. **动作是数据,不是代码**(2026-11-04):每个动作是一份 `MotionClip`(每根骨骼的关键帧轨道 + 镜像规则),渲染只做 `PoseSampler.sample(clip, rig, t)`;新增动作不写 paint 代码。镜像用 `Mirror` 声明,loop clip 首尾帧必须相同(单测锁住)。
 
 ## Design Tokens
 全部见 `cofit_colors.dart`(基础色板 `CoFitPalette` + 语义层 `CoFitColors.dark`)。Alpha 规则:淡底 = 主色 @16%,描边 = 主色 @40%,文字层级 = gray-50 @70/50/42%,分隔线 = white @7–9%。设计参考稿顶部 #13a 有可视化 token 表。

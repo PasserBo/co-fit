@@ -21,7 +21,7 @@ Flutter(iOS-only)App:好友以小人形式出现在共享「房间」里,打出�
 | 本地 | shared_preferences | 只存「进行中的运动会话快照」(被杀后恢复) |
 | 开关 | Firebase Remote Config | `core/flags/FeatureFlags`,目前一个:`auth_google_enabled`(默认 false) |
 | 法律文档 | GitHub Pages(GitSpec) | `docs/legal/*.md` → `https://passerbo.github.io/co-fit/docs-legal-{privacy,terms}` |
-| 动画 | 占位几何小人(`avatar`) | Rive 范围外;`AvatarRenderer` 接口留给将来替换 |
+| 动画 | 豆豆骨架引擎(`avatar`,纯 Dart Rig + Clip 数据) | `AvatarRenderer` 接口留给将来 Rive 高级皮肤;设计见 docs/avatar_*.md |
 
 ## 3. 目录与分层
 
@@ -51,7 +51,7 @@ lib/
 | `room` | 房间 CRUD、成员管理、举报、presence/事件折叠、房间主界面 | `RoomInfoEntity`、`RoomBrowserNotifier`、`RoomActivitySnapshot` |
 | `action` | 动作卡模板、自建卡、牌组、打牌会话、打卡历史、会话恢复 | `ActionTemplateCard`、`ActionDeck`、`OwnActionSessionNotifier` |
 | `invite` | `cofit://room/<id>?h=<hash>` 深链解析与预览 | `InviteLinkFormat`、`InviteLinkGate` |
-| `avatar` | 占位小人渲染与动作集 | `AvatarRenderer`、`IdleAvatarFigure` |
+| `avatar` | 豆豆小人:骨架(`Rig`)、动作数据(`MotionClip`)、采样(`PoseSampler`)、绘制(`RigAvatarPainter`) | `AvatarRenderer`、`IdleAvatarFigure`、`MotionClipLibrary` |
 | `social` | **空目录**(好友系统 v2) | — |
 
 ## 4. 数据模型(Firestore)

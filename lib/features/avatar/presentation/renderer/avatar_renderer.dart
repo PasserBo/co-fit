@@ -2,9 +2,17 @@ import 'package:flutter/widgets.dart';
 
 import '../../domain/entity/avatar_motion.dart';
 
+/// 形体(头顶 → 脚底)占视框高的比例(豆豆:y7→y89 = 82/100,spec §0)。
+/// token `sizeFigure*` 定义形体高;调用方用 [avatarViewboxHeight] 换算。
+const double avatarFigureFraction = 0.82;
+
+double avatarViewboxHeight(double figureHeight) =>
+    figureHeight / avatarFigureFraction;
+
 /// 小人外观(由主题层解析后注入,渲染实现不读主题):
-/// - 自己:body = gray-50 白,headRing = lime@90 常亮(#6b 定稿);
-/// - 好友:body = 状态色 hue,无头环(#6b 定稿);
+/// - 自己:body = gray-50 白,headRing = lime@90 常亮(#6b 定稿,豆豆上为蛋体描边);
+/// - 好友:body = 状态色 hue,无描边(#6b 定稿;P3 改为自定义身体色);
+/// - ink:深色「墨」= 两点眼与四肢分段缝(背景色),null 则不画眼、不留缝;
 /// - 远侧肢体 = body @80%(#14a 派生规则)由实现层推导。
 @immutable
 class AvatarAppearance {
@@ -13,12 +21,14 @@ class AvatarAppearance {
     required this.aura,
     required this.auraOpacity,
     this.headRing,
+    this.ink,
   });
 
   final Color body;
   final Color aura;
   final double auraOpacity;
   final Color? headRing;
+  final Color? ink;
 
   @override
   bool operator ==(Object other) =>
@@ -26,10 +36,11 @@ class AvatarAppearance {
       other.body == body &&
       other.aura == aura &&
       other.auraOpacity == auraOpacity &&
-      other.headRing == headRing;
+      other.headRing == headRing &&
+      other.ink == ink;
 
   @override
-  int get hashCode => Object.hash(body, aura, auraOpacity, headRing);
+  int get hashCode => Object.hash(body, aura, auraOpacity, headRing, ink);
 }
 
 /// 动画实现的模块化边界(用户要求 1):场景层只依赖本接口 +

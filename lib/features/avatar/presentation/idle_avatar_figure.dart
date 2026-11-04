@@ -35,9 +35,9 @@ class IdleAvatarFigure extends ConsumerWidget {
         headRing: withHeadRing && !dimmed
             ? colors.primaryMain.withValues(alpha: CoFitOpacities.strong)
             : null,
+        ink: colors.bgApp,
       ),
-      // #14a 视框换算:形体(y18→y78)占视框 60/100
-      height: figureHeight * (100 / 60),
+      height: avatarViewboxHeight(figureHeight),
     );
 
     if (!dimmed) {

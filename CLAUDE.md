@@ -59,7 +59,7 @@ fvm flutter analyze
 - entity 用 `@freezed`;repository 接口在 domain,实现在 infrastructure。
 - 现状约定:repository 实现实际放各 feature 的 `data/`(历史沿用,不迁移);action 特性旧 usecase 在 `domain/` 下(遗留,不迁移),新 usecase 一律放 `usecase/`。
 
-已实现 feature:`room`(房间 CRUD/presence/事件折叠/成员管理/举报/实时感知被移出与解散)、`auth`(Apple+Google+邮箱登录、bootstrap)、`profile`(资料/onboarding/账号删除)、`invite`(邀请深链)、`action`(动作卡模板/自建卡/牌组云端化/打卡历史/会话被杀恢复)、`avatar`(占位小人动作集)。`social` 仍是空目录。
+已实现 feature:`room`(房间 CRUD/presence/事件折叠/成员管理/举报/实时感知被移出与解散)、`auth`(Apple+Google+邮箱登录、bootstrap)、`profile`(资料/onboarding/账号删除)、`invite`(邀请深链)、`action`(动作卡模板/自建卡/牌组云端化/打卡历史/会话被杀恢复)、`avatar`(豆豆骨架引擎:Rig/MotionClip/PoseSampler,动作是数据不是代码,见 `docs/avatar_bean_spec.md`)。`social` 仍是空目录。
 
 **架构总览(现状)与踩坑清单:[docs/project_overview.md](docs/project_overview.md);用户流程与页面完成度:[docs/flows_status.md](docs/flows_status.md)。** 跨 feature 纯 UI 组件放 `lib/core/widget/`(确认弹窗一律用 `showCoFitConfirmSheet`,不要再写原生 AlertDialog)。
 

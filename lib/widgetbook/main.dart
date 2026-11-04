@@ -5,6 +5,7 @@ import 'package:widgetbook/widgetbook.dart';
 import '../core/navigation/app_shell.dart';
 import '../core/navigation/app_shell_index_provider.dart';
 import '../core/theme/cofit_colors.dart';
+import '../core/theme/cofit_dimens.dart';
 import '../core/theme/cofit_theme.dart';
 import '../core/widget/brand_splash.dart';
 import '../core/widget/cofit_confirm_sheet.dart';
@@ -29,6 +30,9 @@ import '../features/auth/presentation/widget/login_brand_block.dart';
 import '../features/auth/presentation/widget/my_page_body.dart';
 import '../features/avatar/domain/entity/avatar_motion.dart';
 import '../features/avatar/presentation/renderer/avatar_renderer.dart';
+import '../features/avatar/presentation/renderer/motion_clip_library.dart';
+import '../features/avatar/presentation/renderer/rig/motion_clip.dart';
+import '../features/avatar/presentation/renderer/rig_avatar_painter.dart';
 import '../features/avatar/presentation/renderer/vector_avatar_renderer.dart';
 import '../features/room/domain/entity/room_presence_member.dart';
 import '../features/room/domain/entity/room_info_entity.dart';
@@ -180,13 +184,14 @@ class CoFitWidgetbook extends StatelessWidget {
           name: 'avatar',
           children: [
             WidgetbookComponent(
-              name: 'AvatarMotion(动作集 #14a)',
+              name: 'AvatarMotion(豆豆 8 基础状态)',
               useCases: [
                 WidgetbookUseCase(
                   name: 'Playground',
                   builder: _avatarPlayground,
                 ),
                 WidgetbookUseCase(name: '全状态一览', builder: _avatarGallery),
+                WidgetbookUseCase(name: '动作工作台', builder: _avatarWorkbench),
               ],
             ),
           ],
@@ -263,6 +268,7 @@ Widget _avatarPlayground(BuildContext context) {
               headRing: isSelf
                   ? colors.primaryMain.withValues(alpha: CoFitOpacities.strong)
                   : null,
+              ink: colors.bgApp,
             ),
             height: 200,
           );
@@ -270,6 +276,117 @@ Widget _avatarPlayground(BuildContext context) {
       ),
     ),
   );
+}
+
+/// 动作工作台(实施计划 P1 第 4 步):选 clip、定帧滑杆、四档尺寸、
+/// 两个相位(0 / 0.5)并排看交替,剪影模式做 46px 辨识测试。
+Widget _avatarWorkbench(BuildContext context) {
+  final clip = context.knobs.object.dropdown(
+    label: 'clip',
+    options: MotionClipLibrary.all,
+    labelBuilder: (c) => c.id,
+    initialOption: MotionClipLibrary.all[2],
+  );
+  final hold = context.knobs.boolean(label: '定帧(用下方 t)');
+  final t = context.knobs.double.slider(
+    label: 't',
+    initialValue: 0.5,
+    min: 0,
+    max: 1,
+  );
+  final silhouette = context.knobs.boolean(label: '剪影(纯白、无眼、无缝)');
+  const sizes = [
+    CoFitDimens.sizeFigureFriend,
+    CoFitDimens.sizeFigureSelf,
+    CoFitDimens.sizeFigureHero,
+    200.0,
+  ];
+
+  return Scaffold(
+    body: Builder(
+      builder: (context) {
+        final colors = Theme.of(context).extension<CoFitColors>()!;
+        final appearance = AvatarAppearance(
+          body: colors.textPrimary,
+          aura: colors.primaryMain,
+          auraOpacity: silhouette ? 0 : CoFitOpacities.auraActive,
+          headRing: silhouette
+              ? null
+              : colors.primaryMain.withValues(alpha: CoFitOpacities.strong),
+          ink: silhouette ? null : colors.bgApp,
+        );
+        Widget figure(double figureHeight, double phaseSeed) {
+          final height = avatarViewboxHeight(figureHeight);
+          if (hold) {
+            return StaticAvatarFrame(
+              clip: clip,
+              appearance: appearance,
+              height: height,
+              t: t,
+              phaseSeed: phaseSeed,
+            );
+          }
+          return VectorAvatarFigure(
+            motion: _motionForClip(clip),
+            appearance: appearance,
+            height: height,
+            phaseSeed: phaseSeed,
+          );
+        }
+
+        return Center(
+          child: Wrap(
+            spacing: CoFitDimens.spacingLg,
+            runSpacing: CoFitDimens.spacingLg,
+            crossAxisAlignment: WrapCrossAlignment.end,
+            children: [
+              for (final size in sizes)
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        figure(size, 0),
+                        if (size == sizes.last) ...[
+                          const SizedBox(width: CoFitDimens.spacingMd),
+                          figure(size, 0.5),
+                        ],
+                      ],
+                    ),
+                    const SizedBox(height: CoFitDimens.spacingXs),
+                    Text(
+                      size == sizes.last
+                          ? '200 · 相位 0 / 0.5'
+                          : '${size.toInt()}',
+                      style: Theme.of(context).textTheme.labelSmall,
+                    ),
+                  ],
+                ),
+            ],
+          ),
+        );
+      },
+    ),
+  );
+}
+
+/// 工作台用:clip → 能驱动 VectorAvatarFigure 的指令(P2 起改为 motionId)。
+AvatarMotion _motionForClip(MotionClip clip) {
+  for (final entry in MotionClipLibrary.prototypes.entries) {
+    if (entry.value == clip) {
+      return AvatarMotion(
+        state: AvatarMotionState.exercise,
+        actionType: entry.key,
+      );
+    }
+  }
+  return switch (clip.id) {
+    'windup' => const AvatarMotion(state: AvatarMotionState.windup),
+    'paused' => const AvatarMotion(state: AvatarMotionState.paused),
+    'finish' => const AvatarMotion(state: AvatarMotionState.finish),
+    _ => AvatarMotion.idle(),
+  };
 }
 
 Widget _avatarGallery(BuildContext context) {

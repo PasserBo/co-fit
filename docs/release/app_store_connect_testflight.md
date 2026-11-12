@@ -57,7 +57,7 @@
 1. **Xcode → Settings → Accounts 里登录拥有 `J95TRWHWYM` 团队的 Apple ID**(TestFlight 上传用 Xcode 签名即可,不需要 App Store Connect API key)。
    ⚠️ 2026-11-05 实测:本机没登录账号、也没有该团队的 Apple Distribution 证书时,归档成功但导出 ipa 报 `exportArchive No Accounts / No signing certificate "iOS Distribution" found`。登录后 `-allowProvisioningUpdates` 会自动申请 Distribution 证书与 App Store profile,不需要手动去开发者网站建。
 2. `.env` 里有真实 `ABLY_API_KEY` / `ABLY_CLIENT_ID_PREFIX`(gitignored)。
-3. 版本号:`pubspec.yaml` 当前 `1.0.0+1`。**每次上传 build number 必须递增**(`+2`、`+3`…),同一 `1.0.0` 下可以传多个 build。
+3. 版本号:`pubspec.yaml` 当前 `1.0.0+2`(build 2 于 2026-11-12 上传)。**每次上传 build number 必须递增**(`+2`、`+3`…),同一 `1.0.0` 下可以传多个 build。
 
 ### 2.2 构建命令
 
@@ -82,7 +82,8 @@ scripts/export_ipa.sh
 
 - **Transporter.app**(Mac App Store 免费):拖 `build/ios/ipa/*.ipa` → Deliver。最省事。
 - Xcode Organizer:`open build/ios/archive/Runner.xcarchive` → Distribute App → App Store Connect → Upload。
-- 命令行:`xcrun altool --upload-app -f build/ios/ipa/<name>.ipa -t ios --apiKey <KEY_ID> --apiIssuer <ISSUER>`(要先在 Connect → Users and Access → Integrations 建 API key)。
+- **命令行(推荐,无需 API key)**:`scripts/upload_testflight.sh` —— 用 Xcode 已登录账号把现有归档 `-exportArchive` 到 `destination: upload`,等价于 Organizer 的 Upload。
+- 命令行(API key):`xcrun altool --upload-app -f build/ios/ipa/<name>.ipa -t ios --apiKey <KEY_ID> --apiIssuer <ISSUER>`(要先在 Connect → Users and Access → Integrations 建 API key)。
 
 上传后 10–30 分钟处理完,Connect → TestFlight 页会出现 build;若 0.1 没加,这里会卡在「缺少出口合规信息」,点进去选「否,不使用非豁免加密」。
 

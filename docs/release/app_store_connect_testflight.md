@@ -82,7 +82,7 @@ scripts/export_ipa.sh
 
 - **Transporter.app**(Mac App Store 免费):拖 `build/ios/ipa/*.ipa` → Deliver。最省事。
 - Xcode Organizer:`open build/ios/archive/Runner.xcarchive` → Distribute App → App Store Connect → Upload。
-- **命令行(推荐,无需 API key)**:`scripts/upload_testflight.sh` —— 用 Xcode 已登录账号把现有归档 `-exportArchive` 到 `destination: upload`,等价于 Organizer 的 Upload。
+- **命令行(推荐)**:`scripts/upload_testflight.sh` —— 用 App Store Connect API key 对现有归档做云签名并 `-exportArchive` 到 `destination: upload`,不依赖 Xcode 登录态(2026-11-12 实测:Xcode 已登录但 xcodebuild 仍报 `Failed to Use Accounts`,API key 路径可用)。配置 `~/.config/cofit-release/config.json` `{ "keyId", "issuerId" }`,私钥 `~/.appstoreconnect/private_keys/AuthKey_<keyId>.p8`;与 GeoGhost 共用同一团队 `J95TRWHWYM` 的发布 key(App Manager 角色)。
 - 命令行(API key):`xcrun altool --upload-app -f build/ios/ipa/<name>.ipa -t ios --apiKey <KEY_ID> --apiIssuer <ISSUER>`(要先在 Connect → Users and Access → Integrations 建 API key)。
 
 上传后 10–30 分钟处理完,Connect → TestFlight 页会出现 build;若 0.1 没加,这里会卡在「缺少出口合规信息」,点进去选「否,不使用非豁免加密」。

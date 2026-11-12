@@ -32,6 +32,7 @@ class MotionPickerSheet extends StatelessWidget {
     return showModalBottomSheet<String>(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
       backgroundColor: Theme.of(context).extension<CoFitColors>()!.bgSurface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(

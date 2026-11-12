@@ -111,6 +111,10 @@ abstract class CoFitMotion {
 
   /// 新建卡片定位外发光时长 (#16a)
   static const createGlow = Duration(milliseconds: 1200);
+
+  /// 启动 splash:入场(小人+字标淡入上浮)/ 与首页交叉淡出
+  static const splashReveal = Duration(milliseconds: 600);
+  static const splashFade = Duration(milliseconds: 320);
 }
 
 /// decor.* — 装饰性绘制常量
@@ -129,6 +133,9 @@ abstract class CoFitDecor {
   static const fanFocusLift = 120.0;
   static const fanSideOpacity = 0.55;
   static const playSwipeThreshold = 60.0;
+
+  /// 聚焦态横向甩动切牌的速度阈值(px/s)
+  static const fanFlingVelocity = 400.0;
 
   /// 动画节奏倍率(README §动画:慢/标准/快 → 时长 ×1.3/×1/×0.75)
   static const tempoSlow = 1.3;

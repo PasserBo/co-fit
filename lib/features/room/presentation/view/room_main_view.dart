@@ -448,6 +448,8 @@ class _RoomMainViewState extends ConsumerState<RoomMainView> {
     }
 
     final safeTop = MediaQuery.paddingOf(context).top;
+    // 底部 home indicator / 手势条:扇形手牌与牌组 chip 整体抬高,场景同步让位。
+    final safeBottom = MediaQuery.paddingOf(context).bottom;
 
     return Scaffold(
       body: Stack(
@@ -467,7 +469,7 @@ class _RoomMainViewState extends ConsumerState<RoomMainView> {
                 return Padding(
                   padding: EdgeInsets.only(
                     top: safeTop + CoFitDimens.sizeMinTapTarget,
-                    bottom: CoFitDimens.sizeFanHeight,
+                    bottom: safeBottom + CoFitDimens.sizeFanHeight,
                   ),
                   child: RoomScene(
                     members: _mergedMembers(browser, roomId, now),
@@ -565,7 +567,7 @@ class _RoomMainViewState extends ConsumerState<RoomMainView> {
           Positioned(
             left: 0,
             right: 0,
-            bottom: 0,
+            bottom: safeBottom,
             child: CardFan(
               cards: fanCards,
               focused: _fanFocused,
@@ -580,7 +582,7 @@ class _RoomMainViewState extends ConsumerState<RoomMainView> {
           if (!_fanFocused)
             Positioned(
               left: CoFitDimens.spacingXl,
-              bottom: CoFitDimens.sizeDeckChipBottom,
+              bottom: safeBottom + CoFitDimens.sizeDeckChipBottom,
               child: DeckChip(
                 deckName: activeDeck?.name ?? '未选择牌组',
                 open: _popoverOpen,
@@ -605,7 +607,8 @@ class _RoomMainViewState extends ConsumerState<RoomMainView> {
                   : null,
               bottom: _fanFocused
                   ? null
-                  : CoFitDimens.sizeDeckChipBottom +
+                  : safeBottom +
+                        CoFitDimens.sizeDeckChipBottom +
                         CoFitDimens.sizeDockItem +
                         CoFitDimens.spacingSm,
               child: Align(

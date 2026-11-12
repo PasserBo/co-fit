@@ -757,6 +757,10 @@
     "brandCompactScale": {
       "$value": 0.8,
       "$description": "小屏 375 品牌区小人缩放(#19a 附注)"
+    },
+    "fanFlingVelocity": {
+      "$value": 400,
+      "$description": "扇形聚焦态横向甩动切牌的速度阈值 px/s(seed v1)"
     }
   },
   "blur": {
@@ -915,6 +919,22 @@
         "unit": "ms"
       },
       "$description": "新建卡片定位外发光时长 (#16a)"
+    },
+    "splashReveal": {
+      "$type": "duration",
+      "$value": {
+        "value": 600,
+        "unit": "ms"
+      },
+      "$description": "启动 splash 入场(小人+字标淡入上浮)(seed v1)"
+    },
+    "splashFade": {
+      "$type": "duration",
+      "$value": {
+        "value": 320,
+        "unit": "ms"
+      },
+      "$description": "splash ↔ 首页交叉淡出(seed v1)"
     }
   }
 }

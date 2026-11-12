@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/navigation/app_shell.dart';
+import '../../../core/theme/cofit_dimens.dart';
 import '../../../core/widget/brand_splash.dart';
 import '../../action/presentation/view/card_library_page.dart';
 import '../../invite/presentation/invite_link_gate.dart';
@@ -17,12 +18,14 @@ import 'user_bootstrap_provider.dart';
 import 'view/login_page_view.dart';
 import 'view/my_page_view.dart';
 
-/// 三态门控:
-///   authState loading            → splash
-///   user == null                 → LoginPageView(并清理 bootstrap)
-///   user != null, profile 加载中 → splash(防闪 onboarding)
-///   profile == null              → OnboardingPageView
-///   profile != null              → bootstrap + AppShell
+/// 门控:
+///   authState loading                  → splash
+///   user == null                       → LoginPageView(并清理 bootstrap)
+///   user != null, profile 加载中       → splash(防闪 onboarding)
+///   profile == null                    → OnboardingPageView
+///   profile != null, bootstrap 未放行  → splash(带阶段文案;防闪「没有加入任何房间」)
+///   bootstrap 放行                     → AppShell
+/// 各态之间用 [CoFitMotion.splashFade] 交叉淡出。
 class AuthGatePage extends ConsumerStatefulWidget {
   const AuthGatePage({super.key});
 
@@ -34,7 +37,10 @@ class _AuthGatePageState extends ConsumerState<AuthGatePage> {
   String? _bootstrappedUserId;
   bool _isClearScheduled = false;
 
-  static const _splash = BrandSplash();
+  static const _splashKey = ValueKey('gate_splash');
+  static const _loginKey = ValueKey('gate_login');
+  static const _onboardingKey = ValueKey('gate_onboarding');
+  static const _shellKey = ValueKey('gate_shell');
 
   void _scheduleClear() {
     _bootstrappedUserId = null;
@@ -66,16 +72,25 @@ class _AuthGatePageState extends ConsumerState<AuthGatePage> {
 
   @override
   Widget build(BuildContext context) {
+    return AnimatedSwitcher(
+      duration: CoFitMotion.splashFade,
+      switchInCurve: Curves.easeOut,
+      switchOutCurve: Curves.easeIn,
+      child: _buildStage(),
+    );
+  }
+
+  Widget _buildStage() {
     final authState = ref.watch(authStateProvider);
 
     if (authState.isLoading && !authState.hasValue) {
-      return _splash;
+      return const BrandSplash(key: _splashKey);
     }
 
     final user = authState.value;
     if (user == null) {
       _scheduleClear();
-      return const LoginPageView();
+      return const LoginPageView(key: _loginKey);
     }
     return _buildLoggedIn(user);
   }
@@ -85,17 +100,29 @@ class _AuthGatePageState extends ConsumerState<AuthGatePage> {
 
     // profile 首帧 loading 不得先渲 onboarding(防闪)。
     if (profileState.isLoading && !profileState.hasValue) {
-      return _splash;
+      return const BrandSplash(key: _splashKey);
     }
     final profile = profileState.value;
     if (profile == null) {
-      return OnboardingPageView(userId: user.uid);
+      return OnboardingPageView(key: _onboardingKey, userId: user.uid);
     }
 
     _scheduleBootstrap(user.uid);
 
+    // 启动数据(实时连接 / 已加入房间 / 卡牌牌组 / 会话恢复)没就绪前停在 splash,
+    // 否则房间页会先闪一帧「没有加入任何房间」空态。超时兜底见 UserBootstrapNotifier。
+    final bootstrap = ref.watch(userBootstrapProvider);
+    final gateOpen = bootstrap.userId == user.uid && bootstrap.isGateOpen;
+    if (!gateOpen) {
+      return BrandSplash(
+        key: _splashKey,
+        statusText: bootstrap.phase.splashLabel,
+      );
+    }
+
     // 槽位顺序与 AppShell.destinations 一致:房间 / 牌库 / 我的
     return InviteLinkGate(
+      key: _shellKey,
       userId: user.uid,
       child: AppShell(
         pages: [

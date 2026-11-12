@@ -37,6 +37,7 @@ final selectTemplateCardUsecaseProvider = Provider<SelectTemplateCardUsecase>((
   return SelectTemplateCardUsecase(
     ref.watch(actionTemplateRepositoryProvider),
     ref.watch(actionTemplateSelectionRepositoryProvider),
+    customCardRepository: ref.watch(customCardRepositoryProvider),
   );
 });
 

@@ -18,6 +18,7 @@ class RoomEditSheetView extends ConsumerStatefulWidget {
     return showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
       backgroundColor: Theme.of(context).extension<CoFitColors>()!.bgSurface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(

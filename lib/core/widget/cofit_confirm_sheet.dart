@@ -146,6 +146,7 @@ Future<String?> showCoFitTextInputSheet(
   return showModalBottomSheet<String>(
     context: context,
     isScrollControlled: true,
+    useSafeArea: true,
     builder: (_) => _TextInputSheet(
       title: title,
       label: label,

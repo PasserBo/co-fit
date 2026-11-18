@@ -30,6 +30,7 @@ import '../../../invite/provider/invite_usecase_providers.dart';
 import '../join_room_provider.dart';
 import '../room_browser_provider.dart';
 import '../widget/dissolve_room_dialog.dart';
+import '../widget/activity_hud.dart';
 import '../widget/room_actions_sheet.dart';
 import '../widget/room_connection_banner.dart';
 import '../widget/room_scene.dart';
@@ -528,7 +529,7 @@ class _RoomMainViewState extends ConsumerState<RoomMainView> {
                   (hasBanner ? CoFitDimens.sizeMinTapTarget : 0),
               left: 0,
               right: 0,
-              child: Center(child: _ActivityHud(status: self.activityStatus)),
+              child: Center(child: ActivityHud(status: self.activityStatus)),
             ),
 
           // 聚焦模式 scrim(盖住场景与顶栏,点击关闭)
@@ -625,68 +626,6 @@ class _RoomMainViewState extends ConsumerState<RoomMainView> {
               ),
             ),
           ],
-        ],
-      ),
-    );
-  }
-}
-
-/// HUD:当前动作徽章(#6b 简化版,倒计时环用进度环表达)。
-class _ActivityHud extends StatelessWidget {
-  const _ActivityHud({required this.status});
-
-  final UserActivityStatusEntity status;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<CoFitColors>()!;
-    final textTheme = Theme.of(context).textTheme;
-    final name = status.templateName ?? status.actionKey ?? '运动中';
-    final duration = status.durationSec;
-    final remaining = status.remainingSec;
-    final progress = (duration != null && duration > 0 && remaining != null)
-        ? (1 - remaining / duration).clamp(0.0, 1.0)
-        : null;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: CoFitDimens.spacingMd,
-        vertical: CoFitDimens.spacingSm,
-      ),
-      decoration: BoxDecoration(
-        color: colors.bgSurface,
-        borderRadius: BorderRadius.circular(CoFitDimens.radiusLg),
-        border: Border.all(
-          color: colors.primaryBorder,
-          width: CoFitDimens.borderWidthHairline,
-        ),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        spacing: CoFitDimens.spacingSm,
-        children: [
-          SizedBox(
-            width: CoFitDimens.sizeHudRing,
-            height: CoFitDimens.sizeHudRing,
-            child: CircularProgressIndicator(
-              value: progress,
-              strokeWidth: CoFitDimens.borderWidthFocus * 2,
-              color: colors.primaryMain,
-              backgroundColor: colors.borderStrong,
-            ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                '当前动作',
-                style: textTheme.labelSmall?.copyWith(
-                  color: colors.textTertiary,
-                ),
-              ),
-              Text(name, style: textTheme.titleSmall),
-            ],
-          ),
         ],
       ),
     );

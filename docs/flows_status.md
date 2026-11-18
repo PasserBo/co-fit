@@ -9,7 +9,8 @@
 ```
 main() ──► AuthGatePage(三态门控)
             ├─ authState loading ──────────────► Splash
-            ├─ user == null ──────────────────► LoginPageView
+            ├─ user == null ──────────────────► 有滞留邀请链接 / 演示已看过 ► LoginPageView
+            │                                   首次启动(未看过) ──────► WelcomeTourView(演示房间)─跳过/登录─► LoginPageView
             ├─ profile loading ───────────────► Splash(防闪)
             ├─ profile == null ───────────────► OnboardingPageView
             └─ profile != null ───────────────► InviteLinkGate ▸ AppShell
@@ -24,15 +25,20 @@ main() ──► AuthGatePage(三态门控)
 
 ## 2. 用户流程
 
-### F1 首次进入 → 登录 → 起名
+### F1 首次进入 → 演示房间 → 登录 → 起名
 
 ```
+WelcomeTourView(仅首次启动,离线可用)
+  ├─ 示例小人 ×3(标注「示例」)+ 自己 + 4 张演示卡 + 三步引导气泡
+  ├─ 打出一张卡 ──► 本地会话(缩短到 10s)──► HUD 倒计时 ──► 完成 ──► 收尾卡「登录,把好友叫进来」
+  └─ 右上「跳过」/ 收尾卡登录 ──► 标记已看过 ──► LoginPageView
 LoginPageView ─(Apple / Google / 邮箱)─► OnboardingPageView(昵称必填)─► AppShell[房间]
      └─ 邮箱:注册 / 登录 / 忘记密码(重置邮件)
 ```
 
 | 步骤 | 状态 | 备注 |
 |---|---|---|
+| 登录前演示房间 | 🟡 | 2026-11-18(规格 [spec/changes/add-pre-signup-onboarding](spec/changes/add-pre-signup-onboarding/proposal.md)):首次启动先进演示,邀请链接冷启动优先走登录页;看过/跳过/登录过后不再出现;演示不写任何云端数据。待真机走查(T13/T14)后转 ✅ |
 | 三种登录 | ✅ | Apple 2026-09-17 真机验证;**Google 登录由 Remote Config `auth_google_enabled` 控制,默认关**(2026-10-26,uid 不互通问题解决前不开放) |
 | 登录页法律条款链接 | ✅ | 2026-10-26:「登录即表示同意《用户协议》与《隐私政策》」,外开 GitHub Pages |
 | 取消登录 | ✅ | `AuthCancelledException` 静默 |

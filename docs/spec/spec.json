@@ -1,0 +1,32 @@
+{
+  "language": "zh-Hans",
+  "baselineBranch": "main",
+  "mechanismWords": [
+    "Flutter",
+    "Firebase",
+    "Firestore",
+    "Ably",
+    "Riverpod",
+    "freezed",
+    "provider",
+    "usecase",
+    "repository",
+    "Remote Config",
+    "shared_preferences",
+    "AuthGate",
+    "AppShell",
+    "rules",
+    "rooms",
+    "users",
+    "memberships",
+    "decks",
+    "cards",
+    "sessions",
+    "card_templates",
+    "reports",
+    "presence",
+    "MotionClip",
+    "PoseSampler",
+    "Rig"
+  ]
+}

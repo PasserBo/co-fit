@@ -3,6 +3,7 @@
 > 本文描述**已实现**的架构,是新成员/AI 助手理解代码的入口。
 > 分层规则的权威文档仍是 [.cursor/rules/flutter_architecture.mdc](../.cursor/rules/flutter_architecture.mdc);
 > 用户流程与页面完成度见 [flows_status.md](flows_status.md);UI 进度与决议见 [ui_overhaul/STATUS.md](ui_overhaul/STATUS.md)。
+> 产品提案与行为规格见 [spec/SPEC_SYSTEM.md](spec/SPEC_SYSTEM.md),进行中的 change 看 [spec/BOARD.md](spec/BOARD.md)。
 > 立项时的愿景稿(Rive 动画、等距街区、Live Activities 等)已随 git 历史保留,未实现的部分不再出现在本文。
 
 ## 1. 一句话

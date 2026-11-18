@@ -117,6 +117,8 @@ room:{roomId}:events
 7. **Apple 登录凭证必须带 `authorizationCode`**,否则 Firebase 报 `Invalid OAuth response from apple.com`(文案误导)。
 8. **UI 禁止裸 hex / magic number**;新数值先进 token JSON 再进 Dart。
 9. `dart format` 只跑在自己改的文件上——仓库历史文件未全量格式化,整目录 format 会产生大量无关 diff。
+10. **AppBar `actions` 里不能直接放 `FilledButton`**:全局 `filledButtonTheme.minimumSize` 是 `Size.fromHeight`(宽 = 无穷),在无界宽度里布局断言失败,release 下整条工具栏(含返回键)失去点击。用 `core/widget/app_bar_filled_action.dart`。2026-11-19「我的房间」返回键无反应即此因。
+11. **「仅邀请」不是访问控制**:rules 的成员自助加入分支不校验 shareLinkHash,知道房间 ID 就能加入;「仅邀请」只是不出现在「发现房间」列表里。
 
 ## 8. 上架前仍缺(非代码)
 

@@ -8,6 +8,12 @@ class RoomVisibility {
   static const Set<String> allowed = {public, unlisted};
 }
 
+/// 房间文本字段的长度上限(建房 / 编辑表单与 usecase 校验共用)。
+class RoomInfoLimits {
+  static const int nameMaxLength = 30;
+  static const int descriptionMaxLength = 120;
+}
+
 @freezed
 abstract class RoomInfoEntity with _$RoomInfoEntity {
   const RoomInfoEntity._();

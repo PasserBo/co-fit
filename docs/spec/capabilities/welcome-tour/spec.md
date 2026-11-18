@@ -1,6 +1,6 @@
 # Welcome tour
 
-> Status: draft · Baseline: main @ d30242b (2026-11-19)
+> Status: confirmed · Baseline: main @ d30242b (2026-11-19)
 
 ## Purpose
 登录前的演示房间:新用户在交出任何账号之前,先看到自己的小人、几个示例小人,并亲手打出一张动作卡看小人动起来。演示走完或被跳过后才进入登录页。它只在设备上第一次打开 App 时出现。

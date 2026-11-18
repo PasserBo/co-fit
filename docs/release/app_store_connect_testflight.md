@@ -140,15 +140,19 @@ Feedback we are looking for: whether the demo room explains how the app works, h
 
 **反馈邮箱**:填你的邮箱。**营销 URL**:可空。**隐私政策 URL**:`https://passerbo.github.io/co-fit/docs-legal-privacy/`。
 
-**What to Test**(每个 build 可改):
+**What to Test**(每个 build 可改;只写一个账号就能测完的步骤,Beta 审核员只有演示账号):
 ```
-v1.0.0 (3)
-1. 首次打开:演示房间里打出一张卡,看小人做动作;倒计时结束后点「登录,把好友叫进来」(也可以右上「跳过」)
-2. 用 Apple 登录或邮箱注册,完成起名
-3. 新建房间 → 右上 ⋯ → 邀请好友,把链接发给另一台设备
-4. 两台设备同时在房间里,打出一张卡,确认对方能看到你的运动状态变化
-5. App 切后台/被杀后重开,倒计时是否恢复
-6. 「我的 → 运动 → 累计时长」进入运动历史,能看到记录;「我的」页底部「删除账号」能走通
+v1.0.0 (4)
+1. 首次打开:在演示房间里打出一张卡,看小人做动作;倒计时结束后点「登录,把好友叫进来」(也可以右上「跳过」)
+2. 用邮箱或 Apple 登录;新账号会先起名
+3. 「我的 → 新建房间」:填房间名,可见性选「公开」,点「创建并进入」;弹出的分享卡可以复制邀请链接
+4. 「我的 → 发现公开房间」:能看到刚建的房间(标「已加入」),搜索框按房间名搜索
+5. 在房间里点底部手牌,上滑中间那张卡开始运动:小人做动作、倒计时走完后回到待机
+6. 运动中把 App 切到后台或杀掉再打开,倒计时是否接着走
+7. 「我的 → 运动 → 累计时长」进入运动历史,能看到刚才的记录
+8. 「我的 → 我的房间」:列表里有自己的房间,左上返回键能正常返回
+9. 「我的」页底部「删除账号」能走通(会清空该账号全部数据)
+有第二台设备的话可以额外试:把邀请链接发过去加入同一房间,互相看到对方的小人和运动状态。
 已知问题:没装 App 的人点邀请链接不会跳 App Store(本期无 Universal Links);形象自定义尚未开放。
 ```
 
@@ -167,10 +171,11 @@ CoFit is a social fitness app: friends appear as avatars in a shared "virtual gy
 How to test:
 1. On first launch a demo room opens before sign-in (no network or account needed). Tap the cards at the bottom, then swipe up the center card to start a short 10-second demo workout. Tap "跳过" (Skip, top right) or the button "登录,把好友叫进来" (Sign in) to continue. The demo is shown only once per install.
 2. On the sign-in screen tap "使用邮箱登录" (Sign in with email) and use the demo account above. You can also use Sign in with Apple.
-3. The demo account owns a room named "Review Room". Other members' avatars appear only while they are online; to see live status, sign in on a second device with Sign in with Apple and join via the invite link (⋯ at top right → 邀请好友 / Invite).
-4. Tap the fanned cards at the bottom, swipe up a card to start a workout; a countdown runs and the workout is logged in Workout History: tab "我的" (Me) → row "累计时长" (Total time) under "运动" (Workout).
-5. Room owner tools (⋯ at top right): invite via link, manage/remove members, report, disband. Members can report a room or member.
-6. Account deletion: tab "我的" (Me) → "删除账号" (Delete Account) at the bottom removes all user data and revokes the Apple credential. Please test deletion with a Sign in with Apple account if possible, so the demo account stays available for other reviewers.
+3. The demo account owns a room named "Review Room". Other members' avatars appear only while they are online, so with a single account you will see only your own avatar; the demo room in step 1 shows what a room with several people looks like. Optionally, sign in on a second device with Sign in with Apple and join via the invite link (⋯ at top right → 邀请好友 / Invite) to see live status.
+4. To create a room: tab "我的" (Me) → "新建房间" (New room), enter a name, choose "公开" (Public) and tap "创建并进入" (Create and enter). To browse rooms: tab "我的" (Me) → "发现公开房间" (Discover public rooms); public rooms can be searched by name and joined directly.
+5. Tap the fanned cards at the bottom, swipe up a card to start a workout; a countdown runs and the workout is logged in Workout History: tab "我的" (Me) → row "累计时长" (Total time) under "运动" (Workout).
+6. Room owner tools (⋯ at top right): invite via link, manage/remove members, report, disband. Members can report a room or member.
+7. Account deletion: tab "我的" (Me) → "删除账号" (Delete Account) at the bottom removes all user data and revokes the Apple credential. Please test deletion with a Sign in with Apple account if possible, so the demo account stays available for other reviewers.
 
 Notes:
 - No HealthKit, location, camera, photos, push notifications, or ads are used.

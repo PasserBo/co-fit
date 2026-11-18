@@ -1,7 +1,7 @@
 # Tasks: add-pre-signup-onboarding
 
 ## Now
-2026-11-18:M1–M3(T1–T12)全部完成,模拟器(iPhone 17 Pro)全程走通:全新安装 → 演示房间(3 示例小人 + 自己 + 4 卡 + 第一条引导)→ 点场景第二条 → 聚焦上滑打出深蹲 → HUD + 缩短说明 + 第三条引导 → 10s 后回待机 + 收尾卡 → 点「登录,把好友叫进来」→ 登录页。全量 238 条测试通过,analyze 零告警。**T1–T12 的改动均未提交。** 下一步进 M4:T13/T14 由你真机走查(建议顺手开飞行模式验证离线),然后 T15 TestFlight,T16 归档。
+2026-11-18:全部完成。M1–M3 已于 d30242b 提交;用户真机走查 T13/T14 通过;1.0.0 (3) 已上传 TestFlight;本 change 已归档,主规格见 `capabilities/welcome-tour/spec.md`(draft,待用户确认)。
 
 ## M1 · 骨架:门控 + 可跳过的空演示房间(可在模拟器看到演示→登录的切换)
 - [x] T1 把 `room_main_view.dart` 里私有的 `_ActivityHud` 抽成 `room/presentation/widget/activity_hud.dart`,正式房间行为不变 — owner: agent · verify: `fvm flutter analyze` 无新告警;`fvm flutter test test/features/room` 全绿;HUD 行为由新增 widget 测试锁住(2026-11-13 以此替代原「模拟器打一张卡」目测,纯搬移无视觉改动) · done 2026-11-13
@@ -34,7 +34,11 @@
   - evidence: 导航骨架图加未登录分支三路(邀请链接/已看过 → 登录页;首次 → 演示);F1 改名「首次进入 → 演示房间 → 登录 → 起名」,流程图与表格加「登录前演示房间 🟡」行
 
 ## M4 · 真机验收与发布
-- [ ] T13 真机走查:全新安装(先删旧 App)→ 演示 → 打一张卡 → 收尾 → 登录 → 起名 → 主界面;再删 App 重装确认演示重现;退出登录后确认不出演示 — owner: me · verify: 三条路径各一句话回复「OK」或截图问题
-- [ ] T14 邀请链接真机走查:删 App 重装,不先打开 App,直接点一条 `cofit://room/...` 链接 → 应是登录页而非演示;登录起名后邀请预览弹出 — owner: me · verify: 一句话回复
-- [ ] T15 TestFlight 构建并分发(`scripts/build_ipa.sh`,build 号 +1) — owner: me · after: T13, T14 · verify: TestFlight 列表出现新 build
-- [ ] T16 归档本 change:`spec_tool.py archive` 生成 `capabilities/welcome-tour/spec.md`,design §1–§4 的长期部分搬到 `capabilities/welcome-tour/design.md`,BOARD 移除 — owner: agent · after: T15 · verify: archive 干跑无错误;`check` 主规格无 warning
+- [x] T13 真机走查:全新安装(先删旧 App)→ 演示 → 打一张卡 → 收尾 → 登录 → 起名 → 主界面;再删 App 重装确认演示重现;退出登录后确认不出演示 — owner: me · verify: 三条路径各一句话回复「OK」或截图问题
+  - evidence: 2026-11-18 用户真机走查后回复「实际测试没问题」(未单独说明飞行模式)
+- [x] T14 邀请链接真机走查:删 App 重装,不先打开 App,直接点一条 `cofit://room/...` 链接 → 应是登录页而非演示;登录起名后邀请预览弹出 — owner: me · verify: 一句话回复
+  - evidence: 2026-11-18 用户真机走查邀请链接冷启动,同上回复
+- [x] T15 TestFlight 构建并分发(`scripts/build_ipa.sh`,build 号 +1) — owner: me · after: T13, T14 · verify: TestFlight 列表出现新 build
+  - evidence: 2026-11-18 在 d30242b 的干净 worktree 里打包 1.0.0 (3)(工作区有未提交的 AI 教练改动,不进包),`scripts/upload_testflight.sh` 输出 `Uploaded Runner / EXPORT SUCCEEDED`;TestFlight 列表处理完后出现,由用户在 App Store Connect 确认
+- [x] T16 归档本 change:`spec_tool.py archive` 生成 `capabilities/welcome-tour/spec.md`,design §1–§4 的长期部分搬到 `capabilities/welcome-tour/design.md`,BOARD 移除 — owner: agent · after: T15 · verify: archive 干跑无错误;`check` 主规格无 warning
+  - evidence: archive 干跑仅提示未勾任务(已勾完),`check` 主规格见归档提交;长期设计写入 `capabilities/welcome-tour/design.md`

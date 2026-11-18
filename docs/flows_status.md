@@ -38,7 +38,7 @@ LoginPageView ─(Apple / Google / 邮箱)─► OnboardingPageView(昵称必填
 
 | 步骤 | 状态 | 备注 |
 |---|---|---|
-| 登录前演示房间 | 🟡 | 2026-11-18(规格 [spec/changes/add-pre-signup-onboarding](spec/changes/add-pre-signup-onboarding/proposal.md)):首次启动先进演示,邀请链接冷启动优先走登录页;看过/跳过/登录过后不再出现;演示不写任何云端数据。待真机走查(T13/T14)后转 ✅ |
+| 登录前演示房间 | ✅ | 2026-11-18(规格 [spec/capabilities/welcome-tour](spec/capabilities/welcome-tour/spec.md)):首次启动先进演示,邀请链接冷启动优先走登录页;看过/跳过/登录过后不再出现;演示不写任何云端数据。真机走查通过,随 1.0.0 (3) 上 TestFlight |
 | 三种登录 | ✅ | Apple 2026-09-17 真机验证;**Google 登录由 Remote Config `auth_google_enabled` 控制,默认关**(2026-10-26,uid 不互通问题解决前不开放) |
 | 登录页法律条款链接 | ✅ | 2026-10-26:「登录即表示同意《用户协议》与《隐私政策》」,外开 GitHub Pages |
 | 取消登录 | ✅ | `AuthCancelledException` 静默 |

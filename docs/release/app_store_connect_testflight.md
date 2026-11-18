@@ -57,7 +57,7 @@
 1. **Xcode → Settings → Accounts 里登录拥有 `J95TRWHWYM` 团队的 Apple ID**(TestFlight 上传用 Xcode 签名即可,不需要 App Store Connect API key)。
    ⚠️ 2026-11-05 实测:本机没登录账号、也没有该团队的 Apple Distribution 证书时,归档成功但导出 ipa 报 `exportArchive No Accounts / No signing certificate "iOS Distribution" found`。登录后 `-allowProvisioningUpdates` 会自动申请 Distribution 证书与 App Store profile,不需要手动去开发者网站建。
 2. `.env` 里有真实 `ABLY_API_KEY` / `ABLY_CLIENT_ID_PREFIX`(gitignored)。
-3. 版本号:`pubspec.yaml` 当前 `1.0.0+2`(build 2 于 2026-11-12 上传)。**每次上传 build number 必须递增**(`+2`、`+3`…),同一 `1.0.0` 下可以传多个 build。
+3. 版本号:`pubspec.yaml` 当前 `1.0.0+3`(build 3 于 2026-11-18 上传)。**每次上传 build number 必须递增**(`+2`、`+3`…),同一 `1.0.0` 下可以传多个 build。
 
 ### 2.2 构建命令
 
@@ -105,9 +105,13 @@ scripts/export_ipa.sh
 
 ### 3.3 测试账号准备(Beta App Review 和正式审核都要)
 
-- 在 Firebase Auth 建一个**邮箱密码账号**:`review@…`(用你能收信的邮箱),密码记在 `keys/` 目录(gitignored)。
-- 用这个账号登录一次,起好昵称,**提前加入一个已有 2–3 个成员的房间**,并让其中一个成员保持在线/运动中,审核员打开就能看到小人和状态——否则 App 的核心卖点是空的。
-- 房间里预置一个有卡的牌组,让审核员能直接打牌。
+2026-11-19 已建好,脚本 `scripts/seed_review_account.py`(可重复执行):
+
+- **演示账号**:邮箱密码账号 `review.cofit@example.com`,昵称 `Reviewer`(已完成起名,登录直接进主界面)。`example.com` 是保留域名,收不到信,审核也不需要收信。**密码只在 `keys/review_account.json`**(gitignored,权限 600),从那里复制到 App Store Connect。
+- **测试房间**:`Review Room`,演示账号是房主,登录后直接看到这个房间;牌组由 App 首次登录时自动生成默认牌组,不需要预置。
+- **数据怎么写的**:脚本走 Firebase 客户端 REST 接口,以演示账号自己的身份写 Firestore,和 App 一样受 rules 约束,不需要 service account。房间格式与 `create_room_usecase.dart` 一致,邀请链接可用(脚本会打印)。
+- **账号被删了怎么办**:审核员若用演示账号试「删除账号」,数据会被清空;再跑一次脚本即可重建同一邮箱、同一密码的账号和新房间。
+- 房间里别人的小人只在对方在线时出现。审核期间想让审核员看到实时状态,用另一台设备登录自己的账号,通过房间右上 ⋯ → 邀请好友加入 `Review Room` 并保持在线;做不到也没关系,登录前的演示房间已经展示了多人小人和打牌。
 - Sign in with Apple 审核员会用自己的 Apple ID 试,不用准备。Google 登录按钮由 Remote Config 默认关,审核看不到,不用准备。
 
 ---
@@ -116,24 +120,35 @@ scripts/export_ipa.sh
 
 ### 4.1 TestFlight「测试信息」
 
-**Beta App 描述**(中文版,给自己人):
+**Beta App 描述**(主语言简体中文;外部测试者和 Beta 审核都会看):
 ```
-CoFit 是一个「虚拟健身房」:你和好友以小人形象出现在同一个房间里,实时看到谁在运动、在做什么。从手牌里打出一张动作卡就开始运动,倒计时结束自动记录。
+CoFit 是一座「虚拟健身房」:你和好友以小人形象出现在同一个房间里,实时看到谁在运动、在做什么动作。从底部手牌里上滑打出一张动作卡就开始运动,倒计时结束自动记入运动历史。
 
-本轮重点测试:登录 → 起名 → 新建/加入房间 → 邀请好友 → 打牌运动 → 运动历史 → 删除账号。
+第一次打开时会先进入一个演示房间,不用登录就能看到自己的小人、几个「示例」小人,并亲手打出一张卡;之后再用 Apple 或邮箱登录,建房间、邀请好友一起练。
+
+本轮想听到的反馈:演示房间是否让你明白这个 App 怎么玩、和好友在同一房间运动的感觉、打牌与倒计时是否顺手、遇到的任何卡顿或报错。
 ```
 
-**反馈邮箱**:填你的邮箱。**营销 URL**:可空。
+英文版(若 Test Information 加了英文本地化):
+```
+CoFit is a "virtual gym": you and your friends appear as avatars in a shared room and see who is working out, and what they are doing, in real time. Swipe up a card from your hand to start an exercise; when the countdown ends it is saved to your workout history.
+
+On first launch you enter a demo room without signing in: you see your own avatar and a few sample avatars, and play a card yourself. Then sign in with Apple or email, create a room and invite friends to work out together.
+
+Feedback we are looking for: whether the demo room explains how the app works, how it feels to work out in the same room as friends, whether playing cards and the countdown feel smooth, and any lag or errors you hit.
+```
+
+**反馈邮箱**:填你的邮箱。**营销 URL**:可空。**隐私政策 URL**:`https://passerbo.github.io/co-fit/docs-legal-privacy/`。
 
 **What to Test**(每个 build 可改):
 ```
-v1.0.0 (build 1) 首个 TestFlight 版本
-1. 用 Apple 登录或邮箱注册,完成起名
-2. 新建房间 → 右上 ⋯ → 邀请好友,把链接发给另一台设备
-3. 两台设备同时在房间里,打出一张卡,确认对方能看到你的运动状态变化
-4. App 切后台/被杀后重开,倒计时是否恢复
-5. 「我的 → 运动历史」有记录
-6. 「我的 → 删除账号」能走通
+v1.0.0 (3)
+1. 首次打开:演示房间里打出一张卡,看小人做动作;倒计时结束后点「登录,把好友叫进来」(也可以右上「跳过」)
+2. 用 Apple 登录或邮箱注册,完成起名
+3. 新建房间 → 右上 ⋯ → 邀请好友,把链接发给另一台设备
+4. 两台设备同时在房间里,打出一张卡,确认对方能看到你的运动状态变化
+5. App 切后台/被杀后重开,倒计时是否恢复
+6. 「我的 → 运动 → 累计时长」进入运动历史,能看到记录;「我的」页底部「删除账号」能走通
 已知问题:没装 App 的人点邀请链接不会跳 App Store(本期无 Universal Links);形象自定义尚未开放。
 ```
 
@@ -143,22 +158,24 @@ v1.0.0 (build 1) 首个 TestFlight 版本
 |---|---|
 | 联系人 | 你的姓名 / 电话 / 邮箱 |
 | 需要登录 | **是** |
-| 演示账号 | `review@…` / 密码(§3.3) |
+| 演示账号 | `review.cofit@example.com` / 密码见 `keys/review_account.json`(§3.3) |
 | 备注 | 见下 |
 
 ```
-CoFit is a social fitness app: friends appear as avatars in a shared "virtual gym" room and see each other's live workout status. Users start a workout by playing an exercise card from their deck.
+CoFit is a social fitness app: friends appear as avatars in a shared "virtual gym" room and see each other's live workout status. Users start a workout by playing an exercise card from their hand. The UI is in Simplified Chinese.
 
 How to test:
-1. Sign in with the demo account (email/password above) or with Sign in with Apple.
-2. You will land in a room that already has other members. One member is kept online during the review window so you can see live status.
-3. Tap the fanned cards at the bottom, swipe up a card to start a workout; a countdown runs and the workout is logged under "我的 → 运动历史" (Me → Workout History).
-4. Room owner tools (⋯ at top right): invite via link, manage/remove members, report, disband. Members can report a room or member.
-5. Account deletion: "我的 → 删除账号" (Me → Delete Account) removes all user data and revokes the Apple credential.
+1. On first launch a demo room opens before sign-in (no network or account needed). Tap the cards at the bottom, then swipe up the center card to start a short 10-second demo workout. Tap "跳过" (Skip, top right) or the button "登录,把好友叫进来" (Sign in) to continue. The demo is shown only once per install.
+2. On the sign-in screen tap "使用邮箱登录" (Sign in with email) and use the demo account above. You can also use Sign in with Apple.
+3. The demo account owns a room named "Review Room". Other members' avatars appear only while they are online; to see live status, sign in on a second device with Sign in with Apple and join via the invite link (⋯ at top right → 邀请好友 / Invite).
+4. Tap the fanned cards at the bottom, swipe up a card to start a workout; a countdown runs and the workout is logged in Workout History: tab "我的" (Me) → row "累计时长" (Total time) under "运动" (Workout).
+5. Room owner tools (⋯ at top right): invite via link, manage/remove members, report, disband. Members can report a room or member.
+6. Account deletion: tab "我的" (Me) → "删除账号" (Delete Account) at the bottom removes all user data and revokes the Apple credential. Please test deletion with a Sign in with Apple account if possible, so the demo account stays available for other reviewers.
 
 Notes:
 - No HealthKit, location, camera, photos, push notifications, or ads are used.
-- Google Sign-In button exists in code but is disabled by a remote feature flag; only Sign in with Apple and email/password are visible.
+- The sample avatars in the demo room are labelled "示例" (Sample); they are not real users and nothing in the demo is uploaded.
+- Google Sign-In exists in code but is disabled by a remote feature flag; only Sign in with Apple and email/password are visible.
 - Invite deep links use the custom scheme cofit://; Universal Links are not implemented in this version.
 ```
 
@@ -187,7 +204,7 @@ Notes:
 
 - 必交:**6.9 英寸 iPhone**(iPhone 17 Pro Max / 16 Pro Max 模拟器,1320×2868),3–10 张。6.5 英寸可由 6.9 自动缩放。
 - 已改为仅 iPhone,不需要 iPad 截图。
-- 建议 5 张:房间场景(多个小人在线)/ 扇形手牌聚焦 / 打卡倒计时 HUD / 牌库 / 运动历史。用 §3.3 的预置房间来截。
+- 建议 5 张:房间场景(多个小人在线)/ 扇形手牌聚焦 / 打卡倒计时 HUD / 牌库 / 运动历史。多个小人在线的画面可以直接用登录前的演示房间截。
 - 命令:booted 模拟器 `xcrun simctl io booted screenshot room.png`;iPhone 17 Pro 模拟器出的是 6.3 英寸尺寸,**需要换 Pro Max 模拟器**。
 
 ### 5.3 商店文案

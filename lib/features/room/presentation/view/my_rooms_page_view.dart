@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/cofit_colors.dart';
 import '../../../../core/theme/cofit_dimens.dart';
+import '../../../../core/widget/app_bar_filled_action.dart';
 import '../../../auth/presentation/user_bootstrap_provider.dart';
 import '../../../avatar/presentation/idle_avatar_figure.dart';
 import '../../domain/entity/room_presence_member.dart';
@@ -10,7 +11,9 @@ import '../../domain/entity/user_activity_status_entity.dart';
 import '../../provider/room_info_provider.dart';
 import '../join_room_provider.dart';
 import '../room_browser_provider.dart';
-import 'room_create_sheet_view.dart';
+import '../room_navigation.dart';
+import 'room_create_page_view.dart';
+import 'room_discover_page_view.dart';
 import 'room_members_sheet_view.dart';
 
 /// 「我的房间」(#20c 定稿,替代旧 RoomBrowsePage/RoomCommunityPage):
@@ -41,17 +44,18 @@ class MyRoomsPageView extends ConsumerWidget {
     }
   }
 
+  /// 进入房间:切回房间 tab 并收起本页(本页也可能从「我的」页打开)。
   void _enterRoom(BuildContext context, WidgetRef ref, String roomId) {
-    ref.read(roomBrowserProvider.notifier).setFocusedRoom(roomId);
-    Navigator.of(context).pop();
+    enterJoinedRoom(ref, Navigator.of(context), roomId: roomId);
   }
 
-  Future<void> _createRoom(BuildContext context) async {
-    final enterRoom = await RoomCreateSheetView.show(context, userId: userId);
-    // 「先进房间看看」→ 收起本页,回到房间主界面(焦点已在新房间)。
-    if (enterRoom == true && context.mounted) {
-      Navigator.of(context).pop();
-    }
+  /// 建房页成功后自己负责收起所有工具页并进房。
+  void _createRoom(BuildContext context) {
+    RoomCreatePageView.push(context, userId: userId);
+  }
+
+  void _discoverRooms(BuildContext context) {
+    RoomDiscoverPageView.push(context, userId: userId);
   }
 
   Future<void> _handleRemovedRoom(
@@ -96,15 +100,17 @@ class MyRoomsPageView extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('我的房间'),
         actions: [
+          IconButton(
+            tooltip: '发现公开房间',
+            onPressed: () => _discoverRooms(context),
+            icon: const Icon(Icons.explore_rounded),
+          ),
           // 空态自带居中「新建房间」CTA,此处不再重复入口
           if (joinedRoomIds.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(right: CoFitDimens.spacingLg),
-              child: FilledButton.icon(
-                onPressed: () => _createRoom(context),
-                icon: const Icon(Icons.add, size: CoFitDimens.sizeCardIcon),
-                label: const Text('新建'),
-              ),
+            AppBarFilledAction(
+              icon: Icons.add,
+              label: '新建',
+              onPressed: () => _createRoom(context),
             ),
         ],
       ),
@@ -112,6 +118,7 @@ class MyRoomsPageView extends ConsumerWidget {
         child: joinedRoomIds.isEmpty
             ? _EmptyRooms(
                 onCreate: () => _createRoom(context),
+                onDiscover: () => _discoverRooms(context),
                 onManualJoin: () => _manualJoin(context, ref),
               )
             : Column(
@@ -399,9 +406,14 @@ class _ShimmerDotState extends State<_ShimmerDot>
 }
 
 class _EmptyRooms extends StatelessWidget {
-  const _EmptyRooms({required this.onCreate, required this.onManualJoin});
+  const _EmptyRooms({
+    required this.onCreate,
+    required this.onDiscover,
+    required this.onManualJoin,
+  });
 
   final VoidCallback onCreate;
+  final VoidCallback onDiscover;
   final VoidCallback onManualJoin;
 
   @override
@@ -427,7 +439,7 @@ class _EmptyRooms extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  '新建一间,或点开朋友发来的邀请链接',
+                  '新建一间,逛逛公开房间,或点开朋友发来的邀请链接',
                   textAlign: TextAlign.center,
                   style: textTheme.bodySmall?.copyWith(
                     color: colors.textTertiary,
@@ -440,6 +452,11 @@ class _EmptyRooms extends StatelessWidget {
               spacing: CoFitDimens.spacingSm,
               children: [
                 FilledButton(onPressed: onCreate, child: const Text('新建房间')),
+                OutlinedButton.icon(
+                  onPressed: onDiscover,
+                  icon: const Icon(Icons.explore_rounded),
+                  label: const Text('发现公开房间'),
+                ),
                 TextButton(
                   onPressed: onManualJoin,
                   child: Text(
@@ -533,9 +550,7 @@ class _ManualJoinSheetState extends ConsumerState<_ManualJoinSheet> {
               controller: _controller,
               enabled: !_isJoining,
               autofocus: true,
-              decoration: const InputDecoration(
-                labelText: '房间 ID',
-              ),
+              decoration: const InputDecoration(labelText: '房间 ID'),
             ),
             const SizedBox(height: CoFitDimens.spacingLg),
             SizedBox(

@@ -37,7 +37,8 @@ import '../widget/room_scene.dart';
 import '../widget/room_top_bar.dart';
 import 'my_rooms_page_view.dart';
 import 'report_sheet_view.dart';
-import 'room_create_sheet_view.dart';
+import 'room_create_page_view.dart';
+import 'room_discover_page_view.dart';
 import 'room_edit_sheet_view.dart';
 import 'room_members_sheet_view.dart';
 
@@ -357,8 +358,12 @@ class _RoomMainViewState extends ConsumerState<RoomMainView> {
     }
   }
 
-  Future<void> _createFirstRoom() async {
-    await RoomCreateSheetView.show(context, userId: widget.userId);
+  void _createFirstRoom() {
+    RoomCreatePageView.push(context, userId: widget.userId);
+  }
+
+  void _discoverRooms() {
+    RoomDiscoverPageView.push(context, userId: widget.userId);
   }
 
   @override
@@ -375,7 +380,11 @@ class _RoomMainViewState extends ConsumerState<RoomMainView> {
     final joinedRoomIds = browser.joinedRoomIds;
 
     if (joinedRoomIds.isEmpty) {
-      return _EmptyRooms(onCreate: _createFirstRoom, onBrowse: _openBrowse);
+      return _EmptyRooms(
+        onCreate: _createFirstRoom,
+        onDiscover: _discoverRooms,
+        onBrowse: _openBrowse,
+      );
     }
 
     final focusedRoomId = browser.focusedRoomId ?? joinedRoomIds.first;
@@ -634,9 +643,14 @@ class _RoomMainViewState extends ConsumerState<RoomMainView> {
 
 /// 房间 tab 空态(新用户首屏):主 CTA 直接建房,次 CTA 去「我的房间」手输 ID。
 class _EmptyRooms extends StatelessWidget {
-  const _EmptyRooms({required this.onCreate, required this.onBrowse});
+  const _EmptyRooms({
+    required this.onCreate,
+    required this.onDiscover,
+    required this.onBrowse,
+  });
 
   final VoidCallback onCreate;
+  final VoidCallback onDiscover;
   final VoidCallback onBrowse;
 
   @override
@@ -670,7 +684,7 @@ class _EmptyRooms extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        '建一间房,把链接发给朋友,一起打出第一张卡',
+                        '建一间房把链接发给朋友,或者加入一间公开房间,一起打出第一张卡',
                         textAlign: TextAlign.center,
                         style: textTheme.bodySmall?.copyWith(
                           color: colors.textTertiary,
@@ -685,6 +699,11 @@ class _EmptyRooms extends StatelessWidget {
                       FilledButton(
                         onPressed: onCreate,
                         child: const Text('新建房间'),
+                      ),
+                      OutlinedButton.icon(
+                        onPressed: onDiscover,
+                        icon: const Icon(Icons.explore_rounded),
+                        label: const Text('发现公开房间'),
                       ),
                       TextButton(
                         onPressed: onBrowse,

@@ -85,6 +85,35 @@ class FirebaseRoomRepository {
     return RoomInfoEntity.fromMap({...data, 'roomId': trimmed});
   }
 
+  /// 取公开房间(冷启动期一次取回,排序与搜索在客户端做;只用 visibility 单字段
+  /// 等值过滤,走自动单字段索引,不需要复合索引)。
+  ///
+  /// 优先读服务端;失败(离线)时退回本地缓存,缓存也为空才抛出原错误,
+  /// 以便 UI 区分「确实没有公开房间」与「加载失败」。
+  Future<List<RoomInfoEntity>> fetchPublicRooms({required int limit}) async {
+    final query = _firestore
+        .collection('rooms')
+        .where('visibility', isEqualTo: RoomVisibility.public)
+        .limit(limit);
+    QuerySnapshot<Map<String, dynamic>> snapshot;
+    try {
+      snapshot = await query.get(const GetOptions(source: Source.server));
+    } catch (_) {
+      final cached = await query.get(const GetOptions(source: Source.cache));
+      if (cached.docs.isEmpty) {
+        rethrow;
+      }
+      snapshot = cached;
+    }
+    return [
+      for (final doc in snapshot.docs)
+        RoomInfoEntity.fromMap({
+          ...doc.data(),
+          'roomId': doc.id,
+        }).copyWith(fromCache: snapshot.metadata.isFromCache),
+    ];
+  }
+
   /// 实时订阅房间文档:成员被移出 / 房间被解散 / 改名都即时下发
   /// (rules 对登录用户放开 read,被移出者仍能收到最后一次变更)。
   /// 房间不存在或被删除时流出 null(**仅服务端确认**的快照会流出 null)。

@@ -20,6 +20,9 @@ class MyPageBody extends StatelessWidget {
     this.onEditAvatar,
     this.onEditNickname,
     this.onOpenHistory,
+    this.onOpenMyRooms,
+    this.onDiscoverRooms,
+    this.onCreateRoom,
     this.onSignOut,
     this.onDeleteAccount,
     this.onOpenPrivacyPolicy,
@@ -44,6 +47,11 @@ class MyPageBody extends StatelessWidget {
 
   /// 点运动统计行 → 运动历史页(#18)。
   final VoidCallback? onOpenHistory;
+
+  /// 房间分组(我的房间 / 发现公开房间 / 新建房间);三者都为 null 时不显示该分组。
+  final VoidCallback? onOpenMyRooms;
+  final VoidCallback? onDiscoverRooms;
+  final VoidCallback? onCreateRoom;
   final VoidCallback? onSignOut;
 
   /// 删除账号(Apple 上架要求);null 时不显示该入口。
@@ -130,6 +138,43 @@ class MyPageBody extends StatelessWidget {
             ],
           ),
         ],
+        if (onOpenMyRooms != null ||
+            onDiscoverRooms != null ||
+            onCreateRoom != null) ...[
+          const SizedBox(height: CoFitDimens.spacingLg),
+          _GroupLabel('房间'),
+          _SettingsGroup(
+            children: [
+              if (onOpenMyRooms != null)
+                _SettingsRow(
+                  iconColor: colors.primaryMain,
+                  iconBg: colors.primarySubtle,
+                  icon: Icons.home_rounded,
+                  label: '我的房间',
+                  trailing: '$roomCount 间',
+                  onTap: onOpenMyRooms,
+                ),
+              if (onDiscoverRooms != null)
+                _SettingsRow(
+                  iconColor: colors.statusInfo,
+                  iconBg: colors.typeFlexibilitySubtle,
+                  icon: Icons.explore_rounded,
+                  label: '发现公开房间',
+                  trailing: '',
+                  onTap: onDiscoverRooms,
+                ),
+              if (onCreateRoom != null)
+                _SettingsRow(
+                  iconColor: colors.statusPaused,
+                  iconBg: colors.typeCoreSubtle,
+                  icon: Icons.add_rounded,
+                  label: '新建房间',
+                  trailing: '',
+                  onTap: onCreateRoom,
+                ),
+            ],
+          ),
+        ],
         const SizedBox(height: CoFitDimens.spacingLg),
         _GroupLabel('账号'),
         _SettingsGroup(
@@ -196,8 +241,9 @@ class MyPageBody extends StatelessWidget {
             child: Center(
               child: Text(
                 '退出登录',
-                style: textTheme.labelLarge
-                    ?.copyWith(color: colors.statusDanger),
+                style: textTheme.labelLarge?.copyWith(
+                  color: colors.statusDanger,
+                ),
               ),
             ),
           ),
@@ -294,33 +340,34 @@ class _HeroCard extends StatelessWidget {
                 const SizedBox(height: CoFitDimens.spacingXs),
                 Text(
                   '@$handle',
-                  style: textTheme.labelSmall
-                      ?.copyWith(color: colors.textTertiary),
+                  style: textTheme.labelSmall?.copyWith(
+                    color: colors.textTertiary,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 if (onEditAvatar != null) ...[
-                const SizedBox(height: CoFitDimens.spacingMd),
-                GestureDetector(
-                  onTap: onEditAvatar,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: CoFitDimens.spacingLg,
-                      vertical: CoFitDimens.spacingSm,
-                    ),
-                    decoration: ShapeDecoration(
-                      color: colors.primaryMain,
-                      shape: const StadiumBorder(),
-                    ),
-                    child: Text(
-                      '编辑形象',
-                      style: textTheme.labelMedium?.copyWith(
-                        color: colors.primaryOn,
-                        fontWeight: CoFitFontWeights.heading,
+                  const SizedBox(height: CoFitDimens.spacingMd),
+                  GestureDetector(
+                    onTap: onEditAvatar,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: CoFitDimens.spacingLg,
+                        vertical: CoFitDimens.spacingSm,
+                      ),
+                      decoration: ShapeDecoration(
+                        color: colors.primaryMain,
+                        shape: const StadiumBorder(),
+                      ),
+                      child: Text(
+                        '编辑形象',
+                        style: textTheme.labelMedium?.copyWith(
+                          color: colors.primaryOn,
+                          fontWeight: CoFitFontWeights.heading,
+                        ),
                       ),
                     ),
                   ),
-                ),
                 ],
               ],
             ),
@@ -431,10 +478,9 @@ class _GroupLabel extends StatelessWidget {
       ),
       child: Text(
         text,
-        style: Theme.of(context)
-            .textTheme
-            .labelSmall
-            ?.copyWith(color: colors.textDisabled),
+        style: Theme.of(
+          context,
+        ).textTheme.labelSmall?.copyWith(color: colors.textDisabled),
       ),
     );
   }
@@ -461,8 +507,8 @@ class _SettingsGroup extends StatelessWidget {
               Divider(
                 height: CoFitDimens.borderWidthHairline,
                 color: colors.borderSubtle,
-                indent: CoFitDimens.sizeCardIconBlock +
-                    CoFitDimens.spacingMd * 2,
+                indent:
+                    CoFitDimens.sizeCardIconBlock + CoFitDimens.spacingMd * 2,
               ),
             children[i],
           ],
@@ -514,8 +560,7 @@ class _SettingsRow extends StatelessWidget {
           Flexible(
             child: Text(
               trailing,
-              style:
-                  textTheme.bodySmall?.copyWith(color: colors.textTertiary),
+              style: textTheme.bodySmall?.copyWith(color: colors.textTertiary),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),

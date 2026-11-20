@@ -13,6 +13,9 @@ import '../../../profile/domain/entity/user_profile_entity.dart';
 import '../../../profile/provider/user_profile_provider.dart';
 import '../../../profile/provider/delete_account_provider.dart';
 import '../../../profile/provider/user_profile_repository_provider.dart';
+import '../../../room/presentation/view/my_rooms_page_view.dart';
+import '../../../room/presentation/view/room_create_page_view.dart';
+import '../../../room/presentation/view/room_discover_page_view.dart';
 import '../../domain/repository/auth_repository.dart';
 import '../../usecase/sign_out_usecase.dart';
 import '../user_bootstrap_provider.dart';
@@ -90,7 +93,8 @@ class MyPageView extends ConsumerWidget {
     final confirmed = await showCoFitConfirmSheet(
       context,
       title: '删除账号?',
-      message: '将永久删除:你的资料与昵称、全部牌组与自建卡、运动历史记录,'
+      message:
+          '将永久删除:你的资料与昵称、全部牌组与自建卡、运动历史记录,'
           '并退出所有房间(你创建的房间会被解散)。此操作不可撤销。',
       confirmLabel: '删除账号',
       danger: true,
@@ -106,9 +110,7 @@ class MyPageView extends ConsumerWidget {
       builder: (_) => const Center(child: CircularProgressIndicator()),
     );
     try {
-      await ref
-          .read(deleteAccountUsecaseProvider)
-          .execute(userId: user.uid);
+      await ref.read(deleteAccountUsecaseProvider).execute(userId: user.uid);
       // 成功后 authStateChanges 会把 AuthGate 切回登录页,无需手动导航。
     } on AuthCancelledException {
       if (context.mounted) {
@@ -135,10 +137,10 @@ class MyPageView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final roomCount =
-        ref.watch(userBootstrapProvider.select((s) => s.joinedRoomIds.length));
-    final deckCount =
-        ref.watch(actionDecksProvider).value?.length ?? 0;
+    final roomCount = ref.watch(
+      userBootstrapProvider.select((s) => s.joinedRoomIds.length),
+    );
+    final deckCount = ref.watch(actionDecksProvider).value?.length ?? 0;
     final cardCount = ref.watch(templateCardsProvider).value?.length ?? 0;
     final profile = ref.watch(userProfileProvider).value;
     final hasSessionData = ref.watch(recentSessionsProvider).hasValue;
@@ -154,8 +156,9 @@ class MyPageView extends ConsumerWidget {
           deckCount: deckCount,
           cardCount: cardCount,
           sessionCount: hasSessionData ? totals.count : null,
-          totalDurationMin:
-              hasSessionData ? totals.totalDurationSec ~/ 60 : null,
+          totalDurationMin: hasSessionData
+              ? totals.totalDurationSec ~/ 60
+              : null,
           onEditNickname: profile == null
               ? null
               : () => _editNickname(context, ref, profile),
@@ -166,11 +169,21 @@ class MyPageView extends ConsumerWidget {
               ),
             );
           },
+          onOpenMyRooms: () => Navigator.of(context).push(
+            MaterialPageRoute<void>(
+              builder: (_) => MyRoomsPageView(userId: user.uid),
+            ),
+          ),
+          onDiscoverRooms: () =>
+              RoomDiscoverPageView.push(context, userId: user.uid),
+          onCreateRoom: () =>
+              RoomCreatePageView.push(context, userId: user.uid),
           onSignOut: () async {
             await signOutUsecase.execute();
           },
           onDeleteAccount: () => _deleteAccount(context, ref),
-          onOpenPrivacyPolicy: () => _openLegal(context, LegalLinks.privacyPolicy),
+          onOpenPrivacyPolicy: () =>
+              _openLegal(context, LegalLinks.privacyPolicy),
           onOpenTerms: () => _openLegal(context, LegalLinks.termsOfService),
         ),
       ),

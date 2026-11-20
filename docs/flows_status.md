@@ -49,12 +49,14 @@ LoginPageView ─(Apple / Google / 邮箱)─► OnboardingPageView(昵称必填
 
 ```
 AppShell[房间]
-  ├─ 无房间:空态 ──► 「新建房间」/「手动输入 ID」(本次改为直接建房,不再只给「浏览」)
+  ├─ 无房间:空态 ──► 「新建房间」(建房页)/「发现公开房间」/「有邀请链接或房间 ID?」
   └─ 有房间:RoomMainView(PageView 左右滑切房)
        ├─ 顶栏 ⋯ ──► RoomActionsSheet
        │     房主:编辑信息 / 邀请好友 / 成员管理(新) / 举报(新) / 解散
        │     成员:举报(新) / 退出房间
-       ├─ 顶栏 + ──► MyRoomsPageView(我的房间列表 / 新建 / 手输 ID)
+       ├─ 顶栏 + ──► MyRoomsPageView(我的房间列表 / 发现 / 新建 / 手输 ID)
+       │     ├─ 发现 ──► RoomDiscoverPageView(公开房间:搜索 / 预览 / 加入并进入)
+       │     └─ 新建 ──► RoomCreatePageView(建好直接进房 + 「已就绪」分享卡)
        ├─ 扇形手牌 tap ──► 聚焦模式 ──► 上滑打出 ──► HUD 倒计时
        └─ 牌组 chip ──► DeckPopover ──► 查看全部(_DeckSheet)
 ```
@@ -65,7 +67,9 @@ AppShell[房间]
 | 同一人多房间运动状态一致 | 🟡→✅ | 打牌/完成改为广播 presence 到所有已订阅房间(2026-10-26) |
 | 打牌 → 事件流 → 倒计时 → 回待机 | ✅ | 会话中 app 被杀:下次启动补记打卡 / 恢复倒计时(2026-10-26) |
 | 切房 / 切牌组 | ✅ | |
-| 建房 → 成功态 → 分享链接 | ✅ | 分享文案含 `cofit://`,iMessage 中不可点(无 Universal Links) |
+| 建房 → 成功态 → 分享链接 | ✅ | 2026-11-19 改为建房整页(默认公开),建好直接进房再弹「已就绪」分享卡。分享文案含 `cofit://`,iMessage 中不可点(无 Universal Links) |
+| 发现公开房间(浏览 / 搜索 / 加入) | ⛔→✅ | 2026-11-19 change [add-room-create-and-discovery](spec/changes/add-room-create-and-discovery/proposal.md):成员数排序、客户端搜索、无审核无上限;入口=房间空态 / 我的房间 / 我的页 |
+| 「我的房间」返回键 | 🐞→✅ | 2026-11-19 修复:AppBar 里的 FilledButton 撑坏工具栏,返回键点了没反应(见 project_overview 坑 10) |
 | 房主改名/描述/可见性 | ✅ | |
 | 房主解散 | ✅ | 成员侧懒清理 |
 | 成员退出 | ✅ | rules 禁止房主退出 |
@@ -138,7 +142,8 @@ AppShell[我的]
 | Onboarding | `profile/presentation/view/onboarding_page_view.dart` | ✅(本次去占位) |
 | 房间主界面 | `room/presentation/view/room_main_view.dart` | ✅(本次加成员管理/举报) |
 | 我的房间 | `room/presentation/view/my_rooms_page_view.dart` | ✅ |
-| 建房 sheet | `room/presentation/view/room_create_sheet_view.dart` | ✅ |
+| 建房页 | `room/presentation/view/room_create_page_view.dart`(成功卡 `widget/room_created_sheet.dart`) | ✅ 2026-11-19 替代建房 sheet |
+| 发现房间 | `room/presentation/view/room_discover_page_view.dart` + `public_room_preview_sheet_view.dart` | ✅ 2026-11-19 新增 |
 | 编辑房间 sheet | `room/presentation/view/room_edit_sheet_view.dart` | ✅ |
 | 成员管理 sheet | `room/presentation/view/room_members_sheet_view.dart` | ✅ 新增 |
 | 举报 sheet | `room/presentation/view/report_sheet_view.dart` | ✅ 新增 |

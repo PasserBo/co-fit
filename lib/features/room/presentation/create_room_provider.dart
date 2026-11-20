@@ -19,7 +19,7 @@ class CreateRoomState {
     return const CreateRoomState(
       name: '',
       description: '',
-      visibility: RoomVisibility.unlisted,
+      visibility: RoomVisibility.public,
       isSubmitting: false,
     );
   }

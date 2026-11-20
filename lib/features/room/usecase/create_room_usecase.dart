@@ -31,6 +31,16 @@ class CreateRoomUsecase {
     if (trimmedName.isEmpty) {
       throw ArgumentError.value(name, 'name', 'Room name must not be empty.');
     }
+    if (trimmedName.length > RoomInfoLimits.nameMaxLength) {
+      throw ArgumentError.value(name, 'name', 'Room name is too long.');
+    }
+    if (trimmedDescription.length > RoomInfoLimits.descriptionMaxLength) {
+      throw ArgumentError.value(
+        description,
+        'description',
+        'Room description is too long.',
+      );
+    }
     if (!RoomVisibility.allowed.contains(normalizedVisibility)) {
       throw ArgumentError.value(
         visibility,

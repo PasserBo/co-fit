@@ -68,6 +68,8 @@ M40 7 C 59 7, 61 29, 60 48 C 59 63, 50 68, 40 68 C 30 68, 21 63, 20 48 C 19 29, 
 
 ## 5. 八个基础状态关键帧(P1 验收样张)
 
+> 2026-11-21 增补三条(change `add-home-sheet`):站立待机、上台、下台。位移由房间页的位置层负责,clip 只有姿势;时间点与 `motion.stage*` token 对应。
+
 记法:`骨骼: 0% → 50% → 100%`(loop)或带百分比的多段;缓动默认 ease-in-out;`mirror` 表示右/远侧 = 左/近侧取反。周期是 clip 数据(见 token 决议),×1 动画播完回调编排器。
 
 | 状态 | 视角 | 周期 | 轨道 | 特效 |
@@ -80,6 +82,9 @@ M40 7 C 59 7, 61 29, 60 48 C 59 63, 50 68, 40 68 C 30 68, 21 63, 20 48 C 19 29, 
 | **stretch**(柔韧原型) | front | 2.6s loop | spine.rot 0 → −16(40%)→ −16(60%)→ 0(顶点停 20%);head.rot 0 → 8 → 8 → 0;uarmR.rot 常量 −150(过头),farmR.rot −20;thighL.rot 常量 10,thighR −10(站宽) | aura rx17 |
 | **paused** | front | 3.0s loop | root.rot −5 → 5 → −5;整体 opacity .75 | 描边 amber,aura amber @25 |
 | **finish** ×1 | front | 1.1s | root.dy 0 → −16(27%)→ 0(55%)→ −6(70%)→ 0(85%);spine.scale (1,1) → (.94,1.08)(18%)→ (1.06,.94)(55%)→ (1,1)(73%);uarmL.rot 0 → 150(35%,easeOutBack)保持,uarmR mirror | burst ×2(第二个延迟 0.12s) |
+| **idle_stand**(今日面板台上) | front | 2.4s loop | 无 root.dy;spine.scale (1,1) → (.985,1.03) → (1,1) | aura rx17 |
+| **board** ×1(上台) | front | 0.52s | spine.scale 蓄力 (1.1,.88)(17%)→ 腾空 (.95,1.07)(30–65%)→ 触地 (1.12,.86)(78%)→ (.98,1.03)(92%)→ (1,1);uarmL.rot 0 → −8(17%)→ 36(35–65%)→ 16(80%)→ 0,uarmR mirror | 触地 burst(65% 起) |
+| **leave** ×1(下台) | front | 0.48s | spine.scale 蓄力 (1.12,.86)(19%)→ 腾空 (.94,1.08)(33–70%)→ (1,1)(83%);uarmL.rot 0 → −8(19%)→ 30(36%)→ 0(83%),uarmR mirror | aura rx17 |
 
 `run` 的膝弯和 `plank` 的 basePose 是新形象相对 #14a 多出来的两个表达手段(关节、IK),其余与 README §小人动作动画 的意图一致,只是数值按新比例重调。
 

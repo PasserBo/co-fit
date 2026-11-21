@@ -8,7 +8,8 @@ enum RoomSheetAction { leave, editInfo, invite, members, report, dissolve }
 
 /// 房间操作 sheet(#17a 定稿):
 /// 房主版 = 房名 + amber「房主」徽章 + 编辑房间信息 / 邀请好友 / 成员管理 /
-/// 举报 / 解散房间(红);成员版 = 房名 + 举报 / 「退出房间」红字行。
+/// 举报 / 解散房间(红);成员版 = 房名 + 房间成员(只读)/ 举报 /
+/// 「退出房间」红字行。
 /// 成员管理与举报为 UGC 合规必需项(App Store 指南 1.2)。
 /// 纯展示:选择动作后以 Navigator.pop(RoomSheetAction) 返回。
 class RoomActionsSheet extends StatelessWidget {
@@ -134,6 +135,19 @@ class RoomActionsSheet extends StatelessWidget {
                     Navigator.of(context).pop(RoomSheetAction.dissolve),
               ),
             ] else ...[
+              _ActionRow(
+                icon: Icons.group_outlined,
+                iconColor: colors.statusInfo,
+                iconBg: colors.typeFlexibilitySubtle,
+                title: '房间成员',
+                subtitle: '查看成员 · 在线状态',
+                showChevron: true,
+                onTap: () => Navigator.of(context).pop(RoomSheetAction.members),
+              ),
+              Divider(
+                height: CoFitDimens.borderWidthHairline,
+                color: colors.borderSubtle,
+              ),
               _ReportRow(),
               Divider(
                 height: CoFitDimens.borderWidthHairline,

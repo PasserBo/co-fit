@@ -23,17 +23,23 @@ abstract final class MotionClipLibrary {
     CoreStateClips.stretch,
     CoreStateClips.paused,
     CoreStateClips.finish,
+    CoreStateClips.idleStand,
+    CoreStateClips.board,
+    CoreStateClips.leave,
     ...ExerciseClips.all,
   ];
 
-  /// 可被卡片选用的动作(排除 idle/windup/paused/finish 这类状态 clip)。
+  /// 可被卡片选用的动作(排除 idle/windup/paused/finish/上台下台 这类状态 clip)。
   static List<MotionClip> get exercises => all
       .where(
         (c) =>
             c != CoreStateClips.idle &&
             c != CoreStateClips.windup &&
             c != CoreStateClips.paused &&
-            c != CoreStateClips.finish,
+            c != CoreStateClips.finish &&
+            c != CoreStateClips.idleStand &&
+            c != CoreStateClips.board &&
+            c != CoreStateClips.leave,
       )
       .toList(growable: false);
 
@@ -83,7 +89,10 @@ abstract final class MotionClipLibrary {
 
   static MotionClip resolve(AvatarMotion motion) {
     return switch (motion.state) {
-      AvatarMotionState.idle => CoreStateClips.idle,
+      AvatarMotionState.idle =>
+        motion.grounded ? CoreStateClips.idleStand : CoreStateClips.idle,
+      AvatarMotionState.board => CoreStateClips.board,
+      AvatarMotionState.leave => CoreStateClips.leave,
       AvatarMotionState.windup => CoreStateClips.windup,
       AvatarMotionState.paused => CoreStateClips.paused,
       AvatarMotionState.finish => CoreStateClips.finish,

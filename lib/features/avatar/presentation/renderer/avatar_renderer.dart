@@ -9,6 +9,10 @@ const double avatarFigureFraction = 0.82;
 double avatarViewboxHeight(double figureHeight) =>
     figureHeight / avatarFigureFraction;
 
+/// 脚底在视框内的纵向位置比例(豆豆:y89 / 100,spec §0)。
+/// 需要按脚底对齐小人的调用方(今日面板的台子)用它换算。
+const double avatarFeetFraction = 0.89;
+
 /// 小人外观(由主题层解析后注入,渲染实现不读主题):
 /// - 自己:body = gray-50 白,headRing = lime@90 常亮(#6b 定稿,豆豆上为蛋体描边);
 /// - 好友:body = 状态色 hue,无描边(#6b 定稿;P3 改为自定义身体色);

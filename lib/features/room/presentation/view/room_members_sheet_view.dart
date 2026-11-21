@@ -17,7 +17,8 @@ import '../widget/room_scene.dart';
 
 /// 成员管理 sheet(stub 协议:无定稿设计,功能优先;UGC 合规必需)。
 /// 成员列表 = Firestore `members`(memberIds)∪ presence 在线成员;
-/// 房主可「移出」非房主成员(二次确认);被移出者靠懒清理感知。
+/// 所有成员可查看(只读);仅房主可「移出」非房主成员(二次确认);
+/// 被移出者靠懒清理感知。
 class RoomMembersSheetView extends ConsumerStatefulWidget {
   const RoomMembersSheetView({
     required this.roomId,

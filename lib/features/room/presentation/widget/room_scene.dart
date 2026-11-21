@@ -31,19 +31,74 @@ List<RoomPresenceMember> withSelfPresent(
   ];
 }
 
+/// 在线 presence 与房间成员名单合并后的场景数据。
+typedef RoomRoster = ({
+  List<RoomPresenceMember> members,
+  Set<String> offlineUserIds,
+});
+
+/// 把 Firestore 成员名单([rosterIds],有序)与在线 [online] 合并:
+/// - 按名单顺序排列(锚点随人稳定,不因上下线跳位);同一 uid 多端在线只取一个;
+/// - 名单里不在线的成员补 idle 占位(`offline-<uid>`),昵称取 [nicknames];
+/// - 在线但不在名单里的(名单未加载 / 本地兜底的自己)追加在末尾。
+RoomRoster withOfflineMembers(
+  List<RoomPresenceMember> online, {
+  required List<String> rosterIds,
+  Map<String, String?> nicknames = const {},
+}) {
+  final onlineByUid = <String, RoomPresenceMember>{};
+  for (final member in online) {
+    onlineByUid.putIfAbsent(member.userId, () => member);
+  }
+  final members = <RoomPresenceMember>[];
+  final offline = <String>{};
+  final seen = <String>{};
+  for (final uid in rosterIds) {
+    if (!seen.add(uid)) {
+      continue;
+    }
+    final present = onlineByUid[uid];
+    if (present != null) {
+      members.add(present);
+    } else {
+      offline.add(uid);
+      members.add(
+        RoomPresenceMember(
+          clientId: 'offline-$uid',
+          userId: uid,
+          nickname: nicknames[uid],
+        ),
+      );
+    }
+  }
+  for (final member in onlineByUid.values) {
+    if (seen.add(member.userId)) {
+      members.add(member);
+    }
+  }
+  return (members: members, offlineUserIds: offline);
+}
+
 /// 漂浮气泡空间(#6b):好友小人散布在场景锚点上,自己固定在中下方。
-/// 纯展示:presence 列表与动画渲染器由外部注入。
+/// 离线成员([offlineUserIds])以变暗的待机小人留在原锚点。
+/// 纯展示:成员列表与动画渲染器由外部注入。
 class RoomScene extends StatelessWidget {
   const RoomScene({
     required this.members,
     required this.selfUserId,
     required this.renderer,
+    this.offlineUserIds = const {},
+    this.showSelf = true,
     super.key,
   });
 
   final List<RoomPresenceMember> members;
   final String selfUserId;
   final AvatarRenderer renderer;
+  final Set<String> offlineUserIds;
+
+  /// false = 不画自己(房间主界面把自己的小人放在独立一层,见 add-home-sheet)。
+  final bool showSelf;
 
   /// 好友锚点(FractionalOffset,取自 #6b/#t9 mock 的小人位置);
   /// 超出锚点数量的成员从头复用并轻微偏移。
@@ -58,7 +113,8 @@ class RoomScene extends StatelessWidget {
     FractionalOffset(0.55, 0.74),
   ];
 
-  static const _selfAnchor = FractionalOffset(0.5, 0.55);
+  /// 自己在场景中的漂浮位置(房间主界面的独立小人层沿用它)。
+  static const selfAnchor = FractionalOffset(0.5, 0.55);
 
   /// 优先 presence 昵称(G5 已接线 2026-08-10);无昵称回退 uid 前 6 位。
   static String displayName(RoomPresenceMember member) {
@@ -70,7 +126,7 @@ class RoomScene extends StatelessWidget {
     return id.length <= 6 ? id : id.substring(0, 6);
   }
 
-  String? _chipText(RoomPresenceMember member) {
+  static String? chipTextOf(RoomPresenceMember member) {
     final status = member.activityStatus;
     final name = status.templateName ?? status.actionKey;
     if (name == null) {
@@ -85,7 +141,7 @@ class RoomScene extends StatelessWidget {
   }
 
   /// 运动中的动作类型:actionKey = 卡片 rawType,经 fromRaw 归类。
-  ActionType? _actionType(RoomPresenceMember member) {
+  static ActionType? actionTypeOf(RoomPresenceMember member) {
     final key = member.activityStatus.actionKey;
     return key == null ? null : ActionType.fromRaw(key);
   }
@@ -97,8 +153,9 @@ class RoomScene extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final friends =
-        members.where((m) => m.userId != selfUserId).toList(growable: false);
+    final friends = members
+        .where((m) => m.userId != selfUserId)
+        .toList(growable: false);
     RoomPresenceMember? self;
     for (final member in members) {
       if (member.userId == selfUserId) {
@@ -115,27 +172,36 @@ class RoomScene extends StatelessWidget {
             for (var i = 0; i < friends.length; i++)
               Align(
                 alignment: _shiftedAnchor(i),
-                child: AvatarBubble(
-                  key: ValueKey(friends[i].clientId),
-                  name: displayName(friends[i]),
-                  state: friends[i].activityStatus.activityState,
-                  actionType: _actionType(friends[i]),
-                  motionId: friends[i].activityStatus.motionId,
-                  chipText: _chipText(friends[i]),
-                  renderer: renderer,
-                  phaseSeed: phaseSeedOf(friends[i].userId),
-                ),
+                child: offlineUserIds.contains(friends[i].userId)
+                    ? AvatarBubble(
+                        key: ValueKey(friends[i].clientId),
+                        name: displayName(friends[i]),
+                        state: UserActivityState.idle,
+                        offline: true,
+                        renderer: renderer,
+                        phaseSeed: phaseSeedOf(friends[i].userId),
+                      )
+                    : AvatarBubble(
+                        key: ValueKey(friends[i].clientId),
+                        name: displayName(friends[i]),
+                        state: friends[i].activityStatus.activityState,
+                        actionType: actionTypeOf(friends[i]),
+                        motionId: friends[i].activityStatus.motionId,
+                        chipText: chipTextOf(friends[i]),
+                        renderer: renderer,
+                        phaseSeed: phaseSeedOf(friends[i].userId),
+                      ),
               ),
-            if (self != null)
+            if (showSelf && self != null)
               Align(
-                alignment: _selfAnchor,
+                alignment: selfAnchor,
                 child: AvatarBubble(
                   key: const ValueKey('self'),
                   name: '你',
                   state: self.activityStatus.activityState,
-                  actionType: _actionType(self),
+                  actionType: actionTypeOf(self),
                   motionId: self.activityStatus.motionId,
-                  chipText: _chipText(self),
+                  chipText: chipTextOf(self),
                   isSelf: true,
                   renderer: renderer,
                   phaseSeed: phaseSeedOf(self.userId),

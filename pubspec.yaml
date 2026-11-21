@@ -52,6 +52,12 @@ dependencies:
   url_launcher: ^6.3.3
   # 小人骨架的世界矩阵(Flutter 自身依赖,直接引用需显式声明)
   vector_math: ^2.2.0
+  a2ui_flutter: ^0.4.0
+  a2ui_core: ^0.8.0
+  a2ui_agent: ^0.4.0
+  firebase_ai: ^4.0.0
+  path_provider: ^2.1.6
+  flutter_markdown_plus: ^1.0.12
 
 dev_dependencies:
   flutter_test:

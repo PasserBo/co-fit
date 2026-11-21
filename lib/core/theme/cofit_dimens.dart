@@ -70,6 +70,13 @@ abstract class CoFitDimens {
   static const sizeLoginFanCardWidth = 30.0;
   static const sizeLoginFanCardHeight = 42.0;
 
+  /// 今日面板(add-home-sheet):台上小人脚底高出面板上沿的距离 / 把手横条宽
+  static const sizeStageFootInset = 6.0;
+  static const sizeSheetGrabberWidth = 36.0;
+
+  /// 面板展开时手牌下沉的距离
+  static const sizeFanSink = 48.0;
+
   // blur.*
   static const blurOverlay = 8.0;
   static const blurGlow = 10.0;
@@ -115,6 +122,29 @@ abstract class CoFitMotion {
   /// 启动 splash:入场(小人+字标淡入上浮)/ 与首页交叉淡出
   static const splashReveal = Duration(milliseconds: 600);
   static const splashFade = Duration(milliseconds: 320);
+
+  /// 今日面板(台子)升起/降下到位时长(add-home-sheet design §8)
+  static const stageRise = Duration(milliseconds: 320);
+
+  /// 小人上台/下台:蓄力、空中、落地回弹
+  static const stageCrouch = Duration(milliseconds: 90);
+  static const stageHopBoard = Duration(milliseconds: 250);
+  static const stageHopLeave = Duration(milliseconds: 310);
+  static const stageLand = Duration(milliseconds: 180);
+
+  /// 上台/下台 ×1 clip 总时长(= 蓄力 + 空中 + 落地/落定)
+  static const avatarBoard = Duration(milliseconds: 520);
+  static const avatarLeave = Duration(milliseconds: 480);
+
+  /// 面板模块依次出现的间隔 / 单个模块淡入时长
+  static const sheetModuleStagger = Duration(milliseconds: 50);
+  static const sheetModuleReveal = Duration(milliseconds: 200);
+
+  /// 完成庆祝时模块节拍间隔
+  static const celebrateBeatStagger = Duration(milliseconds: 120);
+
+  /// 回到前台后自动展开今日面板前的停顿
+  static const stageAutoExpandDelay = Duration(milliseconds: 200);
 }
 
 /// decor.* — 装饰性绘制常量
@@ -146,6 +176,31 @@ abstract class CoFitDecor {
 
   /// 小屏 375 品牌区小人缩放(#19a 附注)
   static const brandCompactScale = 0.8;
+
+  /// 小人上台/下台弧线高出直线的距离、台上放大倍率、落地时台面下沉
+  static const stageHopArc = 16.0;
+  static const stageFigureScale = 1.15;
+  static const stageLandDip = 3.0;
+
+  /// 拖动把手时面板展开程度低于/高于此值,小人下台/回到台上(回差避免来回跳)
+  static const stageDragLeave = 0.35;
+  static const stageDragBoard = 0.6;
+
+  /// 松手时按甩动方向判定展开/收起的速度阈值(px/s)
+  static const stageFlingVelocity = 700.0;
+
+  /// 面板展开程度超过此值模块开始出现 / 面板高度上限占屏幕高度的比例
+  static const sheetModuleRevealAt = 0.7;
+  static const sheetMaxHeightFraction = 0.45;
+
+  /// 面板展开程度到此值时手牌完全淡出
+  static const fanSinkFadeBy = 0.5;
+
+  /// 起跳距离达到此值时用完整弧高,不足时等比缩小(px)
+  static const stageHopArcFullDistance = 80.0;
+
+  /// 完成 ×1 clip 第一次落地的时间点(占 avatarFinish 的比例);庆祝节拍与触感对齐它
+  static const finishFirstLanding = 0.55;
 }
 
 /// typography.fontWeight.* — 字重 token(字体族见 CoFitTheme)

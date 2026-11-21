@@ -3,14 +3,12 @@ import 'package:cofit/features/room/presentation/widget/room_actions_sheet.dart'
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-Future<void> _pump(
-  WidgetTester tester, {
-  required bool isOwner,
-}) {
+Future<void> _pump(WidgetTester tester, {required bool isOwner}) {
   return tester.pumpWidget(
     MaterialApp(
-      theme: ThemeData(brightness: Brightness.dark)
-          .copyWith(extensions: [CoFitColors.dark]),
+      theme: ThemeData(
+        brightness: Brightness.dark,
+      ).copyWith(extensions: [CoFitColors.dark]),
       home: Scaffold(
         body: RoomActionsSheet(roomName: '考研自习室', isOwner: isOwner),
       ),
@@ -19,10 +17,13 @@ Future<void> _pump(
 }
 
 void main() {
-  testWidgets('member sees report + leave only', (tester) async {
+  testWidgets('member sees members (read-only) + report + leave', (
+    tester,
+  ) async {
     await _pump(tester, isOwner: false);
 
     expect(find.text('考研自习室'), findsOneWidget);
+    expect(find.text('房间成员'), findsOneWidget);
     expect(find.text('举报'), findsOneWidget);
     expect(find.text('退出房间'), findsOneWidget);
     expect(find.text('解散房间'), findsNothing);
@@ -30,8 +31,9 @@ void main() {
     expect(find.text('成员管理'), findsNothing);
   });
 
-  testWidgets('owner sees edit/invite/dissolve and badge, no leave',
-      (tester) async {
+  testWidgets('owner sees edit/invite/dissolve and badge, no leave', (
+    tester,
+  ) async {
     await _pump(tester, isOwner: true);
 
     expect(find.text('房主'), findsOneWidget);
@@ -52,8 +54,9 @@ void main() {
       RoomSheetAction? result;
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(brightness: Brightness.dark)
-              .copyWith(extensions: [CoFitColors.dark]),
+          theme: ThemeData(
+            brightness: Brightness.dark,
+          ).copyWith(extensions: [CoFitColors.dark]),
           home: Builder(
             builder: (context) => Scaffold(
               body: Center(
@@ -61,10 +64,8 @@ void main() {
                   onPressed: () async {
                     result = await showModalBottomSheet<RoomSheetAction>(
                       context: context,
-                      builder: (_) => RoomActionsSheet(
-                        roomName: '考研自习室',
-                        isOwner: isOwner,
-                      ),
+                      builder: (_) =>
+                          RoomActionsSheet(roomName: '考研自习室', isOwner: isOwner),
                     );
                   },
                   child: const Text('open'),
@@ -84,6 +85,10 @@ void main() {
     expect(
       await open(tester, isOwner: false, rowText: '退出房间'),
       RoomSheetAction.leave,
+    );
+    expect(
+      await open(tester, isOwner: false, rowText: '房间成员'),
+      RoomSheetAction.members,
     );
     expect(
       await open(tester, isOwner: true, rowText: '解散房间'),

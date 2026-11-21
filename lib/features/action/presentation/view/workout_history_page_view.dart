@@ -4,6 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/navigation/app_shell_index_provider.dart';
 import '../../../../core/theme/cofit_colors.dart';
 import '../../../../core/theme/cofit_dimens.dart';
+import '../../../ai_coach/presentation/view/ai_coach_page_view.dart';
+import '../../../ai_coach/presentation/widget/coach_beta_badge.dart';
+import '../../../ai_coach/provider/ai_coach_providers.dart';
 import '../../../avatar/presentation/idle_avatar_figure.dart';
 import '../../provider/action_session_history_providers.dart';
 import '../widget/workout_history_body.dart';
@@ -17,9 +20,27 @@ class WorkoutHistoryPageView extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = Theme.of(context).extension<CoFitColors>()!;
     final recordsAsync = ref.watch(recentSessionsProvider);
+    final showCoach = ref.watch(aiCoachEntryVisibleProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('运动历史')),
+      appBar: AppBar(
+        title: const Text('运动历史'),
+        actions: [
+          if (showCoach)
+            TextButton(
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const AiCoachPageView(),
+                ),
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                spacing: CoFitDimens.spacingXs,
+                children: [Text('AI 教练'), CoachBetaBadge()],
+              ),
+            ),
+        ],
+      ),
       body: SafeArea(
         child: recordsAsync.when(
           data: (records) => records.isEmpty
@@ -38,10 +59,9 @@ class WorkoutHistoryPageView extends ConsumerWidget {
               children: [
                 Text(
                   '运动记录加载失败',
-                  style: Theme.of(context)
-                      .textTheme
-                      .bodySmall
-                      ?.copyWith(color: colors.textTertiary),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(color: colors.textTertiary),
                 ),
                 OutlinedButton(
                   onPressed: () => ref.invalidate(recentSessionsProvider),
@@ -80,8 +100,7 @@ class _EmptyHistory extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           spacing: CoFitDimens.spacingLg,
           children: [
-            const IdleAvatarFigure(
-                figureHeight: CoFitDimens.sizeFigureHero),
+            const IdleAvatarFigure(figureHeight: CoFitDimens.sizeFigureHero),
             Column(
               spacing: CoFitDimens.spacingXs,
               children: [
@@ -100,10 +119,7 @@ class _EmptyHistory extends StatelessWidget {
                 ),
               ],
             ),
-            FilledButton(
-              onPressed: onGoToRoom,
-              child: const Text('去房间'),
-            ),
+            FilledButton(onPressed: onGoToRoom, child: const Text('去房间')),
           ],
         ),
       ),

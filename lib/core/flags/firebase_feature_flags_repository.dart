@@ -29,6 +29,9 @@ class FirebaseFeatureFlagsRepository implements FeatureFlagsRepository {
       // 离线 / 配额 / 首次无模板:沿用默认值或上次激活值
       debugPrint('RemoteConfig fetch failed, using defaults: $error');
     }
-    return FeatureFlags.fromReader(_remoteConfig.getBool);
+    return FeatureFlags.fromReader(
+      _remoteConfig.getBool,
+      readString: _remoteConfig.getString,
+    );
   }
 }

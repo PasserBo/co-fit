@@ -33,6 +33,83 @@ abstract final class CoreStateClips {
     },
   );
 
+  /// 站立待机(今日面板台上):脚踩台面,无上下浮动,只保留蛋体呼吸。
+  /// 与漂浮待机同周期,切换时呼吸节奏不变。
+  static const idleStand = MotionClip(
+    id: 'idle_stand',
+    facing: Facing.front,
+    period: CoFitMotion.bobPeriod,
+    tracks: {
+      Bone.spine: Track.keys([
+        Keyframe(0, _zero),
+        Keyframe(0.5, BoneTransform(scaleX: 0.985, scaleY: 1.03)),
+        Keyframe(1, _zero),
+      ]),
+    },
+  );
+
+  /// 上台 ×1(avatarBoard = 蓄力 90 + 腾空 250 + 落地 180):
+  /// 0–17% 下蹲蓄力,17–65% 腾空拉长、双臂外张,65% 触地压扁 + burst,之后回弹。
+  /// 位移由房间页的位置层负责,这里只有姿势;时间点与 stage* token 对应。
+  static const board = MotionClip(
+    id: 'board',
+    facing: Facing.front,
+    period: CoFitMotion.avatarBoard,
+    loop: false,
+    tracks: {
+      Bone.spine: Track.keys([
+        Keyframe(0, _zero, curve: Curves.easeOut),
+        Keyframe(0.17, BoneTransform(scaleX: 1.1, scaleY: 0.88)),
+        Keyframe(0.3, BoneTransform(scaleX: 0.95, scaleY: 1.07)),
+        Keyframe(
+          0.65,
+          BoneTransform(scaleX: 0.95, scaleY: 1.07),
+          curve: Curves.easeOut,
+        ),
+        Keyframe(0.78, BoneTransform(scaleX: 1.12, scaleY: 0.86)),
+        Keyframe(0.92, BoneTransform(scaleX: 0.98, scaleY: 1.03)),
+        Keyframe(1, _zero),
+      ]),
+      Bone.uarmL: Track.keys([
+        Keyframe(0, _zero),
+        Keyframe(0.17, BoneTransform(rotDeg: -8), curve: Curves.easeOut),
+        Keyframe(0.35, BoneTransform(rotDeg: 36)),
+        Keyframe(0.65, BoneTransform(rotDeg: 36), curve: Curves.easeOut),
+        Keyframe(0.8, BoneTransform(rotDeg: 16)),
+        Keyframe(1, _zero),
+      ]),
+    },
+    mirrors: [Mirror(Bone.uarmR, from: Bone.uarmL)],
+    effects: [ClipEffect.aura(), ClipEffect.burst(start: 0.65, speed: 2.8)],
+  );
+
+  /// 下台 ×1(avatarLeave = 蓄力 90 + 腾空 310 + 落定 80):
+  /// 0–19% 下蹲蓄力,19–83% 腾空拉长,末尾回到漂浮待机的起始姿势。
+  static const leave = MotionClip(
+    id: 'leave',
+    facing: Facing.front,
+    period: CoFitMotion.avatarLeave,
+    loop: false,
+    tracks: {
+      Bone.spine: Track.keys([
+        Keyframe(0, _zero, curve: Curves.easeOut),
+        Keyframe(0.19, BoneTransform(scaleX: 1.12, scaleY: 0.86)),
+        Keyframe(0.33, BoneTransform(scaleX: 0.94, scaleY: 1.08)),
+        Keyframe(0.7, BoneTransform(scaleX: 0.94, scaleY: 1.08)),
+        Keyframe(0.83, _zero),
+        Keyframe(1, _zero),
+      ]),
+      Bone.uarmL: Track.keys([
+        Keyframe(0, _zero),
+        Keyframe(0.19, BoneTransform(rotDeg: -8), curve: Curves.easeOut),
+        Keyframe(0.36, BoneTransform(rotDeg: 30)),
+        Keyframe(0.83, _zero),
+        Keyframe(1, _zero),
+      ]),
+    },
+    mirrors: [Mirror(Bone.uarmR, from: Bone.uarmL)],
+  );
+
   /// 起手 ×1:整体 1→1.16→1 回弹(自脚底放大),双臂外张 40°,burst。
   static const windup = MotionClip(
     id: 'windup',

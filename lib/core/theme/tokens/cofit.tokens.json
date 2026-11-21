@@ -701,6 +701,27 @@
         "unit": "px"
       },
       "$description": "登录页斜插装饰卡高 (#19a)"
+    },
+    "stageFootInset": {
+      "$value": {
+        "value": 6,
+        "unit": "px"
+      },
+      "$description": "台上小人脚底高出面板上沿的距离 (add-home-sheet design §8, seed v1)"
+    },
+    "sheetGrabberWidth": {
+      "$value": {
+        "value": 36,
+        "unit": "px"
+      },
+      "$description": "面板把手横条宽 (add-home-sheet design §8, seed v1)"
+    },
+    "fanSink": {
+      "$value": {
+        "value": 48,
+        "unit": "px"
+      },
+      "$description": "面板展开时手牌下沉的距离 (add-home-sheet, seed v1)"
     }
   },
   "decor": {
@@ -761,6 +782,50 @@
     "fanFlingVelocity": {
       "$value": 400,
       "$description": "扇形聚焦态横向甩动切牌的速度阈值 px/s(seed v1)"
+    },
+    "stageHopArc": {
+      "$value": 16,
+      "$description": "小人上台/下台弧线高出直线的距离 px (add-home-sheet design §8, seed v1)"
+    },
+    "stageFigureScale": {
+      "$value": 1.15,
+      "$description": "台上小人放大倍率(以脚底为原点) (add-home-sheet design §8, seed v1)"
+    },
+    "stageLandDip": {
+      "$value": 3,
+      "$description": "小人落地时台面下沉 px (add-home-sheet design §8, seed v1)"
+    },
+    "stageDragLeave": {
+      "$value": 0.35,
+      "$description": "拖动把手时面板展开程度低于此值小人下台 (add-home-sheet design §8, seed v1)"
+    },
+    "stageDragBoard": {
+      "$value": 0.6,
+      "$description": "拖动把手时面板展开程度高于此值小人回到台上 (add-home-sheet design §8, seed v1)"
+    },
+    "stageFlingVelocity": {
+      "$value": 700,
+      "$description": "松手时按甩动方向判定展开/收起的速度阈值 px/s (add-home-sheet design §8, seed v1)"
+    },
+    "sheetModuleRevealAt": {
+      "$value": 0.7,
+      "$description": "面板展开程度超过此值模块开始出现 (add-home-sheet design §8, seed v1)"
+    },
+    "sheetMaxHeightFraction": {
+      "$value": 0.45,
+      "$description": "面板高度上限占屏幕高度的比例 (add-home-sheet design §8, seed v1)"
+    },
+    "fanSinkFadeBy": {
+      "$value": 0.5,
+      "$description": "面板展开程度到此值时手牌完全淡出 (add-home-sheet, seed v1)"
+    },
+    "stageHopArcFullDistance": {
+      "$value": 80,
+      "$description": "起跳距离达到此值时用完整弧高,不足时等比缩小 px (add-home-sheet, seed v1)"
+    },
+    "finishFirstLanding": {
+      "$value": 0.55,
+      "$description": "完成 ×1 clip 第一次落地的时间点(占 avatarFinish 的比例),庆祝节拍与触感对齐它 (add-home-sheet, 与 finish clip 数据一致)"
     }
   },
   "blur": {
@@ -935,6 +1000,94 @@
         "unit": "ms"
       },
       "$description": "splash ↔ 首页交叉淡出(seed v1)"
+    },
+    "stageRise": {
+      "$type": "duration",
+      "$value": {
+        "value": 320,
+        "unit": "ms"
+      },
+      "$description": "今日面板(台子)升起/降下到位时长 (add-home-sheet design §8, seed v1)"
+    },
+    "stageCrouch": {
+      "$type": "duration",
+      "$value": {
+        "value": 90,
+        "unit": "ms"
+      },
+      "$description": "小人上台/下台前蓄力 (add-home-sheet design §8, seed v1)"
+    },
+    "stageHopBoard": {
+      "$type": "duration",
+      "$value": {
+        "value": 250,
+        "unit": "ms"
+      },
+      "$description": "小人上台的空中时间 (add-home-sheet design §8, seed v1)"
+    },
+    "stageHopLeave": {
+      "$type": "duration",
+      "$value": {
+        "value": 310,
+        "unit": "ms"
+      },
+      "$description": "小人下台的空中时间 (add-home-sheet design §8, seed v1)"
+    },
+    "stageLand": {
+      "$type": "duration",
+      "$value": {
+        "value": 180,
+        "unit": "ms"
+      },
+      "$description": "小人落到台上压扁回弹 (add-home-sheet design §8, seed v1)"
+    },
+    "avatarBoard": {
+      "$type": "duration",
+      "$value": {
+        "value": 520,
+        "unit": "ms"
+      },
+      "$description": "小人上台 ×1 clip 总时长 = stageCrouch + stageHopBoard + stageLand (add-home-sheet design §8, seed v1)"
+    },
+    "avatarLeave": {
+      "$type": "duration",
+      "$value": {
+        "value": 480,
+        "unit": "ms"
+      },
+      "$description": "小人下台 ×1 clip 总时长 = stageCrouch + stageHopLeave + 落定 80 (add-home-sheet design §8, seed v1)"
+    },
+    "sheetModuleStagger": {
+      "$type": "duration",
+      "$value": {
+        "value": 50,
+        "unit": "ms"
+      },
+      "$description": "面板模块依次出现的间隔 (add-home-sheet design §8, seed v1)"
+    },
+    "sheetModuleReveal": {
+      "$type": "duration",
+      "$value": {
+        "value": 200,
+        "unit": "ms"
+      },
+      "$description": "面板单个模块淡入上移时长 (add-home-sheet design §8, seed v1)"
+    },
+    "celebrateBeatStagger": {
+      "$type": "duration",
+      "$value": {
+        "value": 120,
+        "unit": "ms"
+      },
+      "$description": "完成庆祝时模块节拍间隔 (add-home-sheet design §8, seed v1)"
+    },
+    "stageAutoExpandDelay": {
+      "$type": "duration",
+      "$value": {
+        "value": 200,
+        "unit": "ms"
+      },
+      "$description": "回到前台后自动展开今日面板前的停顿(让用户看到面板是怎么来的)(add-home-sheet design §7, seed v1)"
     }
   }
 }

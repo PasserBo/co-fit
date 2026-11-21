@@ -6,6 +6,14 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
+# 规则(CLAUDE.md):用于提交的 build 必须从 main 打包——在 main 上、工作区干净、
+# 且与 origin/main 一致。否则线上版本会包含 main 没有的代码(1.0.0 (4) 的教训)。
+branch="$(git rev-parse --abbrev-ref HEAD)"
+[[ "$branch" == "main" ]] || { echo "当前分支是 $branch。提交用的 build 必须从 main 打包:先把分支合进 main。"; exit 1; }
+[[ -z "$(git status --porcelain)" ]] || { echo "工作区有未提交的改动。请先提交或清理,再从 main 打包。"; exit 1; }
+git fetch --quiet origin main || { echo "无法连接远端确认 origin/main,已停止。"; exit 1; }
+[[ "$(git rev-parse HEAD)" == "$(git rev-parse origin/main)" ]] || { echo "本地 main 与 origin/main 不一致。请先 push(或 pull)后再打包。"; exit 1; }
+
 [[ -f .env ]] || { echo "缺少 .env(含 ABLY_API_KEY),见 CLAUDE.md"; exit 1; }
 
 extra=()

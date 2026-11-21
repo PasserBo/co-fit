@@ -27,6 +27,7 @@ fvm flutter analyze
 ### Git / CI
 
 - 远端:`git@github.com-personal:PasserBo/co-fit.git`(SSH alias `github.com-personal`),主分支 `main`,git user `PasserBo`。
+- ⚠️ **用于提交的 build(TestFlight / App Store)必须从 `main` 打包**:先把要发的分支合进 `main` 并 push,再在 `main` 上、工作区干净、与 `origin/main` 一致的状态下运行 `scripts/build_ipa.sh`(脚本会检查,不满足直接退出)。2026-11-21 定:1.0.0 (4) 是从未合并的分支 `claude/community-basics-ab39ed` 打的包,导致线上版本有「发现公开房间」而 `main` 没有。
 - **firestore.rules 的部署走 CI,不要本地 `firebase deploy`**:
   [.github/workflows/deploy-rules.yml](.github/workflows/deploy-rules.yml) 在 push 到 `main` 且 `firestore.rules` 有改动时,用 service account 自动部署到 `cofit-lmdyd`。改完 rules → commit + push → `gh run list --workflow=deploy-rules.yml` 确认 success 即可。
 - 部署 rules 前把 diff 贴给用户确认(历史约定)。
@@ -46,6 +47,8 @@ fvm flutter analyze
 - ⚠️ **Ably presence**:`watchPresence` 必须先 `subscribe()` 再 `get()`;presence update 是整包替换,永远带 `userId`;自己的运动状态经 `AblyRuntimeNotifier.reassertPresence()` 广播到**所有**已订阅房间,不要只写当前房间。
 - Ably key 走 `--dart-define`(`ABLY_API_KEY` / `ABLY_CLIENT_ID_PREFIX`);仓库根 `.env`(gitignored,含真实 key)配合 `.vscode/launch.json` 的 `--dart-define-from-file` 使用。**不要把 key 写进任何被提交的文件。**
 - **功能开关走 Firebase Remote Config**(`lib/core/flags/`):`FeatureFlags` 的字段默认值 = 远端未配置时的行为;Google 登录由 `auth_google_enabled` 控制,**默认关**(2026-10-26 决议:代码保留不删)。要打开:console 新建同名布尔参数并发布。
+- **AI 教练 Beta**(change `add-ai-coach-beta`,2026-11-18):运动历史页入口,`beta_ai_coach_enabled` 默认关,**debug 构建始终可见**。模型走 **Firebase AI Logic**(`firebase_ai` **锁 4.x**——5.x 需 firebase_core 5 / Flutter 3.44),App 内无模型密钥;UI 由 A2UI(`a2ui_flutter`/`a2ui_core`/`a2ui_agent` 0.x,版本同时写在 `CoachChatController.packageVersions`)渲染。会话日志 JSONL 存 `Documents/ai_coach_logs/`,汇总 `fvm dart run tool/summarize_ai_coach_log.dart <log>`。⚠️ 运动记录会发给 Google:**开放给外部测试者前必须先同步隐私政策 / PrivacyInfo / ASC App Privacy 并启用 App Check**(tasks M3)。
+- **今日面板**(change `add-home-sheet`,2026-11-21,进行中):房间页下半部分的可收起面板,展开时自己的小人站在面板上沿;收起后点自己的小人重新展开。代码在 `lib/features/home_sheet/`(规则纯函数在 `domain/`、`usecase/`;`HomeStageController` 用一个展开程度驱动面板、手牌下沉、好友区域)。自己的小人不在 `RoomScene` 里,而在房间页的独立一层(`showSelf: false`),切换房间时不动。模块清单 / 顺序 / 自动展开规则走 Remote Config **字符串**参数 `home_sheet_layout`(JSON,形状见该 change 的 design.md §12;空串 = 内置默认,`modules: []` = 关闭面板)。debug 构建面板末尾有占位模块(带动画慢放开关)。
 - **法律文档**在 `docs/legal/`,随 main 推送由 GitSpec 工作流发布到 GitHub Pages;App 内地址只在 `lib/core/legal/legal_links.dart`(GitSpec slug 规则 `docs/legal/privacy.md` → `/co-fit/docs-legal-privacy`,改文件名必须同步改这里)。
 - 深链:自定义 scheme **`cofit://room/<roomId>?h=<shareLinkHash>`**(拼装/解析唯一事实源 `lib/features/invite/domain/invite_link_format.dart`;Info.plist 已注册 `cofit` 与 Google 回跳两条 scheme)。本期无 Universal Links。
 - **账号删除**(Apple 上架强制):`profile/usecase/delete_account_usecase.dart`。⚠️ 顺序不可调换——Firestore 清理必须在注销 Auth 用户**之前**,uid 失效后 rules 会拒绝一切写入、数据永久残留(已有单测锁住顺序)。Apple 账号会重新授权取新鲜 authorizationCode 用于 `revokeTokenWithAuthorizationCode`;邮箱账号无法静默重认证 → 抛 `ReauthenticationRequiredException`,UI 引导重登。
@@ -60,7 +63,7 @@ fvm flutter analyze
 - entity 用 `@freezed`;repository 接口在 domain,实现在 infrastructure。
 - 现状约定:repository 实现实际放各 feature 的 `data/`(历史沿用,不迁移);action 特性旧 usecase 在 `domain/` 下(遗留,不迁移),新 usecase 一律放 `usecase/`。
 
-已实现 feature:`room`(房间 CRUD/建房页/公开房间发现与搜索/presence/事件折叠/成员管理/举报/实时感知被移出与解散)、`auth`(Apple+Google+邮箱登录、bootstrap)、`profile`(资料/onboarding/账号删除)、`invite`(邀请深链)、`action`(动作卡模板/自建卡/牌组云端化/打卡历史/会话被杀恢复)、`avatar`(豆豆骨架引擎:Rig/MotionClip/PoseSampler,动作是数据不是代码,见 `docs/avatar_bean_spec.md`)。`social` 仍是空目录。
+已实现 feature:`room`(房间 CRUD/建房页/公开房间发现与搜索/presence/事件折叠/成员管理/举报/实时感知被移出与解散)、`auth`(Apple+Google+邮箱登录、bootstrap)、`profile`(资料/onboarding/账号删除)、`invite`(邀请深链)、`action`(动作卡模板/自建卡/牌组云端化/打卡历史/会话被杀恢复)、`avatar`(豆豆骨架引擎:Rig/MotionClip/PoseSampler,动作是数据不是代码,见 `docs/avatar_bean_spec.md`)、`ai_coach`(beta:A2UI 生成式 UI + Firebase AI Logic)、`home_sheet`(今日面板:台子 / 模块注册表 / 今日推荐,进行中)。`social` 仍是空目录。
 
 **架构总览(现状)与踩坑清单:[docs/project_overview.md](docs/project_overview.md);用户流程与页面完成度:[docs/flows_status.md](docs/flows_status.md)。** 产品提案 / 行为规格 / 任务看板走 `solo-spec` skill,根目录 [docs/spec/](docs/spec/SPEC_SYSTEM.md)(随 docs 一起发布到 GitHub Pages,**内容公开**);产品讨论出结论、开始/结束一个 change 时先更新那里。 跨 feature 纯 UI 组件放 `lib/core/widget/`(确认弹窗一律用 `showCoFitConfirmSheet`,不要再写原生 AlertDialog;AppBar 里的主按钮一律用 `AppBarFilledAction`,直接放 `FilledButton` 会撑坏工具栏导致返回键失灵)。
 

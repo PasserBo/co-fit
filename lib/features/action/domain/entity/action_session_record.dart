@@ -3,6 +3,8 @@
 // 本期只写 completed;'aborted' 等状态留作枚举扩展。
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import 'card_amount.dart';
+
 part 'action_session_record.freezed.dart';
 
 abstract class ActionSessionRecordStatus {
@@ -27,6 +29,11 @@ abstract class ActionSessionRecord with _$ActionSessionRecord {
 
     /// 做过哪个动作(P2,可选;rules 放行可选键)。
     String? motionId,
+
+    /// 完成那一刻卡上的强度标签与量的副本(add-card-prescription,可选)。
+    /// 之后卡被改或被删,记录仍然看得到当时做了什么。
+    String? intensityLabel,
+    @Default(<CardAmount>[]) List<CardAmount> amounts,
   }) = _ActionSessionRecord;
 
   Map<String, dynamic> toMap() {
@@ -42,8 +49,18 @@ abstract class ActionSessionRecord with _$ActionSessionRecord {
       'completedAt': completedAt,
       'status': status,
       if (motionId != null) 'motionId': motionId,
+      if (intensityLabel != null && intensityLabel!.isNotEmpty)
+        'intensityLabel': intensityLabel,
+      if (amounts.isNotEmpty)
+        'amounts': [for (final amount in amounts) amount.toMap()],
     };
   }
+
+  /// 「中等 · 15 个 · 5 kg」;都没有返回空串。
+  String get prescriptionText => [
+    if (intensityLabel != null && intensityLabel!.isNotEmpty) intensityLabel!,
+    for (final amount in amounts) amount.text,
+  ].join(' · ');
 
   factory ActionSessionRecord.fromMap(Map<String, dynamic> source) {
     return ActionSessionRecord(
@@ -61,6 +78,11 @@ abstract class ActionSessionRecord with _$ActionSessionRecord {
       motionId: (source['motionId']?.toString().trim().isEmpty ?? true)
           ? null
           : source['motionId'].toString().trim(),
+      intensityLabel: source['intensityLabel'] is String &&
+              (source['intensityLabel'] as String).isNotEmpty
+          ? source['intensityLabel'] as String
+          : null,
+      amounts: CardAmount.listFrom(source['amounts']),
     );
   }
 

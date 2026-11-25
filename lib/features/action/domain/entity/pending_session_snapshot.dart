@@ -1,5 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import 'card_amount.dart';
+
 part 'pending_session_snapshot.freezed.dart';
 
 /// 本机正在进行的运动会话快照(本地持久化,用于 app 被杀后恢复)。
@@ -18,6 +20,8 @@ abstract class PendingSessionSnapshot with _$PendingSessionSnapshot {
     required int durationSec,
     required DateTime startedAt,
     String? motionId,
+    String? intensityLabel,
+    @Default(<CardAmount>[]) List<CardAmount> amounts,
   }) = _PendingSessionSnapshot;
 
   DateTime get endsAt => startedAt.add(Duration(seconds: durationSec));
@@ -39,6 +43,9 @@ abstract class PendingSessionSnapshot with _$PendingSessionSnapshot {
     'durationSec': durationSec,
     'startedAt': startedAt.toUtc().toIso8601String(),
     if (motionId != null) 'motionId': motionId,
+    if (intensityLabel != null) 'intensityLabel': intensityLabel,
+    if (amounts.isNotEmpty)
+      'amounts': [for (final amount in amounts) amount.toMap()],
   };
 
   static String? _optional(Object? value) {
@@ -66,6 +73,8 @@ abstract class PendingSessionSnapshot with _$PendingSessionSnapshot {
       durationSec: durationSec,
       startedAt: startedAt.toLocal(),
       motionId: _optional(source['motionId']),
+      intensityLabel: _optional(source['intensityLabel']),
+      amounts: CardAmount.listFrom(source['amounts']),
     );
   }
 }

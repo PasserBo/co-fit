@@ -384,9 +384,17 @@ service cloud.firestore {
           'completedAt',
           'status',
           'motionId',
+          'intensityLabel',
+          'amounts',
         ]) &&
         // motionId(P2)可选;给了必须是非空字符串
-        (!data.keys().hasAny(['motionId']) || isNonEmptyString(data.motionId));
+        (!data.keys().hasAny(['motionId']) || isNonEmptyString(data.motionId)) &&
+        // 完成时卡上的强度标签与量的副本(add-card-prescription),都可选
+        (!data.keys().hasAny(['intensityLabel']) ||
+          (isNonEmptyString(data.intensityLabel) &&
+            data.intensityLabel.size() <= 32)) &&
+        (!data.keys().hasAny(['amounts']) ||
+          (data.amounts is list && data.amounts.size() <= 8));
     }
 
     match /users/{userId}/sessions/{sessionId} {
@@ -407,6 +415,56 @@ service cloud.firestore {
 
       // 只追加日志:不可改;但账号删除时本人需能清空。
       allow update: if false;
+      allow delete: if isSignedIn() && request.auth.uid == userId;
+    }
+
+    // users/{uid}/session_memos 运动 memo(change add-workout-memo):仅本人读写。
+    // 与 sessions 分开:sessions 只追加不可改,memo 可补写、修改、删除。
+    // 文档 id = 运动记录的 sessionId。
+    function hasValidMemoShape(data) {
+      return data.keys().hasAll([
+          'sessionId',
+          'templateId',
+          'completedAt',
+          'updatedAt',
+        ]) &&
+        data.keys().hasOnly([
+          'sessionId',
+          'templateId',
+          'completedAt',
+          'updatedAt',
+          'feel',
+          'note',
+        ]);
+    }
+
+    function hasValidMemoValues(data, sessionId) {
+      return data.sessionId == sessionId &&
+        isNonEmptyString(data.templateId) &&
+        data.completedAt is timestamp &&
+        data.updatedAt is timestamp &&
+        // 两个内容字段都可选;给了必须合法
+        (!data.keys().hasAny(['feel']) ||
+          (isNonEmptyString(data.feel) && data.feel.size() <= 32)) &&
+        (!data.keys().hasAny(['note']) ||
+          (isNonEmptyString(data.note) && data.note.size() <= 500));
+    }
+
+    match /users/{userId}/session_memos/{sessionId} {
+      allow read: if isSignedIn() && request.auth.uid == userId;
+
+      allow create: if isSignedIn() &&
+        request.auth.uid == userId &&
+        hasValidMemoShape(request.resource.data) &&
+        hasValidMemoValues(request.resource.data, sessionId);
+
+      allow update: if isSignedIn() &&
+        request.auth.uid == userId &&
+        hasValidMemoShape(request.resource.data) &&
+        hasValidMemoValues(request.resource.data, sessionId) &&
+        request.resource.data.templateId == resource.data.templateId &&
+        request.resource.data.completedAt == resource.data.completedAt;
+
       allow delete: if isSignedIn() && request.auth.uid == userId;
     }
 

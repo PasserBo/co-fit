@@ -390,6 +390,13 @@
         "unit": "px"
       },
       "$description": "选中/焦点描边 (README)"
+    },
+    "progressRing": {
+      "$value": {
+        "value": 4,
+        "unit": "px"
+      },
+      "$description": "今日进度环线宽 (add-daily-card-goal design §8, seed v1)"
     }
   },
   "size": {
@@ -722,6 +729,13 @@
         "unit": "px"
       },
       "$description": "面板展开时手牌下沉的距离 (add-home-sheet, seed v1)"
+    },
+    "progressRing": {
+      "$value": {
+        "value": 44,
+        "unit": "px"
+      },
+      "$description": "今日进度环直径 (add-daily-card-goal design §8, seed v1)"
     }
   },
   "decor": {
@@ -826,6 +840,10 @@
     "finishFirstLanding": {
       "$value": 0.55,
       "$description": "完成 ×1 clip 第一次落地的时间点(占 avatarFinish 的比例),庆祝节拍与触感对齐它 (add-home-sheet, 与 finish clip 数据一致)"
+    },
+    "goalReachedPulseScale": {
+      "$value": 1.18,
+      "$description": "达成今日目标时进度环强调的放大倍数 (add-daily-card-goal design §8, seed v1)"
     }
   },
   "blur": {
@@ -1088,6 +1106,30 @@
         "unit": "ms"
       },
       "$description": "回到前台后自动展开今日面板前的停顿(让用户看到面板是怎么来的)(add-home-sheet design §7, seed v1)"
+    },
+    "progressRoll": {
+      "$type": "duration",
+      "$value": {
+        "value": 600,
+        "unit": "ms"
+      },
+      "$description": "今日进度的数字与进度环滚到新值 (add-daily-card-goal design §8, seed v1)"
+    },
+    "goalReachedPulse": {
+      "$type": "duration",
+      "$value": {
+        "value": 500,
+        "unit": "ms"
+      },
+      "$description": "达成今日目标时进度环强调一次 (add-daily-card-goal design §8, seed v1)"
+    },
+    "dailyProgressBeatTimeout": {
+      "$type": "duration",
+      "$value": {
+        "value": 2500,
+        "unit": "ms"
+      },
+      "$description": "今日进度等不到庆祝节拍时直接更新的等待上限 (add-daily-card-goal design §8, seed v1)"
     }
   }
 }

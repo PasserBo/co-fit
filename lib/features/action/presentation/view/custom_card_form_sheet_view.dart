@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/cofit_colors.dart';
 import '../../../../core/theme/cofit_dimens.dart';
+import '../../../../core/widget/cofit_confirm_sheet.dart';
+import '../../domain/entity/card_amount.dart';
 import '../../domain/entity/action_template_card.dart';
 import '../../domain/entity/action_type.dart';
 import '../../provider/custom_card_providers.dart';
@@ -66,8 +68,48 @@ class _CustomCardFormSheetViewState
   late String? _intensity = widget.editing?.intensityLabel.isNotEmpty == true
       ? widget.editing!.intensityLabel
       : null;
+  /// 卡上的量(可选、可多选):种类 key → 这一项。
+  late final Map<String, CardAmount> _amounts = {
+    for (final amount in widget.editing?.amounts ?? const <CardAmount>[])
+      amount.kind: amount,
+  };
   bool _isSubmitting = false;
   String? _errorMessage;
+
+  /// 按种类清单的顺序;清单里没有的(以后删掉的种类)排在后面,不丢。
+  List<CardAmount> get _amountList => [
+    for (final kind in CardAmountKind.all) ?_amounts[kind.key],
+    for (final amount in _amounts.values)
+      if (CardAmountKind.byKey(amount.kind) == null) amount,
+  ];
+
+  Map<String, dynamic> get _baseline =>
+      CardAmount.baseline(label: _intensity, amounts: _amountList);
+
+  /// 点一个种类:没选 → 输入数值;已选 → 去掉。
+  Future<void> _toggleAmount(CardAmountKind kind) async {
+    if (_amounts.containsKey(kind.key)) {
+      setState(() => _amounts.remove(kind.key));
+      return;
+    }
+    final typed = await showCoFitTextInputSheet(
+      context,
+      title: kind.label,
+      label: '${kind.label}(${kind.unit})',
+      confirmLabel: '确定',
+      maxLength: 7,
+      validator: (value) {
+        final parsed = num.tryParse(value);
+        return parsed == null || parsed <= 0 || parsed > CardAmount.maxValue
+            ? '请输入大于 0 的数字'
+            : null;
+      },
+    );
+    final parsed = typed == null ? null : num.tryParse(typed);
+    if (parsed != null && mounted) {
+      setState(() => _amounts[kind.key] = CardAmount.of(kind, parsed));
+    }
+  }
 
   @override
   void initState() {
@@ -142,8 +184,7 @@ class _CustomCardFormSheetViewState
               name: _trimmedName,
               rawType: _type.name,
               durationSec: _durationSec,
-              intensityBaseline:
-                  _intensity == null ? const {} : {'label': _intensity},
+              intensityBaseline: _baseline,
               motionId: _motionId,
             );
       } else {
@@ -152,8 +193,7 @@ class _CustomCardFormSheetViewState
               name: _trimmedName,
               rawType: _type.name,
               durationSec: _durationSec,
-              intensityBaseline:
-                  _intensity == null ? const {} : {'label': _intensity},
+              intensityBaseline: _baseline,
               motionId: _motionId,
             );
       }
@@ -206,6 +246,7 @@ class _CustomCardFormSheetViewState
                   type: _type,
                   durationSec: _durationSec,
                   intensityLabel: _intensity,
+                  amountsText: CardAmount.textOf(_amountList),
                 ),
               ),
               const SizedBox(height: CoFitDimens.spacingLg),
@@ -304,6 +345,23 @@ class _CustomCardFormSheetViewState
                                 () => _intensity =
                                     _intensity == label ? null : label,
                               ),
+                    ),
+                ],
+              ),
+              const SizedBox(height: CoFitDimens.spacingLg),
+              _FieldLabel('做多少(可选,可多选)'),
+              Wrap(
+                spacing: CoFitDimens.spacingSm,
+                runSpacing: CoFitDimens.spacingSm,
+                children: [
+                  for (final kind in CardAmountKind.all)
+                    _SelectChip(
+                      key: ValueKey('card_amount_${kind.key}'),
+                      label: _amounts[kind.key] == null
+                          ? kind.label
+                          : '${kind.label} ${_amounts[kind.key]!.text}',
+                      selected: _amounts.containsKey(kind.key),
+                      onTap: _isSubmitting ? null : () => _toggleAmount(kind),
                     ),
                 ],
               ),
@@ -481,6 +539,7 @@ class _SelectChip extends StatelessWidget {
     required this.label,
     required this.selected,
     this.onTap,
+    super.key,
   });
 
   final String label;

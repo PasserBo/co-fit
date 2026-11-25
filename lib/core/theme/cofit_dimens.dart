@@ -24,6 +24,9 @@ abstract class CoFitDimens {
   static const borderWidthHairline = 1.0;
   static const borderWidthFocus = 1.5;
 
+  /// 今日进度环线宽
+  static const borderWidthProgressRing = 4.0;
+
   // size.*
   static const sizeCardTypeBar = 4.0;
   static const sizeCardIconBlock = 26.0;
@@ -76,6 +79,9 @@ abstract class CoFitDimens {
 
   /// 面板展开时手牌下沉的距离
   static const sizeFanSink = 48.0;
+
+  /// 今日进度环直径
+  static const sizeProgressRing = 44.0;
 
   // blur.*
   static const blurOverlay = 8.0;
@@ -145,6 +151,15 @@ abstract class CoFitMotion {
 
   /// 回到前台后自动展开今日面板前的停顿
   static const stageAutoExpandDelay = Duration(milliseconds: 200);
+
+  /// 今日进度的数字与进度环滚到新值
+  static const progressRoll = Duration(milliseconds: 600);
+
+  /// 达成今日目标时进度环强调一次
+  static const goalReachedPulse = Duration(milliseconds: 500);
+
+  /// 今日进度等不到庆祝节拍时直接更新的等待上限
+  static const dailyProgressBeatTimeout = Duration(milliseconds: 2500);
 }
 
 /// decor.* — 装饰性绘制常量
@@ -201,6 +216,9 @@ abstract class CoFitDecor {
 
   /// 完成 ×1 clip 第一次落地的时间点(占 avatarFinish 的比例);庆祝节拍与触感对齐它
   static const finishFirstLanding = 0.55;
+
+  /// 达成今日目标时进度环强调的放大倍数
+  static const goalReachedPulseScale = 1.18;
 }
 
 /// typography.fontWeight.* — 字重 token(字体族见 CoFitTheme)

@@ -85,7 +85,10 @@ void main() {
 
     test('内置默认布局包含今日推荐', () {
       final specs = resolveHomeSheetModules(HomeSheetLayout.defaults);
-      expect(specs.map((s) => s.id), [HomeSheetModuleIds.recommendation]);
+      expect(
+        specs.map((s) => s.id),
+        contains(HomeSheetModuleIds.recommendation),
+      );
     });
   });
 

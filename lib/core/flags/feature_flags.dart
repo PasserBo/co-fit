@@ -6,6 +6,8 @@ class FeatureFlags {
     this.authGoogleEnabled = false,
     this.betaAiCoachEnabled = false,
     this.homeSheetLayout = '',
+    this.dailyGoalConfig = '',
+    this.workoutMemoConfig = '',
   });
 
   /// 登录页是否展示「通过 Google 登录」(2026-10-26 决议:默认关,
@@ -22,17 +24,32 @@ class FeatureFlags {
   /// `HomeSheetLayout.parse`。参数名 `home_sheet_layout`。
   final String homeSheetLayout;
 
+  /// 今日进度的内容配置(JSON 字符串,change add-daily-card-goal,形状见其
+  /// design.md §2:计量方式、默认目标、可选目标)。空串 = App 内置默认值;
+  /// 解析与回退在 `DailyGoalConfig.parse`。参数名 `daily_goal_config`。
+  final String dailyGoalConfig;
+
+  /// 运动 memo 的内容配置(JSON 字符串,change add-workout-memo,形状见其
+  /// design.md §3:感受档位、可补记时长、文字上限)。
+  /// 空串 = App 内置默认值;解析与回退在 `WorkoutMemoConfig.parse`。
+  /// 参数名 `workout_memo_config`。
+  final String workoutMemoConfig;
+
   static const defaults = FeatureFlags();
 
   static const keyAuthGoogleEnabled = 'auth_google_enabled';
   static const keyBetaAiCoachEnabled = 'beta_ai_coach_enabled';
   static const keyHomeSheetLayout = 'home_sheet_layout';
+  static const keyDailyGoalConfig = 'daily_goal_config';
+  static const keyWorkoutMemoConfig = 'workout_memo_config';
 
   /// 与 Remote Config 的 `setDefaults` 形状一致。
   static Map<String, Object> defaultsMap() => {
     keyAuthGoogleEnabled: defaults.authGoogleEnabled,
     keyBetaAiCoachEnabled: defaults.betaAiCoachEnabled,
     keyHomeSheetLayout: defaults.homeSheetLayout,
+    keyDailyGoalConfig: defaults.dailyGoalConfig,
+    keyWorkoutMemoConfig: defaults.workoutMemoConfig,
   };
 
   factory FeatureFlags.fromReader(
@@ -44,6 +61,10 @@ class FeatureFlags {
       betaAiCoachEnabled: readBool(keyBetaAiCoachEnabled),
       homeSheetLayout:
           readString?.call(keyHomeSheetLayout) ?? defaults.homeSheetLayout,
+      dailyGoalConfig:
+          readString?.call(keyDailyGoalConfig) ?? defaults.dailyGoalConfig,
+      workoutMemoConfig:
+          readString?.call(keyWorkoutMemoConfig) ?? defaults.workoutMemoConfig,
     );
   }
 }

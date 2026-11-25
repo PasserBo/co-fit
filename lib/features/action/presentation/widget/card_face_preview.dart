@@ -15,6 +15,7 @@ class CardFacePreview extends StatelessWidget {
     required this.type,
     required this.durationSec,
     this.intensityLabel,
+    this.amountsText,
     this.source,
     this.large = false,
     super.key,
@@ -24,6 +25,9 @@ class CardFacePreview extends StatelessWidget {
   final ActionType type;
   final int durationSec;
   final String? intensityLabel;
+
+  /// 卡上的量(「15 个 · 5 kg」);null 或空 = 不显示这一行。
+  final String? amountsText;
 
   /// null = 不显示来源徽章(创建表单预览态)。
   final ActionSource? source;
@@ -121,6 +125,17 @@ class CardFacePreview extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
+                if (amountsText != null && amountsText!.isNotEmpty) ...[
+                  const SizedBox(height: CoFitDimens.spacingXs),
+                  Text(
+                    amountsText!,
+                    key: const ValueKey('card_face_amounts'),
+                    style: textTheme.labelSmall
+                        ?.copyWith(color: colors.textSecondary),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
               ],
             ),
           ),

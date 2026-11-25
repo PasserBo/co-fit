@@ -39,7 +39,12 @@ class ActionCard extends StatelessWidget {
 
   String get _durationLabel {
     final minutes = (card.defaultDurationSec / 60).round().clamp(1, 999);
-    return card.source == ActionSource.custom ? '$minutes min · 自建' : '$minutes min';
+    // 时长 · 卡上的量(15 个 · 5 kg)· 来源;放不下时省略号截断
+    return [
+      '$minutes min',
+      for (final amount in card.amounts) amount.text,
+      if (card.source == ActionSource.custom) '自建',
+    ].join(' · ');
   }
 
   @override

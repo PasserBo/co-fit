@@ -6,6 +6,8 @@ part 'home_sheet_layout.freezed.dart';
 
 /// 今日面板内置模块的 id(布局配置里用这些字符串)。
 abstract final class HomeSheetModuleIds {
+  static const lastSessionMemo = 'last_session_memo';
+  static const dailyProgress = 'daily_progress';
   static const recommendation = 'recommendation';
 }
 
@@ -17,7 +19,12 @@ abstract class HomeSheetLayout with _$HomeSheetLayout {
 
   const factory HomeSheetLayout({
     /// 模块 id,按显示顺序。空 = 关闭今日面板。
-    @Default([HomeSheetModuleIds.recommendation]) List<String> modules,
+    @Default([
+      HomeSheetModuleIds.lastSessionMemo,
+      HomeSheetModuleIds.dailyProgress,
+      HomeSheetModuleIds.recommendation,
+    ])
+    List<String> modules,
 
     /// 冷启动进入房间页时展开。
     @Default(true) bool expandOnColdStart,

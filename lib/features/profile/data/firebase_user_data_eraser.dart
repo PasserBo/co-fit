@@ -5,12 +5,18 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 /// 这里只负责 users/{uid} 及其子集合。
 class FirebaseUserDataEraser {
   FirebaseUserDataEraser({FirebaseFirestore? firestore})
-      : _firestore = firestore ?? FirebaseFirestore.instance;
+    : _firestore = firestore ?? FirebaseFirestore.instance;
 
   final FirebaseFirestore _firestore;
 
   /// 子集合名(rules 里逐个放开了本人 delete)。
-  static const _subcollections = ['memberships', 'decks', 'cards', 'sessions'];
+  static const _subcollections = [
+    'memberships',
+    'decks',
+    'cards',
+    'sessions',
+    'session_memos',
+  ];
 
   Future<void> eraseUserData({required String userId}) async {
     final trimmed = userId.trim();

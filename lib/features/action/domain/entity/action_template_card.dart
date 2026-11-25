@@ -1,5 +1,6 @@
 import 'action_source.dart';
 import 'action_type.dart';
+import 'card_amount.dart';
 
 class ActionTemplateCard {
   const ActionTemplateCard({
@@ -32,6 +33,10 @@ class ActionTemplateCard {
 
   /// 牌库排序(SSOT `firestore/card_templates.json` 的 order;自建卡 0)。
   final int order;
+
+  /// 卡上写的「做多少」(次数 / 重量 / 距离…),可以没有,也可以有几项。
+  List<CardAmount> get amounts =>
+      CardAmount.listFrom(intensityBaseline['amounts']);
 
   String get intensityLabel {
     final label = intensityBaseline['label'];

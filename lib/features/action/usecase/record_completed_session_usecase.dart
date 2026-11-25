@@ -27,6 +27,8 @@ class RecordCompletedSessionUsecase {
       templateName: card.name,
       actionKey: card.rawType,
       motionId: card.motionId,
+      intensityLabel: card.intensityLabel.isEmpty ? null : card.intensityLabel,
+      amounts: card.amounts,
       durationSec: card.defaultDurationSec,
       startedAt: session.startedAt,
       completedAt: _now(),

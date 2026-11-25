@@ -215,7 +215,7 @@ return $default(_that.modules,_that.expandOnColdStart,_that.expandAfterAwayMinut
 
 
 class _HomeSheetLayout extends HomeSheetLayout {
-  const _HomeSheetLayout({final  List<String> modules = const [HomeSheetModuleIds.recommendation], this.expandOnColdStart = true, this.expandAfterAwayMinutes = 30, this.expandAfterCompletion = true, this.celebrationMaxAgeHours = 12}): _modules = modules,super._();
+  const _HomeSheetLayout({final  List<String> modules = const [HomeSheetModuleIds.lastSessionMemo, HomeSheetModuleIds.dailyProgress, HomeSheetModuleIds.recommendation], this.expandOnColdStart = true, this.expandAfterAwayMinutes = 30, this.expandAfterCompletion = true, this.celebrationMaxAgeHours = 12}): _modules = modules,super._();
   
 
 /// 模块 id,按显示顺序。空 = 关闭今日面板。

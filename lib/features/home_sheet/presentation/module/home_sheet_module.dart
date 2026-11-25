@@ -4,6 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart';
 
 import '../../../action/provider/action_decks_provider.dart';
+import '../../../daily_goal/presentation/view/daily_progress_module_view.dart';
+import '../../../daily_goal/provider/daily_goal_providers.dart';
+import '../../../workout_memo/presentation/view/last_session_memo_module_view.dart';
+import '../../../workout_memo/provider/workout_memo_providers.dart';
 import '../../domain/entity/home_sheet_layout.dart';
 import '../../provider/home_sheet_providers.dart';
 import '../view/recommendation_module_view.dart';
@@ -52,8 +56,36 @@ final _recommendationStatusProvider = Provider<HomeSheetModuleStatus>((ref) {
       : HomeSheetModuleStatus.empty;
 });
 
+/// 今日进度:记录加载中显示占位;加载失败时不出现。
+final _dailyProgressStatusProvider = Provider<HomeSheetModuleStatus>((ref) {
+  final progress = ref.watch(dailyProgressProvider);
+  if (progress.hasValue) {
+    return HomeSheetModuleStatus.content;
+  }
+  return progress.hasError
+      ? HomeSheetModuleStatus.empty
+      : HomeSheetModuleStatus.loading;
+});
+
+/// 刚才这张:有可补记的记录时才出现。
+final _lastSessionMemoStatusProvider = Provider<HomeSheetModuleStatus>((ref) {
+  return ref.watch(memoPromptTargetProvider) == null
+      ? HomeSheetModuleStatus.empty
+      : HomeSheetModuleStatus.content;
+});
+
 /// 内置模块注册表:id → 模块。新增模块只需在这里登记。
 final Map<String, HomeSheetModuleSpec> homeSheetModuleRegistry = {
+  HomeSheetModuleIds.lastSessionMemo: HomeSheetModuleSpec(
+    id: HomeSheetModuleIds.lastSessionMemo,
+    status: _lastSessionMemoStatusProvider,
+    build: (host) => const LastSessionMemoModuleView(),
+  ),
+  HomeSheetModuleIds.dailyProgress: HomeSheetModuleSpec(
+    id: HomeSheetModuleIds.dailyProgress,
+    status: _dailyProgressStatusProvider,
+    build: (host) => DailyProgressModuleView(host: host),
+  ),
   HomeSheetModuleIds.recommendation: HomeSheetModuleSpec(
     id: HomeSheetModuleIds.recommendation,
     status: _recommendationStatusProvider,

@@ -13,12 +13,24 @@ class WorkoutHistoryBody extends StatelessWidget {
   const WorkoutHistoryBody({
     required this.records,
     required this.now,
+    this.header,
+    this.memoSummaries = const {},
+    this.onRecordTap,
     super.key,
   });
 
   /// 按 completedAt 倒序(repository 保证)。
   final List<ActionSessionRecord> records;
   final DateTime now;
+
+  /// 列表最上方的附加内容(今日进度);由页面传入。
+  final Widget? header;
+
+  /// 记录 id → memo 的一行摘要(感受 · 文字);没有 memo 的记录不在表里。
+  final Map<String, String> memoSummaries;
+
+  /// 点一条记录(打开 memo 详情)。null = 行不可点。
+  final ValueChanged<ActionSessionRecord>? onRecordTap;
 
   DateTime _dayOf(DateTime time) => DateTime(time.year, time.month, time.day);
 
@@ -60,6 +72,10 @@ class WorkoutHistoryBody extends StatelessWidget {
         CoFitDimens.spacingLg,
       ),
       children: [
+        if (header != null) ...[
+          header!,
+          const SizedBox(height: CoFitDimens.spacingSm),
+        ],
         _WeekSummaryCard(records: records, now: now),
         for (final entry in groups.entries) ...[
           Padding(
@@ -81,6 +97,10 @@ class WorkoutHistoryBody extends StatelessWidget {
               child: _RecordRow(
                 record: record,
                 timeLabel: _timeLabel(record.completedAt),
+                memoSummary: memoSummaries[record.sessionId],
+                onTap: onRecordTap == null
+                    ? null
+                    : () => onRecordTap!(record),
               ),
             ),
         ],
@@ -220,10 +240,17 @@ class _WeekSummaryCard extends StatelessWidget {
 }
 
 class _RecordRow extends StatelessWidget {
-  const _RecordRow({required this.record, required this.timeLabel});
+  const _RecordRow({
+    required this.record,
+    required this.timeLabel,
+    this.memoSummary,
+    this.onTap,
+  });
 
   final ActionSessionRecord record;
   final String timeLabel;
+  final String? memoSummary;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -232,7 +259,8 @@ class _RecordRow extends StatelessWidget {
     final type = ActionType.fromRaw(record.actionKey);
     final minutes = (record.durationSec / 60).round().clamp(1, 999);
 
-    return Container(
+    final row = Container(
+      key: ValueKey('history_record_${record.sessionId}'),
       padding: const EdgeInsets.symmetric(
         horizontal: CoFitDimens.spacingMd,
         vertical: CoFitDimens.spacingSm,
@@ -271,11 +299,27 @@ class _RecordRow extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
-                  '${type.label} · $minutes min',
+                  [
+                    type.label,
+                    '$minutes min',
+                    if (record.prescriptionText.isNotEmpty)
+                      record.prescriptionText,
+                  ].join(' · '),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: textTheme.labelSmall?.copyWith(
                     color: colors.textTertiary,
                   ),
                 ),
+                if (memoSummary != null)
+                  Text(
+                    memoSummary!,
+                    style: textTheme.labelSmall?.copyWith(
+                      color: colors.textSecondary,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
               ],
             ),
           ),
@@ -285,6 +329,14 @@ class _RecordRow extends StatelessWidget {
           ),
         ],
       ),
+    );
+    if (onTap == null) {
+      return row;
+    }
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: row,
     );
   }
 }

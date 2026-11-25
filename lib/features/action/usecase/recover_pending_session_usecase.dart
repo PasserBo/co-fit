@@ -61,6 +61,9 @@ class RecoverPendingSessionUsecase {
       durationSec: snapshot.durationSec,
       startedAt: snapshot.startedAt,
       completedAt: snapshot.endsAt,
+      motionId: snapshot.motionId,
+      intensityLabel: snapshot.intensityLabel,
+      amounts: snapshot.amounts,
     );
     await _history.recordSession(record);
     await _pending.clear();

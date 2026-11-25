@@ -9,7 +9,14 @@
       "ablyActionId": "squat",
       "defaultDurationSec": 60,
       "intensityBaseline": {
-        "label": "中等"
+        "label": "中等",
+        "amounts": [
+          {
+            "kind": "reps",
+            "value": 15,
+            "unit": "个"
+          }
+        ]
       },
       "equipment": "none",
       "order": 10,
@@ -22,7 +29,14 @@
       "ablyActionId": "lunge",
       "defaultDurationSec": 60,
       "intensityBaseline": {
-        "label": "中等"
+        "label": "中等",
+        "amounts": [
+          {
+            "kind": "reps",
+            "value": 12,
+            "unit": "个"
+          }
+        ]
       },
       "equipment": "none",
       "order": 20,
@@ -35,7 +49,14 @@
       "ablyActionId": "pushup",
       "defaultDurationSec": 45,
       "intensityBaseline": {
-        "label": "挑战"
+        "label": "挑战",
+        "amounts": [
+          {
+            "kind": "reps",
+            "value": 10,
+            "unit": "个"
+          }
+        ]
       },
       "equipment": "mat",
       "order": 30,
@@ -48,7 +69,14 @@
       "ablyActionId": "glute_bridge",
       "defaultDurationSec": 60,
       "intensityBaseline": {
-        "label": "轻松"
+        "label": "轻松",
+        "amounts": [
+          {
+            "kind": "reps",
+            "value": 15,
+            "unit": "个"
+          }
+        ]
       },
       "equipment": "mat",
       "order": 40
@@ -72,7 +100,19 @@
       "ablyActionId": "biceps_curl",
       "defaultDurationSec": 60,
       "intensityBaseline": {
-        "label": "中等"
+        "label": "中等",
+        "amounts": [
+          {
+            "kind": "reps",
+            "value": 12,
+            "unit": "个"
+          },
+          {
+            "kind": "weight",
+            "value": 3,
+            "unit": "kg"
+          }
+        ]
       },
       "equipment": "dumbbell",
       "order": 60
@@ -84,7 +124,19 @@
       "ablyActionId": "shoulder_press",
       "defaultDurationSec": 60,
       "intensityBaseline": {
-        "label": "中等"
+        "label": "中等",
+        "amounts": [
+          {
+            "kind": "reps",
+            "value": 10,
+            "unit": "个"
+          },
+          {
+            "kind": "weight",
+            "value": 3,
+            "unit": "kg"
+          }
+        ]
       },
       "equipment": "dumbbell",
       "order": 70
@@ -96,7 +148,14 @@
       "ablyActionId": "calf_raise",
       "defaultDurationSec": 60,
       "intensityBaseline": {
-        "label": "轻松"
+        "label": "轻松",
+        "amounts": [
+          {
+            "kind": "reps",
+            "value": 20,
+            "unit": "个"
+          }
+        ]
       },
       "equipment": "none",
       "order": 80
@@ -108,7 +167,14 @@
       "ablyActionId": "jumping_jack",
       "defaultDurationSec": 45,
       "intensityBaseline": {
-        "label": "中等"
+        "label": "中等",
+        "amounts": [
+          {
+            "kind": "reps",
+            "value": 30,
+            "unit": "个"
+          }
+        ]
       },
       "equipment": "none",
       "order": 90,
@@ -121,7 +187,14 @@
       "ablyActionId": "run_in_place",
       "defaultDurationSec": 60,
       "intensityBaseline": {
-        "label": "中等"
+        "label": "中等",
+        "amounts": [
+          {
+            "kind": "distance",
+            "value": 150,
+            "unit": "m"
+          }
+        ]
       },
       "equipment": "none",
       "order": 100,
@@ -134,7 +207,14 @@
       "ablyActionId": "high_knees",
       "defaultDurationSec": 30,
       "intensityBaseline": {
-        "label": "挑战"
+        "label": "挑战",
+        "amounts": [
+          {
+            "kind": "reps",
+            "value": 40,
+            "unit": "个"
+          }
+        ]
       },
       "equipment": "none",
       "order": 110,
@@ -147,7 +227,14 @@
       "ablyActionId": "burpee",
       "defaultDurationSec": 30,
       "intensityBaseline": {
-        "label": "挑战"
+        "label": "挑战",
+        "amounts": [
+          {
+            "kind": "reps",
+            "value": 8,
+            "unit": "个"
+          }
+        ]
       },
       "equipment": "none",
       "order": 120
@@ -159,7 +246,14 @@
       "ablyActionId": "mountain_climber",
       "defaultDurationSec": 30,
       "intensityBaseline": {
-        "label": "挑战"
+        "label": "挑战",
+        "amounts": [
+          {
+            "kind": "reps",
+            "value": 30,
+            "unit": "个"
+          }
+        ]
       },
       "equipment": "mat",
       "order": 130
@@ -171,7 +265,14 @@
       "ablyActionId": "jump_rope",
       "defaultDurationSec": 60,
       "intensityBaseline": {
-        "label": "中等"
+        "label": "中等",
+        "amounts": [
+          {
+            "kind": "reps",
+            "value": 80,
+            "unit": "个"
+          }
+        ]
       },
       "equipment": "rope",
       "order": 140
@@ -183,7 +284,14 @@
       "ablyActionId": "skater",
       "defaultDurationSec": 45,
       "intensityBaseline": {
-        "label": "中等"
+        "label": "中等",
+        "amounts": [
+          {
+            "kind": "reps",
+            "value": 20,
+            "unit": "个"
+          }
+        ]
       },
       "equipment": "none",
       "order": 150
@@ -195,7 +303,14 @@
       "ablyActionId": "march",
       "defaultDurationSec": 90,
       "intensityBaseline": {
-        "label": "轻松"
+        "label": "轻松",
+        "amounts": [
+          {
+            "kind": "distance",
+            "value": 80,
+            "unit": "m"
+          }
+        ]
       },
       "equipment": "none",
       "order": 160,
@@ -233,7 +348,14 @@
       "ablyActionId": "crunch",
       "defaultDurationSec": 45,
       "intensityBaseline": {
-        "label": "中等"
+        "label": "中等",
+        "amounts": [
+          {
+            "kind": "reps",
+            "value": 15,
+            "unit": "个"
+          }
+        ]
       },
       "equipment": "mat",
       "order": 190,
@@ -246,7 +368,14 @@
       "ablyActionId": "bicycle_crunch",
       "defaultDurationSec": 45,
       "intensityBaseline": {
-        "label": "中等"
+        "label": "中等",
+        "amounts": [
+          {
+            "kind": "reps",
+            "value": 20,
+            "unit": "个"
+          }
+        ]
       },
       "equipment": "mat",
       "order": 200
@@ -258,7 +387,14 @@
       "ablyActionId": "russian_twist",
       "defaultDurationSec": 45,
       "intensityBaseline": {
-        "label": "中等"
+        "label": "中等",
+        "amounts": [
+          {
+            "kind": "reps",
+            "value": 20,
+            "unit": "个"
+          }
+        ]
       },
       "equipment": "mat",
       "order": 210
@@ -270,7 +406,14 @@
       "ablyActionId": "dead_bug",
       "defaultDurationSec": 60,
       "intensityBaseline": {
-        "label": "轻松"
+        "label": "轻松",
+        "amounts": [
+          {
+            "kind": "reps",
+            "value": 12,
+            "unit": "个"
+          }
+        ]
       },
       "equipment": "mat",
       "order": 220
@@ -282,7 +425,14 @@
       "ablyActionId": "bird_dog",
       "defaultDurationSec": 60,
       "intensityBaseline": {
-        "label": "轻松"
+        "label": "轻松",
+        "amounts": [
+          {
+            "kind": "reps",
+            "value": 10,
+            "unit": "个"
+          }
+        ]
       },
       "equipment": "mat",
       "order": 230
@@ -294,7 +444,14 @@
       "ablyActionId": "leg_raise",
       "defaultDurationSec": 45,
       "intensityBaseline": {
-        "label": "中等"
+        "label": "中等",
+        "amounts": [
+          {
+            "kind": "reps",
+            "value": 12,
+            "unit": "个"
+          }
+        ]
       },
       "equipment": "mat",
       "order": 240,

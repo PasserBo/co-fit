@@ -8,6 +8,10 @@ import '../../../ai_coach/presentation/view/ai_coach_page_view.dart';
 import '../../../ai_coach/presentation/widget/coach_beta_badge.dart';
 import '../../../ai_coach/provider/ai_coach_providers.dart';
 import '../../../avatar/presentation/idle_avatar_figure.dart';
+import '../../../daily_goal/presentation/view/daily_progress_history_header_view.dart';
+import '../../../workout_memo/presentation/view/workout_memo_sheet_view.dart';
+import '../../../workout_memo/presentation/widget/memo_editor.dart';
+import '../../../workout_memo/provider/workout_memo_providers.dart';
 import '../../provider/action_session_history_providers.dart';
 import '../widget/workout_history_body.dart';
 
@@ -21,6 +25,11 @@ class WorkoutHistoryPageView extends ConsumerWidget {
     final colors = Theme.of(context).extension<CoFitColors>()!;
     final recordsAsync = ref.watch(recentSessionsProvider);
     final showCoach = ref.watch(aiCoachEntryVisibleProvider);
+    final memoConfig = ref.watch(workoutMemoConfigProvider);
+    final memoSummaries = {
+      for (final memo in ref.watch(workoutMemoMapProvider).values)
+        memo.sessionId: ?memoSummaryText(memo, memoConfig),
+    };
 
     return Scaffold(
       appBar: AppBar(
@@ -50,7 +59,14 @@ class WorkoutHistoryPageView extends ConsumerWidget {
                     Navigator.of(context).pop();
                   },
                 )
-              : WorkoutHistoryBody(records: records, now: DateTime.now()),
+              : WorkoutHistoryBody(
+                  records: records,
+                  now: DateTime.now(),
+                  header: const DailyProgressHistoryHeaderView(),
+                  memoSummaries: memoSummaries,
+                  onRecordTap: (record) =>
+                      showWorkoutMemoSheet(context, record: record),
+                ),
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (error, _) => Center(
             child: Column(

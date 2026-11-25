@@ -82,6 +82,10 @@ class OwnActionSessionNotifier extends Notifier<TemplateCardSession?> {
               durationSec: card.defaultDurationSec,
               startedAt: session.startedAt,
               motionId: card.motionId,
+              intensityLabel: card.intensityLabel.isEmpty
+                  ? null
+                  : card.intensityLabel,
+              amounts: card.amounts,
             ),
           )
           .catchError((Object error) {

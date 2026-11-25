@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/cofit_colors.dart';
 import '../../../../core/theme/cofit_dimens.dart';
 import '../../../../core/widget/cofit_confirm_sheet.dart';
+import '../../domain/entity/card_amount.dart';
 import '../../domain/entity/action_deck.dart';
 import '../../domain/entity/action_source.dart';
 import '../../domain/entity/action_template_card.dart';
@@ -168,6 +169,7 @@ class CardDetailSheetView extends ConsumerWidget {
                   durationSec: card.defaultDurationSec,
                   intensityLabel:
                       card.intensityLabel.isEmpty ? null : card.intensityLabel,
+                  amountsText: CardAmount.textOf(card.amounts),
                   source: card.source,
                   large: true,
                 ),

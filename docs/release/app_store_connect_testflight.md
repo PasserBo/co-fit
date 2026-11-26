@@ -142,21 +142,20 @@ Feedback we are looking for: whether the demo room explains how the app works, h
 
 **What to Test**(每个 build 可改;只写一个账号就能测完的步骤,Beta 审核员只有演示账号):
 ```
-v1.0.0 (5)
-本次新增:房间页的「今日面板」;不在线的成员也留在房间里(变暗显示)。
+v1.0.0 (6)
+本次新增:今日进度(每天的目标与进度)、做完一张卡后记一句感受(运动 memo)、卡片标明「做多少」;伙伴开始运动时的推送通知。
 1. 首次打开:在演示房间里打出一张卡,看小人做动作;倒计时结束后点「登录,把好友叫进来」(也可以右上「跳过」)
 2. 用邮箱或 Apple 登录;新账号会先起名
-3. 「我的 → 发现公开房间」:列表里已有几个公开房间,用搜索框按房间名或简介搜索;点开一个房间,点「加入并进入」
-4. 「我的 → 新建房间」:填房间名,可见性选「公开」,点「创建并进入」;弹出的分享卡可以复制邀请链接;回到「发现公开房间」能看到它标着「已加入」
-5. 进入房间后,下半部分是「今日面板」,自己的小人站在面板上沿。试三种收起方式:点自己的小人、点面板顶部的把手、按住把手往下拖;收起后小人跳回房间,底部手牌出现。再点自己的小人,面板重新展开
-6. 面板展开时点「今日推荐」:面板收起,手牌展开并停在推荐的那张卡上
-7. 上滑中间那张卡开始运动:小人做动作、倒计时走完后回到待机
+3. 「我的 → 发现公开房间」:列表里已有几个公开房间,用搜索框按房间名或简介搜索;点开一个房间,点「加入并进入」。进房后会弹出「伙伴开始运动时通知你?」,点「打开通知」后再出现系统的通知权限请求
+4. 「我的 → 新建房间」:填房间名,可见性选「公开」,点「创建并进入」;弹出的分享卡可以复制邀请链接;关掉分享卡后(如果第 3 步没回答)也会询问通知
+5. 进入房间后,下半部分是「今日面板」:最上方「今日进度」显示今天完成几张 / 目标几张,右侧按钮可以改目标;「今日推荐」点一下,面板收起并停在推荐的卡上
+6. 上滑中间那张卡开始运动(有的卡片上写着建议做多少:次数 / 重量 / 距离等);小人做动作、倒计时走完后回到待机
+7. 做完后面板最上方出现「刚才这张」:点一个感受,也可以写一句话(都可以跳过);今日进度跟着加一
 8. 运动中把 App 切到后台或杀掉再打开,倒计时是否接着走
-9. 「我的 → 运动 → 累计时长」进入运动历史,能看到刚才的记录
-10. 「我的 → 我的房间」:列表里有自己的房间,左上返回键能正常返回
+9. 「我的 → 运动 → 累计时长」进入运动历史,能看到刚才的记录和写的感受,点一行可以修改或删除
+10. 「我的 → 通知」:可以关掉「伙伴开始运动时通知我」;房间右上「⋯」里可以「静音通知」这个房间
 11. 「我的」页底部「删除账号」能走通(会清空该账号全部数据)
-请留意:面板和小人的动画是否顺畅、有没有卡住或错位;动画播放中的点击会被忽略,这是有意的。
-有第二台设备的话可以额外试:把邀请链接发过去加入同一房间,互相看到对方的小人和运动状态;一方退出 App 后,另一方看到对方的小人变暗并标「离线」。
+有第二台设备的话可以额外试:把邀请链接发过去加入同一房间,两边都允许通知;一方把 App 切到后台或锁屏,另一方开始一张卡,应收到「你的「房间名」运动伙伴 昵称 开始运动了!」,点开会进到那个房间。同一个人 3 小时内最多收到一条。
 已知问题:没装 App 的人点邀请链接不会跳 App Store(本期无 Universal Links);形象自定义尚未开放。
 ```
 
@@ -178,11 +177,12 @@ How to test:
 3. The demo account owns a room named "Review Room". Members who are not online stay in the room as dimmed avatars labelled "离线" (Offline); live workout status is shown only for members who are online. The demo room in step 1 shows what a room with several active people looks like. Optionally, sign in on a second device with Sign in with Apple and join via the invite link (⋯ at top right → 邀请好友 / Invite) to see live status.
 4. To create a room: tab "我的" (Me) → "新建房间" (New room), enter a name, choose "公开" (Public) and tap "创建并进入" (Create and enter). To browse rooms: tab "我的" (Me) → "发现公开房间" (Discover public rooms). A few public rooms already exist; search by name or description, tap a room and then "加入并进入" (Join and enter).
 5. When you enter a room, the lower half of the screen is a panel ("今日面板", Today panel) and your own avatar stands on its top edge. Tap your avatar, or tap or drag down the handle at the top of the panel, to collapse it; the hand of cards then appears at the bottom. Tapping "今日推荐" (Today's pick) in the panel also collapses it and opens the hand on the suggested card. Tap your avatar again to reopen the panel. With the panel collapsed, tap the fanned cards and swipe up a card to start a workout; a countdown runs and the workout is logged in Workout History: tab "我的" (Me) → row "累计时长" (Total time) under "运动" (Workout).
-6. Room owner tools (⋯ at top right): invite via link, manage/remove members, report, disband. Members can report a room or member.
-7. Account deletion: tab "我的" (Me) → "删除账号" (Delete Account) at the bottom removes all user data and revokes the Apple credential. Please test deletion with a Sign in with Apple account if possible, so the demo account stays available for other reviewers.
+6. Room owner tools (⋯ at top right): invite via link, manage/remove members, mute notifications for this room, report, disband. Members can report a room or member and mute the room.
+7. Push notifications: after joining or creating a room, an in-app sheet ("伙伴开始运动时通知你?", Notify you when a friend starts a workout?) explains the purpose first; the system permission dialog appears only after tapping "打开通知" (Turn on notifications). When a friend in the same room starts a workout, the other members receive one notification (at most one per person every 3 hours). Users can turn this off in tab "我的" (Me) → "通知" (Notifications), or mute a single room from its ⋯ menu. Receiving a notification needs a second account in the same room.
+8. Account deletion: tab "我的" (Me) → "删除账号" (Delete Account) at the bottom removes all user data and revokes the Apple credential. Please test deletion with a Sign in with Apple account if possible, so the demo account stays available for other reviewers.
 
 Notes:
-- No HealthKit, location, camera, photos, push notifications, or ads are used.
+- No HealthKit, location, camera, photos, or ads are used. Push notifications are used only for the feature in step 7 (no marketing notifications).
 - The sample avatars in the demo room are labelled "示例" (Sample); they are not real users and nothing in the demo is uploaded.
 - Google Sign-In exists in code but is disabled by a remote feature flag; only Sign in with Apple and email/password are visible.
 - Invite deep links use the custom scheme cofit://; Universal Links are not implemented in this version.

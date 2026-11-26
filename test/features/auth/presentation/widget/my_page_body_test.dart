@@ -11,8 +11,9 @@ Future<void> _pump(
 }) {
   return tester.pumpWidget(
     MaterialApp(
-      theme: ThemeData(brightness: Brightness.dark)
-          .copyWith(extensions: [CoFitColors.dark]),
+      theme: ThemeData(
+        brightness: Brightness.dark,
+      ).copyWith(extensions: [CoFitColors.dark]),
       home: Scaffold(
         body: MyPageBody(
           displayName: 'xiaoman',
@@ -67,5 +68,66 @@ void main() {
     await tester.scrollUntilVisible(find.text('退出登录'), 100);
     await tester.tap(find.text('退出登录'));
     expect(signedOut, isTrue);
+  });
+
+  group('通知分组(add-partner-start-push)', () {
+    Future<void> pumpPush(
+      WidgetTester tester, {
+      bool? on,
+      ValueChanged<bool>? onChanged,
+      VoidCallback? onOpenSettings,
+    }) {
+      return tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            brightness: Brightness.dark,
+          ).copyWith(extensions: [CoFitColors.dark]),
+          home: Scaffold(
+            body: MyPageBody(
+              displayName: 'xiaoman',
+              handle: 'a1b2c3',
+              roomCount: 1,
+              deckCount: 1,
+              cardCount: 1,
+              partnerStartPushOn: on,
+              onPartnerStartPushChanged: onChanged,
+              onOpenSystemNotificationSettings: onOpenSettings,
+            ),
+          ),
+        ),
+      );
+    }
+
+    testWidgets('设置未加载(null)时不显示分组', (tester) async {
+      await pumpPush(tester);
+      expect(find.text('伙伴开始运动时通知我'), findsNothing);
+    });
+
+    testWidgets('点开关行切换', (tester) async {
+      bool? changed;
+      await pumpPush(tester, on: true, onChanged: (v) => changed = v);
+      await tester.scrollUntilVisible(find.text('伙伴开始运动时通知我'), 100);
+      expect(find.byType(Switch), findsOneWidget);
+      await tester.tap(find.text('伙伴开始运动时通知我'));
+      expect(changed, isFalse);
+    });
+
+    testWidgets('系统权限被拒:显示说明行,点了去系统设置', (tester) async {
+      var opened = false;
+      await pumpPush(
+        tester,
+        on: true,
+        onChanged: (_) {},
+        onOpenSettings: () => opened = true,
+      );
+      await tester.scrollUntilVisible(find.text('系统通知已关闭'), 100);
+      await tester.tap(find.text('系统通知已关闭'));
+      expect(opened, isTrue);
+    });
+
+    testWidgets('系统权限正常:不显示说明行', (tester) async {
+      await pumpPush(tester, on: false, onChanged: (_) {});
+      expect(find.text('系统通知已关闭'), findsNothing);
+    });
   });
 }

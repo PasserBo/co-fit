@@ -16,6 +16,11 @@ class FirebaseUserDataEraser {
     'cards',
     'sessions',
     'session_memos',
+    // 伙伴开始运动推送(add-partner-start-push)
+    'devices',
+    'settings',
+    'workout_starts',
+    'notification_state',
   ];
 
   Future<void> eraseUserData({required String userId}) async {

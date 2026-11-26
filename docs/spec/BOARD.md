@@ -13,3 +13,4 @@
 | [add-workout-memo](changes/add-workout-memo/proposal.md) | in-progress | 代码与测试完成(未提交,已按用户决议去掉次数);**等用户确认 `firestore.rules` 的 diff**,之后提交推送、核对规则部署、真机走一遍,见 [tasks.md](changes/add-workout-memo/tasks.md) | me |
 | [add-character-page](changes/add-character-page/proposal.md) | idea | 把「我的」拆成小人页 + 设置,运动记录归小人;排在 add-workout-memo 之后;有 5 个待定问题 | me |
 | [add-card-prescription](changes/add-card-prescription/proposal.md) | in-progress | 代码与测试完成(未提交);**等用户确认 `firestore.rules` 的 diff**(运动记录新增两个可选字段),见 [tasks.md](changes/add-card-prescription/tasks.md) | me |
+| [add-partner-start-push](changes/add-partner-start-push/proposal.md) | in-progress | 已提交推送 main,Function 已上线,rules 由 CI 部署;下一步真机双账号走查(T21);CI 的 Functions 部署权限待补(T19 B),见 [tasks.md](changes/add-partner-start-push/tasks.md) | me |

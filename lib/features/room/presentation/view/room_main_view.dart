@@ -53,6 +53,7 @@ import 'room_create_page_view.dart';
 import 'room_discover_page_view.dart';
 import 'room_edit_sheet_view.dart';
 import 'room_members_sheet_view.dart';
+import '../../../notification/provider/notification_providers.dart';
 
 /// 房间主界面(#6b 定稿):全屏沉浸场景,无底部 nav。
 /// 漂浮气泡(presence)+ 左右滑切换房间 + 底部扇形手牌(#5d 聚焦/上滑打出)
@@ -473,8 +474,14 @@ class _RoomMainViewState extends ConsumerState<RoomMainView>
           top: Radius.circular(CoFitDimens.radiusLg),
         ),
       ),
-      builder: (context) =>
-          RoomActionsSheet(roomName: roomName, isOwner: isOwner),
+      builder: (context) => RoomActionsSheet(
+        roomName: roomName,
+        isOwner: isOwner,
+        isPushMuted: ref
+            .read(notificationSettingsProvider)
+            .value
+            ?.isRoomMuted(roomId),
+      ),
     );
     if (!mounted || action == null) {
       return;
@@ -496,6 +503,8 @@ class _RoomMainViewState extends ConsumerState<RoomMainView>
           roomId: roomId,
           viewerId: widget.userId,
         );
+      case RoomSheetAction.toggleMute:
+        await _togglePushMute(roomId: roomId, roomName: roomName);
       case RoomSheetAction.report:
         final submitted = await ReportSheetView.show(
           context,
@@ -510,6 +519,33 @@ class _RoomMainViewState extends ConsumerState<RoomMainView>
         }
       case RoomSheetAction.dissolve:
         await _confirmAndDissolveRoom(roomId: roomId, roomName: roomName);
+    }
+  }
+
+  /// 静音 / 取消静音这个房间的伙伴推送(change add-partner-start-push)。
+  Future<void> _togglePushMute({
+    required String roomId,
+    required String roomName,
+  }) async {
+    final muted =
+        ref.read(notificationSettingsProvider).value?.isRoomMuted(roomId) ??
+        false;
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      await ref
+          .read(setRoomPushMutedUsecaseProvider)
+          .execute(userId: widget.userId, roomId: roomId, muted: !muted);
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          SnackBar(
+            content: Text(muted ? '已恢复「$roomName」的通知' : '已静音「$roomName」的通知'),
+          ),
+        );
+    } catch (_) {
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(const SnackBar(content: Text('设置保存失败,请重试')));
     }
   }
 

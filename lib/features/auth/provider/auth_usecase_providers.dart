@@ -7,7 +7,9 @@ import '../usecase/sign_in_with_apple_usecase.dart';
 import '../usecase/sign_in_with_google_usecase.dart';
 import '../usecase/sign_out_usecase.dart';
 import '../usecase/watch_auth_state_usecase.dart';
+import '../../notification/provider/notification_providers.dart';
 import 'auth_repository_provider.dart';
+import 'auth_state_provider.dart';
 
 final watchAuthStateUsecaseProvider = Provider<WatchAuthStateUsecase>((ref) {
   return WatchAuthStateUsecase(ref.watch(authRepositoryProvider));
@@ -27,9 +29,7 @@ final signInWithGoogleUsecaseProvider = Provider<SignInWithGoogleUsecase>((
   return SignInWithGoogleUsecase(ref.watch(authRepositoryProvider));
 });
 
-final signInWithAppleUsecaseProvider = Provider<SignInWithAppleUsecase>((
-  ref,
-) {
+final signInWithAppleUsecaseProvider = Provider<SignInWithAppleUsecase>((ref) {
   return SignInWithAppleUsecase(ref.watch(authRepositoryProvider));
 });
 
@@ -40,5 +40,13 @@ final sendPasswordResetUsecaseProvider = Provider<SendPasswordResetUsecase>((
 });
 
 final signOutUsecaseProvider = Provider<SignOutUsecase>((ref) {
-  return SignOutUsecase(ref.watch(authRepositoryProvider));
+  return SignOutUsecase(
+    ref.watch(authRepositoryProvider),
+    currentUserId: () => ref.read(authStateProvider).value?.uid,
+    beforeSignOut: [
+      // 退出登录后这台设备不再收到该账号的推送(change add-partner-start-push)
+      (userId) =>
+          ref.read(unregisterPushDeviceUsecaseProvider).execute(userId: userId),
+    ],
+  );
 });

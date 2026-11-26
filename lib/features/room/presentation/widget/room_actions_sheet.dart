@@ -4,23 +4,37 @@ import '../../../../core/theme/cofit_colors.dart';
 import '../../../../core/theme/cofit_dimens.dart';
 
 /// 房间操作 sheet 可返回的动作。
-enum RoomSheetAction { leave, editInfo, invite, members, report, dissolve }
+enum RoomSheetAction {
+  leave,
+  editInfo,
+  invite,
+  members,
+  toggleMute,
+  report,
+  dissolve,
+}
 
 /// 房间操作 sheet(#17a 定稿):
 /// 房主版 = 房名 + amber「房主」徽章 + 编辑房间信息 / 邀请好友 / 成员管理 /
 /// 举报 / 解散房间(红);成员版 = 房名 + 房间成员(只读)/ 举报 /
 /// 「退出房间」红字行。
 /// 成员管理与举报为 UGC 合规必需项(App Store 指南 1.2)。
+/// 两版都在举报前多一行「静音通知 / 取消静音」(change add-partner-start-push;
+/// [isPushMuted] 为 null 时不显示)。
 /// 纯展示:选择动作后以 Navigator.pop(RoomSheetAction) 返回。
 class RoomActionsSheet extends StatelessWidget {
   const RoomActionsSheet({
     required this.roomName,
     required this.isOwner,
+    this.isPushMuted,
     super.key,
   });
 
   final String roomName;
   final bool isOwner;
+
+  /// 这个房间的伙伴推送是否已静音;null = 不显示静音行。
+  final bool? isPushMuted;
 
   @override
   Widget build(BuildContext context) {
@@ -117,6 +131,13 @@ class RoomActionsSheet extends StatelessWidget {
                 height: CoFitDimens.borderWidthHairline,
                 color: colors.borderSubtle,
               ),
+              if (isPushMuted != null) ...[
+                _MuteRow(isMuted: isPushMuted!),
+                Divider(
+                  height: CoFitDimens.borderWidthHairline,
+                  color: colors.borderSubtle,
+                ),
+              ],
               _ReportRow(),
               Divider(
                 height: CoFitDimens.borderWidthHairline,
@@ -148,6 +169,13 @@ class RoomActionsSheet extends StatelessWidget {
                 height: CoFitDimens.borderWidthHairline,
                 color: colors.borderSubtle,
               ),
+              if (isPushMuted != null) ...[
+                _MuteRow(isMuted: isPushMuted!),
+                Divider(
+                  height: CoFitDimens.borderWidthHairline,
+                  color: colors.borderSubtle,
+                ),
+              ],
               _ReportRow(),
               Divider(
                 height: CoFitDimens.borderWidthHairline,
@@ -168,6 +196,28 @@ class RoomActionsSheet extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// 静音通知行(房主/成员共用):伙伴在这个房间开始运动时不推送。
+class _MuteRow extends StatelessWidget {
+  const _MuteRow({required this.isMuted});
+
+  final bool isMuted;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<CoFitColors>()!;
+    return _ActionRow(
+      icon: isMuted
+          ? Icons.notifications_active_outlined
+          : Icons.notifications_off_outlined,
+      iconColor: colors.statusPaused,
+      iconBg: colors.typeCoreSubtle,
+      title: isMuted ? '取消静音' : '静音通知',
+      subtitle: isMuted ? '恢复伙伴开始运动的通知' : '伙伴在这里开始运动时不通知我',
+      onTap: () => Navigator.of(context).pop(RoomSheetAction.toggleMute),
     );
   }
 }

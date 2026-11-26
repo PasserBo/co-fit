@@ -10,6 +10,7 @@ import '../../../core/widget/brand_splash.dart';
 import '../../action/presentation/view/card_library_page.dart';
 import '../../invite/presentation/invite_link_gate.dart';
 import '../../invite/provider/pending_invite_provider.dart';
+import '../../notification/presentation/push_lifecycle_binder.dart';
 import '../../profile/presentation/view/onboarding_page_view.dart';
 import '../../profile/provider/user_profile_provider.dart';
 import '../../room/presentation/view/room_main_view.dart';
@@ -174,15 +175,18 @@ class _AuthGatePageState extends ConsumerState<AuthGatePage> {
     return InviteLinkGate(
       key: _shellKey,
       userId: user.uid,
-      child: AppShell(
-        pages: [
-          RoomMainView(userId: user.uid),
-          const CardLibraryPage(),
-          MyPageView(
-            user: user,
-            signOutUsecase: ref.watch(signOutUsecaseProvider),
-          ),
-        ],
+      child: PushLifecycleBinder(
+        userId: user.uid,
+        child: AppShell(
+          pages: [
+            RoomMainView(userId: user.uid),
+            const CardLibraryPage(),
+            MyPageView(
+              user: user,
+              signOutUsecase: ref.watch(signOutUsecaseProvider),
+            ),
+          ],
+        ),
       ),
     );
   }

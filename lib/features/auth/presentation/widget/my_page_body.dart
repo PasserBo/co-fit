@@ -6,7 +6,8 @@ import '../../../../core/widget/floating_dock.dart';
 
 /// 「我的」页纯展示层(10a 形象优先,2026-08-01 决议:内容收敛到已实现功能)。
 /// 英雄区(占位小人 + 名字 + 可选「编辑形象」,回调为 null 时隐藏)+ 真实数据统计块 + 账号分组 + 退出登录。
-/// 10a 中的 累计时长/连续打卡/通知隐私开关 等未实现功能不做。
+/// 10a 中的 连续打卡 / 灵动岛 / 串门 等未实现功能不做;「通知」分组只放已实现的推送开关
+/// (change add-partner-start-push,沿用 10a「通知与隐私」的开关行样式)。
 class MyPageBody extends StatelessWidget {
   const MyPageBody({
     required this.displayName,
@@ -27,6 +28,9 @@ class MyPageBody extends StatelessWidget {
     this.onDeleteAccount,
     this.onOpenPrivacyPolicy,
     this.onOpenTerms,
+    this.partnerStartPushOn,
+    this.onPartnerStartPushChanged,
+    this.onOpenSystemNotificationSettings,
     super.key,
   });
 
@@ -60,6 +64,13 @@ class MyPageBody extends StatelessWidget {
   /// 法律文档(两者都为 null 时不显示「关于」分组)。
   final VoidCallback? onOpenPrivacyPolicy;
   final VoidCallback? onOpenTerms;
+
+  /// 「伙伴开始运动时通知我」开关的当前值;null 时不显示「通知」分组。
+  final bool? partnerStartPushOn;
+  final ValueChanged<bool>? onPartnerStartPushChanged;
+
+  /// 系统通知权限被拒时非 null:分组里多一行说明,点了去系统设置。
+  final VoidCallback? onOpenSystemNotificationSettings;
 
   @override
   Widget build(BuildContext context) {
@@ -171,6 +182,31 @@ class MyPageBody extends StatelessWidget {
                   label: '新建房间',
                   trailing: '',
                   onTap: onCreateRoom,
+                ),
+            ],
+          ),
+        ],
+        if (partnerStartPushOn != null) ...[
+          const SizedBox(height: CoFitDimens.spacingLg),
+          _GroupLabel('通知'),
+          _SettingsGroup(
+            children: [
+              _SettingsToggleRow(
+                iconColor: colors.primaryMain,
+                iconBg: colors.primarySubtle,
+                icon: Icons.notifications_active_outlined,
+                label: '伙伴开始运动时通知我',
+                value: partnerStartPushOn!,
+                onChanged: onPartnerStartPushChanged,
+              ),
+              if (onOpenSystemNotificationSettings != null)
+                _SettingsRow(
+                  iconColor: colors.statusPaused,
+                  iconBg: colors.typeCoreSubtle,
+                  icon: Icons.notifications_off_outlined,
+                  label: '系统通知已关闭',
+                  trailing: '去设置',
+                  onTap: onOpenSystemNotificationSettings,
                 ),
             ],
           ),
@@ -582,6 +618,79 @@ class _SettingsRow extends StatelessWidget {
       behavior: HitTestBehavior.opaque,
       onTap: onTap,
       child: row,
+    );
+  }
+}
+
+/// 开关行(10a「通知与隐私」):图标块 + 文案 + 开关,整行可点。
+class _SettingsToggleRow extends StatelessWidget {
+  const _SettingsToggleRow({
+    required this.icon,
+    required this.iconColor,
+    required this.iconBg,
+    required this.label,
+    required this.value,
+    this.onChanged,
+  });
+
+  final IconData icon;
+  final Color iconColor;
+  final Color iconBg;
+  final String label;
+  final bool value;
+  final ValueChanged<bool>? onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<CoFitColors>()!;
+    final textTheme = Theme.of(context).textTheme;
+
+    return MergeSemantics(
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onChanged == null ? null : () => onChanged!(!value),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: CoFitDimens.spacingMd,
+            vertical: CoFitDimens.spacingXs,
+          ),
+          child: Row(
+            spacing: CoFitDimens.spacingMd,
+            children: [
+              Container(
+                width: CoFitDimens.sizeCardIconBlock,
+                height: CoFitDimens.sizeCardIconBlock,
+                decoration: BoxDecoration(
+                  color: iconBg,
+                  borderRadius: BorderRadius.circular(CoFitDimens.radiusSm),
+                ),
+                child: Icon(
+                  icon,
+                  size: CoFitDimens.sizeCardIcon,
+                  color: iconColor,
+                ),
+              ),
+              Expanded(
+                child: Text(
+                  label,
+                  style: textTheme.bodyMedium,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              Switch(
+                value: value,
+                onChanged: onChanged,
+                activeTrackColor: colors.primaryMain,
+                activeThumbColor: colors.primaryOn,
+                inactiveTrackColor: colors.bgOverlay,
+                inactiveThumbColor: colors.textTertiary,
+                trackOutlineColor: WidgetStatePropertyAll(colors.borderSubtle),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

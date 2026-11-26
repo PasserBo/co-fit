@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/legal/legal_links.dart';
 import '../../../../core/widget/cofit_confirm_sheet.dart';
@@ -13,6 +14,8 @@ import '../../../profile/domain/entity/user_profile_entity.dart';
 import '../../../profile/provider/user_profile_provider.dart';
 import '../../../profile/provider/delete_account_provider.dart';
 import '../../../profile/provider/user_profile_repository_provider.dart';
+import '../../../notification/domain/entity/push_permission_status.dart';
+import '../../../notification/provider/notification_providers.dart';
 import '../../../room/presentation/view/my_rooms_page_view.dart';
 import '../../../room/presentation/view/room_create_page_view.dart';
 import '../../../room/presentation/view/room_discover_page_view.dart';
@@ -88,6 +91,39 @@ class MyPageView extends ConsumerWidget {
     }
   }
 
+  /// 伙伴开始运动推送的总开关;打开时若没问过系统权限会顺带请求。
+  Future<void> _setPartnerStartPush(
+    BuildContext context,
+    WidgetRef ref,
+    bool enabled,
+  ) async {
+    try {
+      await ref
+          .read(setPartnerStartPushUsecaseProvider)
+          .execute(userId: user.uid, enabled: enabled);
+    } catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(const SnackBar(content: Text('设置保存失败,请重试')));
+      }
+    } finally {
+      ref.invalidate(pushPermissionStatusProvider);
+    }
+  }
+
+  /// iOS 本 App 的系统设置页(通知开关在里面)。
+  Future<void> _openSystemSettings(BuildContext context) async {
+    final opened = await launchUrl(Uri.parse('app-settings:'));
+    if (!opened && context.mounted) {
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          const SnackBar(content: Text('请在「设置 → CoFit → 通知」中允许通知')),
+        );
+    }
+  }
+
   /// 删除账号(Apple 上架要求)。二次确认 → 重认证 → 清数据 → 注销。
   Future<void> _deleteAccount(BuildContext context, WidgetRef ref) async {
     final confirmed = await showCoFitConfirmSheet(
@@ -145,6 +181,8 @@ class MyPageView extends ConsumerWidget {
     final profile = ref.watch(userProfileProvider).value;
     final hasSessionData = ref.watch(recentSessionsProvider).hasValue;
     final totals = ref.watch(sessionTotalsProvider);
+    final pushSettings = ref.watch(notificationSettingsProvider).value;
+    final pushPermission = ref.watch(pushPermissionStatusProvider).value;
 
     return Scaffold(
       body: SafeArea(
@@ -185,6 +223,13 @@ class MyPageView extends ConsumerWidget {
           onOpenPrivacyPolicy: () =>
               _openLegal(context, LegalLinks.privacyPolicy),
           onOpenTerms: () => _openLegal(context, LegalLinks.termsOfService),
+          partnerStartPushOn: pushSettings?.partnerStartEnabled,
+          onPartnerStartPushChanged: (enabled) =>
+              _setPartnerStartPush(context, ref, enabled),
+          onOpenSystemNotificationSettings:
+              pushPermission == PushPermissionStatus.denied
+              ? () => _openSystemSettings(context)
+              : null,
         ),
       ),
     );

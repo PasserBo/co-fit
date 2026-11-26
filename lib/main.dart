@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/navigation/app_navigator.dart';
 import 'core/theme/cofit_theme.dart';
 import 'features/auth/presentation/auth_gate_page.dart';
+import 'features/notification/data/firebase_push_messaging_gateway.dart';
 import 'firestore/ably_state_machine.dart';
 import 'firestore/firebase_initializer.dart';
 
@@ -16,6 +19,12 @@ Future<void> main() async {
     runApp(StartupErrorApp(error: '$error', stackTrace: '$stackTrace'));
     return;
   }
+  // 伙伴开始运动的推送在前台不弹(spec: 前台不弹出);失败不影响启动。
+  unawaited(
+    FirebasePushMessagingGateway.configureForegroundPresentation().catchError(
+      (Object e) => debugPrint('push: foreground options failed $e'),
+    ),
+  );
   runApp(const ProviderScope(child: CoFitApp()));
 }
 

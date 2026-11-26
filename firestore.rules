@@ -468,6 +468,64 @@ service cloud.firestore {
       allow delete: if isSignedIn() && request.auth.uid == userId;
     }
 
+    // ── 伙伴开始运动推送(change add-partner-start-push)──────────────────
+    // 推送由 Cloud Functions(Admin SDK,绕过 rules)发出;客户端只登记设备、
+    // 改自己的设置、留「开始运动」信号。四个子集合都在账号删除清理列表里。
+
+    // 推送设备:文档 id = FCM token。本人可写可删,不可读(服务端读)。
+    match /users/{userId}/devices/{token} {
+      allow read: if false;
+      allow create, update: if isSignedIn() &&
+        request.auth.uid == userId &&
+        request.resource.data.keys().hasAll(['token', 'platform', 'updatedAt']) &&
+        request.resource.data.keys().hasOnly(['token', 'platform', 'updatedAt']) &&
+        request.resource.data.token == token &&
+        token.size() <= 1024 &&
+        request.resource.data.platform in ['ios'] &&
+        request.resource.data.updatedAt == request.time;
+      allow delete: if isSignedIn() && request.auth.uid == userId;
+    }
+
+    // 通知设置:目前只有 notifications 一个文档。不存在 = 开、无静音。
+    match /users/{userId}/settings/{settingId} {
+      allow read, delete: if isSignedIn() && request.auth.uid == userId;
+      allow create, update: if isSignedIn() &&
+        request.auth.uid == userId &&
+        settingId == 'notifications' &&
+        request.resource.data.keys().hasAll(['updatedAt']) &&
+        request.resource.data.keys().hasOnly([
+          'partnerStartEnabled',
+          'mutedRoomIds',
+          'updatedAt',
+        ]) &&
+        (!request.resource.data.keys().hasAny(['partnerStartEnabled']) ||
+          request.resource.data.partnerStartEnabled is bool) &&
+        (!request.resource.data.keys().hasAny(['mutedRoomIds']) ||
+          (request.resource.data.mutedRoomIds is list &&
+            request.resource.data.mutedRoomIds.size() <= 200)) &&
+        request.resource.data.updatedAt == request.time;
+    }
+
+    // 「开始运动」信号:本人在自己是成员的房间里创建;服务端处理后删除。
+    match /users/{userId}/workout_starts/{sessionId} {
+      allow read, update: if false;
+      allow create: if isSignedIn() &&
+        request.auth.uid == userId &&
+        request.resource.data.keys().hasAll(['roomId', 'startedAt', 'createdAt']) &&
+        request.resource.data.keys().hasOnly(['roomId', 'startedAt', 'createdAt']) &&
+        isNonEmptyString(request.resource.data.roomId) &&
+        exists(/databases/$(database)/documents/users/$(userId)/memberships/$(request.resource.data.roomId)) &&
+        request.resource.data.startedAt is timestamp &&
+        request.resource.data.createdAt == request.time;
+      allow delete: if isSignedIn() && request.auth.uid == userId;
+    }
+
+    // 推送冷却等服务端状态:只有服务端写;本人可读、可删(账号删除)。
+    match /users/{userId}/notification_state/{kind} {
+      allow read, delete: if isSignedIn() && request.auth.uid == userId;
+      allow create, update: if false;
+    }
+
     match /card_templates/{templateId} {
       allow read: if isSignedIn();
       allow create, update, delete: if false;

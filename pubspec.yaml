@@ -58,6 +58,7 @@ dependencies:
   firebase_ai: ^4.0.0
   path_provider: ^2.1.6
   flutter_markdown_plus: ^1.0.12
+  firebase_messaging: ^16.7.1
 
 dev_dependencies:
   flutter_test:

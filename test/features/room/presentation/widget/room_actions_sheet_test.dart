@@ -99,4 +99,92 @@ void main() {
       RoomSheetAction.editInfo,
     );
   });
+
+  group('静音通知(add-partner-start-push)', () {
+    Future<RoomSheetAction?> pumpWithMute(
+      WidgetTester tester, {
+      required bool? muted,
+    }) async {
+      RoomSheetAction? popped;
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            brightness: Brightness.dark,
+          ).copyWith(extensions: [CoFitColors.dark]),
+          home: Builder(
+            builder: (context) => Scaffold(
+              body: TextButton(
+                onPressed: () async {
+                  popped = await showModalBottomSheet<RoomSheetAction>(
+                    context: context,
+                    isScrollControlled: true,
+                    builder: (_) => RoomActionsSheet(
+                      roomName: '早起组',
+                      isOwner: false,
+                      isPushMuted: muted,
+                    ),
+                  );
+                },
+                child: const Text('open'),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+      return popped;
+    }
+
+    testWidgets('未静音:显示「静音通知」', (tester) async {
+      await pumpWithMute(tester, muted: false);
+      expect(find.text('静音通知'), findsOneWidget);
+      expect(find.text('取消静音'), findsNothing);
+    });
+
+    testWidgets('已静音:菜单显示「取消静音」', (tester) async {
+      await pumpWithMute(tester, muted: true);
+      expect(find.text('取消静音'), findsOneWidget);
+    });
+
+    testWidgets('未知(null):不显示静音行', (tester) async {
+      await pumpWithMute(tester, muted: null);
+      expect(find.text('静音通知'), findsNothing);
+      expect(find.text('取消静音'), findsNothing);
+    });
+
+    testWidgets('点静音行返回 toggleMute', (tester) async {
+      RoomSheetAction? result;
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            brightness: Brightness.dark,
+          ).copyWith(extensions: [CoFitColors.dark]),
+          home: Builder(
+            builder: (context) => Scaffold(
+              body: TextButton(
+                onPressed: () async {
+                  result = await showModalBottomSheet<RoomSheetAction>(
+                    context: context,
+                    isScrollControlled: true,
+                    builder: (_) => const RoomActionsSheet(
+                      roomName: '早起组',
+                      isOwner: true,
+                      isPushMuted: false,
+                    ),
+                  );
+                },
+                child: const Text('open'),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('静音通知'));
+      await tester.pumpAndSettle();
+      expect(result, RoomSheetAction.toggleMute);
+    });
+  });
 }

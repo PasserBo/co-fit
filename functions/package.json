@@ -1,0 +1,26 @@
+{
+  "name": "cofit-functions",
+  "private": true,
+  "main": "lib/index.js",
+  "engines": {
+    "node": "22"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "test": "jest",
+    "test:emu": "firebase emulators:exec --only firestore --project demo-cofit \"jest --config jest.emu.config.js\""
+  },
+  "dependencies": {
+    "firebase-admin": "^13.10.0",
+    "firebase-functions": "^6.6.0"
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^4.0.1",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^20.19.43",
+    "firebase": "^11.10.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.4.15",
+    "typescript": "^5.9.3"
+  }
+}

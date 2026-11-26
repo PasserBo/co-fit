@@ -17,10 +17,15 @@ class FirebasePushDeviceRepository implements PushDeviceRepository {
           .doc(token);
 
   @override
-  Future<void> register({required String userId, required String token}) {
+  Future<void> register({
+    required String userId,
+    required String token,
+    required int utcOffsetMinutes,
+  }) {
     return _doc(userId, token).set({
       'token': token,
       'platform': 'ios',
+      'utcOffsetMinutes': utcOffsetMinutes,
       'updatedAt': FieldValue.serverTimestamp(),
     });
   }

@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/analytics/analytics_events.dart';
+import '../../../core/analytics/analytics_provider.dart';
 import '../../../core/theme/cofit_dimens.dart';
 import '../../../core/widget/cofit_confirm_sheet.dart';
 import '../../invite/provider/pending_invite_provider.dart';
@@ -12,6 +14,7 @@ import '../../room/provider/room_info_provider.dart';
 import '../domain/entity/push_message.dart';
 import '../provider/notification_providers.dart';
 import '../provider/push_offer_request_provider.dart';
+import '../usecase/push_permission_prompt.dart';
 
 /// 推送的生命周期接线,包在 AppShell 外层(已登录、启动数据就绪):
 /// - 挂载 / 回到前台 / token 刷新时,让服务端的设备登记与系统权限一致;
@@ -90,7 +93,13 @@ class _PushLifecycleBinderState extends ConsumerState<PushLifecycleBinder>
       return;
     }
     final joined = ref.read(roomBrowserProvider).joinedRoomIds;
-    if (!joined.contains(roomId)) {
+    final entered = joined.contains(roomId);
+    unawaited(
+      ref.read(analyticsTrackerProvider).log(AnalyticsEvents.pushOpened, {
+        AnalyticsEvents.pEntered: AnalyticsEvents.flag(entered),
+      }),
+    );
+    if (!entered) {
       return;
     }
     unawaited(enterJoinedRoom(ref, Navigator.of(context), roomId: roomId));
@@ -120,7 +129,7 @@ class _PushLifecycleBinderState extends ConsumerState<PushLifecycleBinder>
       debugPrint('push: offer check failed $e');
       return;
     }
-    await _offer(roomName: null);
+    await _offer(roomName: null, trigger: AnalyticsEvents.triggerExisting);
   }
 
   Future<bool> _hasRoomWithOthers() async {
@@ -143,6 +152,9 @@ class _PushLifecycleBinderState extends ConsumerState<PushLifecycleBinder>
       await _offer(
         roomName: name.isEmpty ? null : name,
         isNewRoom: request.isNewRoom,
+        trigger: request.isNewRoom
+            ? AnalyticsEvents.triggerCreate
+            : AnalyticsEvents.triggerJoin,
       );
     }
   }
@@ -160,14 +172,16 @@ class _PushLifecycleBinderState extends ConsumerState<PushLifecycleBinder>
 
   Future<void> _offer({
     required String? roomName,
+    required String trigger,
     bool isNewRoom = false,
   }) async {
     if (_offering) {
       return;
     }
     _offering = true;
+    final analytics = ref.read(analyticsTrackerProvider);
     try {
-      await ref
+      final outcome = await ref
           .read(offerPushPermissionUsecaseProvider)
           .execute(
             userId: widget.userId,
@@ -175,6 +189,11 @@ class _PushLifecycleBinderState extends ConsumerState<PushLifecycleBinder>
               if (!mounted) {
                 return false;
               }
+              unawaited(
+                analytics.log(AnalyticsEvents.pushOfferShown, {
+                  AnalyticsEvents.pTrigger: trigger,
+                }),
+              );
               final accepted = await showCoFitConfirmSheet(
                 context,
                 title: '伙伴开始运动时通知你?',
@@ -186,9 +205,30 @@ class _PushLifecycleBinderState extends ConsumerState<PushLifecycleBinder>
                 cancelLabel: '以后再说',
                 icon: Icons.notifications_active_outlined,
               );
+              unawaited(
+                analytics.log(AnalyticsEvents.pushOfferResult, {
+                  AnalyticsEvents.pTrigger: trigger,
+                  AnalyticsEvents.pAccepted: AnalyticsEvents.flag(
+                    accepted == true,
+                  ),
+                }),
+              );
               return accepted == true;
             },
           );
+      if (outcome == PushOfferOutcome.requested) {
+        final status = await ref
+            .read(pushMessagingGatewayProvider)
+            .permissionStatus();
+        unawaited(
+          analytics.log(AnalyticsEvents.pushPermissionResult, {
+            AnalyticsEvents.pSource: AnalyticsEvents.sourceOffer,
+            AnalyticsEvents.pResult: status.canReceive
+                ? AnalyticsEvents.resultGranted
+                : AnalyticsEvents.resultDenied,
+          }),
+        );
+      }
       ref.invalidate(pushPermissionStatusProvider);
     } catch (e) {
       debugPrint('push: offer failed $e');

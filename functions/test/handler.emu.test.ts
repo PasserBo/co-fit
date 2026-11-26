@@ -36,8 +36,13 @@ async function seedRoom(roomId: string, name: string, memberIds: string[]) {
   await Promise.all(memberIds.map((id) => db.doc(`users/${id}/memberships/${roomId}`).set({ roomId })));
 }
 
-async function seedDevice(uid: string, token: string) {
-  await db.doc(`users/${uid}/devices/${token}`).set({ token, platform: 'ios', updatedAt: Timestamp.now() });
+async function seedDevice(uid: string, token: string, utcOffsetMinutes?: number) {
+  await db.doc(`users/${uid}/devices/${token}`).set({
+    token,
+    platform: 'ios',
+    updatedAt: Timestamp.now(),
+    ...(utcOffsetMinutes === undefined ? {} : { utcOffsetMinutes }),
+  });
 }
 
 function start(roomId: string, startedAt = now) {
@@ -138,4 +143,16 @@ it('失效 token 被删除', async () => {
   await start('r-early');
   expect((await db.doc('users/zhou/devices/tok-zhou').get()).exists).toBe(false);
   expect((await db.doc('users/chen/devices/tok-chen').get()).exists).toBe(false);
+});
+
+it('接收者当地夜间:不发,也不占冷却;同一人白天的设备照发', async () => {
+  // now = 12:00Z:纽约 7:00(夜间),东京 21:00(白天)
+  await seedDevice('zhou', 'tok-zhou', -300);
+  await seedDevice('chen', 'tok-chen', -300);
+  await seedDevice('chen', 'tok-chen-tokyo', 540);
+  await start('r-early');
+  const tokens = sentTo().map((s) => s.token);
+  expect(tokens).toEqual(['tok-chen-tokyo']);
+  const zhouState = await db.doc('users/zhou/notification_state/partner_start').get();
+  expect(zhouState.exists).toBe(false);
 });

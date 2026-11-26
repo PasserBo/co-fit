@@ -18,6 +18,7 @@ import {
   buildNotificationText,
   chooseRoom,
   isCoolingDown,
+  isQuietHours,
   isStale,
   parseConfig,
   parseSettings,
@@ -111,7 +112,12 @@ async function notifyRecipient(params: {
   if (!room) return 'skipped';
 
   const devices = await userRef.collection('devices').get();
+  // 夜间的设备不发(spec: 夜间不推送);全部在夜间时不占冷却。
   const tokens = devices.docs
+    .filter(
+      (d) =>
+        !isQuietHours(now, d.get('utcOffsetMinutes'), config.quietStartHour, config.quietEndHour),
+    )
     .map((d) => d.get('token'))
     .filter((t): t is string => typeof t === 'string' && t !== '');
   if (tokens.length === 0) return 'skipped';

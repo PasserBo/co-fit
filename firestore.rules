@@ -472,17 +472,22 @@ service cloud.firestore {
     // 推送由 Cloud Functions(Admin SDK,绕过 rules)发出;客户端只登记设备、
     // 改自己的设置、留「开始运动」信号。四个子集合都在账号删除清理列表里。
 
-    // 推送设备:文档 id = FCM token。本人可写可删,不可读(服务端读)。
+    // 推送设备:文档 id = FCM token,带设备当地时差(夜间不推送用)。本人可写可删,不可读(服务端读)。
     match /users/{userId}/devices/{token} {
       allow read: if false;
       allow create, update: if isSignedIn() &&
         request.auth.uid == userId &&
         request.resource.data.keys().hasAll(['token', 'platform', 'updatedAt']) &&
-        request.resource.data.keys().hasOnly(['token', 'platform', 'updatedAt']) &&
+        request.resource.data.keys().hasOnly(['token', 'platform', 'updatedAt', 'utcOffsetMinutes']) &&
         request.resource.data.token == token &&
         token.size() <= 1024 &&
         request.resource.data.platform in ['ios'] &&
-        request.resource.data.updatedAt == request.time;
+        request.resource.data.updatedAt == request.time &&
+        // 设备当地时间与 UTC 的差(分钟),服务端据此判断夜间不推送
+        (!request.resource.data.keys().hasAny(['utcOffsetMinutes']) ||
+          (request.resource.data.utcOffsetMinutes is int &&
+            request.resource.data.utcOffsetMinutes >= -840 &&
+            request.resource.data.utcOffsetMinutes <= 840));
       allow delete: if isSignedIn() && request.auth.uid == userId;
     }
 

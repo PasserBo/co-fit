@@ -1,8 +1,7 @@
 # Tasks: add-partner-start-push
 
 ## Now
-2026-11-26:代码已提交推送 main;Blaze、App ID 推送能力、APNs key(Key ID `VG4U48LNDU`,dev + prod 都已上传到 `com.passerbo.cofitapp`)完成;`partnerStartPush` 已从本机部署上线(Node 22,us-central1);rules 由 CI 部署。下一步:T21 真机双账号走查(me)。CI 的 Functions 部署权限(T19 方案 B)可以以后再补,在那之前改 `functions/` 在本机部署。
-⚠️ App 带 `aps-environment` entitlement:App ID 已开推送,真机签名应当正常;若 Xcode / build_ipa 报 profile 不含推送能力,让签名重新生成 profile 即可。
+2026-11-26:1.0.0 (6) 已上传 TestFlight(含推送与加入 / 新建房间后的询问)。之后加了**夜间不推送**(T23,未提交):要用户确认 rules diff → 推送 main → 本机重新部署 Functions(T24)。真机双账号走查(T21)仍待做。
 
 ## M1 · 服务端与数据
 - [x] T1 `firestore.rules`:新增 `devices` / `settings` / `workout_starts` / `notification_state` 四段 — owner: agent · done 2026-11-26
@@ -41,6 +40,9 @@
 - [x] ~~T15 和伙伴同房间完成一张卡后请求权限(系统只弹一次)~~ dropped: 2026-11-26 用户改为加入房间后 App 内先问,见 T22
 - [x] T22 App 内通知提示:加入房间(邀请 / 发现 / 手输 ID)后、或更新前就在有人房间里的用户打开 App 时,先用确认弹层说明,点「打开通知」才弹系统请求;「以后再说」7 天内不再问;新建房间在邀请卡收起后问(文案说伙伴加入后)— owner: agent · done 2026-11-26
   - evidence: `shouldOfferPushPermission` / `OfferPushPermissionUsecase` 单测;全量 436 过;新 token `motion.pushOfferDelay`(800ms)
+- [x] T23 夜间不推送:设备登记带 `utcOffsetMinutes`(每次同步更新),服务端按接收者设备当地时间跳过 23:00–8:00(配置 `quietStartHour` / `quietEndHour`),不补发;全部设备在夜间时不占冷却 — owner: agent · done 2026-11-26
+  - evidence: `isQuietHours` 单测 4 组;handler 模拟器测试「接收者当地夜间」;rules 测试「可以带当地时差」;App 端单测「登记时带上设备当地时差」
+- [ ] T24 用户确认 rules diff(devices 多一个可选字段 `utcOffsetMinutes`)后推送 main;**本机重新部署 Functions**(CI 仍缺权限,见 T19 B)— owner: me · after: T23
 
 ## M4 · 外部配置与上线(me)
 

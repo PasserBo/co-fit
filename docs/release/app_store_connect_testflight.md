@@ -202,11 +202,14 @@ Notes:
 | 标识符 → 用户 ID | 是 | 是 | 否 | App 功能 | Firebase uid + **昵称**(Apple 定义里 screen name / handle 属 User ID,不是 Name),Ably presence 带 userId |
 | 健康与健身 → 健身 | 是 | 是 | 否 | App 功能 | `users/{uid}/sessions` 运动记录 |
 | 用户内容 → 其他用户内容 | 是 | 是 | 否 | App 功能 | 房间名/描述、自建卡、牌组、举报内容 |
-| 设备 ID / 位置 / 联系人 / 照片 / 诊断 / 使用数据 / 广告数据 | 否 | — | — | — | 无 Analytics、Crashlytics、广告 SDK |
+| 使用数据 → 产品交互 | 是 | **否** | 否 | 分析 | Google Analytics for Firebase(通知询问 / 推送点开 / 出牌等事件,不上报用户 id;change add-usage-analytics,2026-11-26) |
+| 标识符 → 设备 ID | 是 | **否** | 否 | 分析 | Firebase Analytics 的应用实例 ID(不收集 IDFA,IDFV 采集已关) |
+| 位置 / 联系人 / 照片 / 诊断 / 广告数据 | 否 | — | — | — | 无 Crashlytics、广告 SDK |
 | 联系信息 → 姓名 | **否** | — | — | — | Apple 登录虽请求 `fullName` scope,但返回的姓名未读取、未上传;昵称归 User ID。⚠️ 若将来打开 Google 登录,Firebase Auth 会自动存 Google 账号的真实姓名到 `displayName`,届时要改为「是」 |
 
 - 「是否用于追踪」全部 **否**,所以不会触发 ATT。
 - Firebase Remote Config 取参时带 OS 版本/国家/语言做定向,Firebase 文档未归入任何需申报类型,且不关联用户,按 Apple「仅用于功能、不存储、不关联」豁免处理,不申报。
+- 推送:推送令牌、通知设置、设备时差只用于发通知(App 功能),Apple 的数据类型里没有对应项;推送内容(房间名、昵称)已在「其他用户内容 / 用户 ID」里。
 - 这张表和 §0.6 的 `PrivacyInfo.xcprivacy` 必须保持一致;隐私政策 §1 已逐条对应。
 
 ### 5.2 截图

@@ -1,6 +1,6 @@
 # CoFit 隐私政策
 
-生效日期:2026-10-26
+生效日期:2026-11-26
 
 CoFit(以下简称「本应用」)由个人开发者 PasserBo 开发运营。本政策说明本应用收集哪些信息、如何使用,以及你如何控制这些信息。使用本应用即表示你同意本政策。
 
@@ -16,14 +16,17 @@ CoFit(以下简称「本应用」)由个人开发者 PasserBo 开发运营。本
 | 自建动作卡、牌组 | 你的个性化运动内容 | Cloud Firestore `users/{uid}/cards`、`users/{uid}/decks` |
 | 运动记录(动作名称、时长、开始/完成时间、所在房间) | 「运动历史」与统计 | Cloud Firestore `users/{uid}/sessions` |
 | 举报内容(被举报的房间或成员、原因) | 处理违规内容 | Cloud Firestore `reports`(仅开发者可读) |
+| 通知设置(是否接收伙伴开始运动的通知、静音的房间) | 决定是否给你发通知 | Cloud Firestore `users/{uid}/settings` |
 
 ### 1.2 自动产生的信息
 
 - **实时在线状态**:当你进入房间,你的用户 ID、昵称和当前运动状态会通过 Ably 实时服务广播给同一房间的成员。该数据仅在你在线期间存在,离线后自动清除,不做持久保存。
 - **本地缓存**:进行中的运动会话快照保存在你的设备本地,用于应用意外退出后恢复计时;完成后自动删除。
+- **推送通知**:你允许通知后,本应用会保存这台设备的推送令牌和设备当地与标准时间的时差(用于在你当地夜间不发送通知),存于 Cloud Firestore `users/{uid}/devices`。你开始一张卡时,应用会留下一条「开始运动」记录(房间与开始时间),服务器据此通知同房间的伙伴后立即删除。通知内容(房间名、你的昵称)经 Firebase Cloud Messaging 与 Apple 推送服务送达对方设备。你可以在「我的 → 通知」或系统设置中关闭,退出登录后这台设备不再收到通知。
+- **使用数据统计**:本应用使用 Google Analytics for Firebase 统计功能的使用情况(例如是否打开了通知、推送是否被点开、开始与完成了几张卡),用来改进产品。统计**不包含**你的账号 ID、昵称、邮箱或运动内容,不与你的账号关联,不收集广告标识符,也不用于广告或跨应用追踪。Firebase 会为每次安装生成一个随机的应用实例 ID。
 - **技术数据**:Firebase 与 Ably 服务在提供连接时会处理设备的网络地址等技术信息,详见各自的隐私政策。
 
-本应用**不收集**:精确位置、通讯录、照片、健康数据(HealthKit)、广告标识符,也不接入任何广告或分析 SDK。
+本应用**不收集**:精确位置、通讯录、照片、健康数据(HealthKit)、广告标识符,也不接入任何广告 SDK。
 
 ## 2. 信息的使用
 
@@ -31,8 +34,10 @@ CoFit(以下简称「本应用」)由个人开发者 PasserBo 开发运营。本
 
 1. 提供账号登录与房间内的实时同步功能;
 2. 展示你的运动历史与统计;
-3. 处理举报、维护社区秩序;
-4. 排查故障、保障服务安全。
+3. 在同房间的伙伴开始运动时通知你(可关闭);
+4. 统计功能的使用情况,改进产品(不关联账号);
+5. 处理举报、维护社区秩序;
+6. 排查故障、保障服务安全。
 
 我们不会将你的信息出售或用于广告投放。
 
@@ -47,7 +52,8 @@ CoFit(以下简称「本应用」)由个人开发者 PasserBo 开发运营。本
 
 本应用依赖以下第三方服务,它们各自处理数据的方式受其隐私政策约束:
 
-- Google Firebase(Authentication、Cloud Firestore、Remote Config):https://firebase.google.com/support/privacy
+- Google Firebase(Authentication、Cloud Firestore、Remote Config、Cloud Functions、Cloud Messaging、Google Analytics for Firebase):https://firebase.google.com/support/privacy
+- Apple 推送通知服务(APNs):https://www.apple.com/legal/privacy/
 - Ably Realtime:https://ably.com/privacy
 - Sign in with Apple:https://www.apple.com/legal/privacy/
 - Google 登录(如开放):https://policies.google.com/privacy
@@ -55,7 +61,7 @@ CoFit(以下简称「本应用」)由个人开发者 PasserBo 开发运营。本
 ## 5. 数据保留与删除
 
 - 账号存续期间,上述数据持续保存。
-- 你可以随时在「我的 → 删除账号」中**永久删除**账号:应用会先清空你在 Firestore 中的全部数据(资料、房间成员关系、牌组、自建卡、运动记录),解散你创建的房间,然后注销登录账号。通过 Apple 登录的账号会同时撤销 Apple 授权。
+- 你可以随时在「我的 → 删除账号」中**永久删除**账号:应用会先清空你在 Firestore 中的全部数据(资料、房间成员关系、牌组、自建卡、运动记录与 memo、推送设备与通知设置),解散你创建的房间,然后注销登录账号。通过 Apple 登录的账号会同时撤销 Apple 授权。
 - 删除操作不可恢复。举报记录在处理完毕后由开发者定期清理。
 
 ## 6. 未成年人

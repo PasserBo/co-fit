@@ -54,6 +54,8 @@ import 'room_discover_page_view.dart';
 import 'room_edit_sheet_view.dart';
 import 'room_members_sheet_view.dart';
 import '../../../notification/provider/notification_providers.dart';
+import '../../../../core/analytics/analytics_events.dart';
+import '../../../../core/analytics/analytics_provider.dart';
 
 /// 房间主界面(#6b 定稿):全屏沉浸场景,无底部 nav。
 /// 漂浮气泡(presence)+ 左右滑切换房间 + 底部扇形手牌(#5d 聚焦/上滑打出)
@@ -535,6 +537,11 @@ class _RoomMainViewState extends ConsumerState<RoomMainView>
       await ref
           .read(setRoomPushMutedUsecaseProvider)
           .execute(userId: widget.userId, roomId: roomId, muted: !muted);
+      unawaited(
+        ref.read(analyticsTrackerProvider).log(AnalyticsEvents.roomPushMuted, {
+          AnalyticsEvents.pMuted: AnalyticsEvents.flag(!muted),
+        }),
+      );
       messenger
         ..hideCurrentSnackBar()
         ..showSnackBar(

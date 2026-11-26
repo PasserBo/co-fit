@@ -65,13 +65,19 @@ class FakeGateway implements PushMessagingGateway {
 
 class FakeDevices implements PushDeviceRepository {
   final registered = <String>{};
+  final offsets = <String, int>{};
   final log = <String>[];
   Object? unregisterError;
 
   @override
-  Future<void> register({required String userId, required String token}) async {
-    log.add('register $userId $token');
+  Future<void> register({
+    required String userId,
+    required String token,
+    required int utcOffsetMinutes,
+  }) async {
+    log.add('register $userId $token $utcOffsetMinutes');
     registered.add(token);
+    offsets[token] = utcOffsetMinutes;
   }
 
   @override
@@ -249,6 +255,18 @@ void main() {
       final devices = FakeDevices();
       await SyncPushDeviceUsecase(gateway, devices).execute(userId: 'u');
       expect(devices.registered, {'tok-1'});
+    });
+
+    test('登记时带上设备当地时差', () async {
+      final gateway = FakeGateway(status: PushPermissionStatus.authorized);
+      final devices = FakeDevices();
+      final now = DateTime.now();
+      await SyncPushDeviceUsecase(
+        gateway,
+        devices,
+        now: () => now,
+      ).execute(userId: 'u');
+      expect(devices.offsets['tok-1'], now.timeZoneOffset.inMinutes);
     });
 
     test('token 刷新时登记新 token', () async {

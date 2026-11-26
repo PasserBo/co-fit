@@ -1,8 +1,12 @@
+import 'dart:async';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../../core/analytics/analytics_events.dart';
+import '../../../../core/analytics/analytics_provider.dart';
 import '../../../../core/legal/legal_links.dart';
 import '../../../../core/widget/cofit_confirm_sheet.dart';
 
@@ -97,10 +101,28 @@ class MyPageView extends ConsumerWidget {
     WidgetRef ref,
     bool enabled,
   ) async {
+    final analytics = ref.read(analyticsTrackerProvider);
+    final before = ref.read(pushPermissionStatusProvider).value;
     try {
-      await ref
+      final after = await ref
           .read(setPartnerStartPushUsecaseProvider)
           .execute(userId: user.uid, enabled: enabled);
+      unawaited(
+        analytics.log(AnalyticsEvents.pushSettingChanged, {
+          AnalyticsEvents.pEnabled: AnalyticsEvents.flag(enabled),
+        }),
+      );
+      if (before == PushPermissionStatus.notDetermined &&
+          after != PushPermissionStatus.notDetermined) {
+        unawaited(
+          analytics.log(AnalyticsEvents.pushPermissionResult, {
+            AnalyticsEvents.pSource: AnalyticsEvents.sourceSettings,
+            AnalyticsEvents.pResult: after.canReceive
+                ? AnalyticsEvents.resultGranted
+                : AnalyticsEvents.resultDenied,
+          }),
+        );
+      }
     } catch (_) {
       if (context.mounted) {
         ScaffoldMessenger.of(context)

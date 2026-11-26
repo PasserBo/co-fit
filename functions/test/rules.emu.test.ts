@@ -56,6 +56,17 @@ describe('devices', () => {
   it('不能替别人登记', async () => {
     await assertFails(setDoc(doc(zhou(), `users/lin/devices/${token}`), valid));
   });
+  it('可以带当地时差,超出范围或类型不对不行', async () => {
+    await assertSucceeds(
+      setDoc(doc(lin(), `users/lin/devices/${token}`), { ...valid, utcOffsetMinutes: 540 }),
+    );
+    await assertFails(
+      setDoc(doc(lin(), `users/lin/devices/${token}`), { ...valid, utcOffsetMinutes: 2000 }),
+    );
+    await assertFails(
+      setDoc(doc(lin(), `users/lin/devices/${token}`), { ...valid, utcOffsetMinutes: '540' }),
+    );
+  });
   it('token 必须等于文档 id,不能多字段', async () => {
     await assertFails(setDoc(doc(lin(), 'users/lin/devices/other'), valid));
     await assertFails(setDoc(doc(lin(), `users/lin/devices/${token}`), { ...valid, extra: 1 }));

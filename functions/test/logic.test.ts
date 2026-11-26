@@ -4,6 +4,7 @@ import {
   buildNotificationText,
   chooseRoom,
   isCoolingDown,
+  isQuietHours,
   isStale,
   parseConfig,
   parseSettings,
@@ -115,5 +116,38 @@ describe('buildNotificationText', () => {
   });
   it('没有昵称时用兜底称呼', () => {
     expect(buildNotificationText(DEFAULT_CONFIG, '早起组', '  ').body).toContain('伙伴 TA 开始');
+  });
+});
+
+describe('isQuietHours', () => {
+  // 2026-11-26T00:00Z = 东京 9:00(+540)、纽约 19:00(-300)、洛杉矶 16:00(-480)
+  const now = new Date('2026-11-26T00:00:00Z');
+
+  it('跨零点的夜间时段 23–8', () => {
+    expect(isQuietHours(new Date('2026-11-26T07:00:00Z'), -300, 23, 8)).toBe(true); // 纽约 2:00
+    expect(isQuietHours(now, 540, 23, 8)).toBe(false); // 东京 9:00
+    expect(isQuietHours(new Date('2026-11-25T14:00:00Z'), 540, 23, 8)).toBe(true); // 东京 23:00
+    expect(isQuietHours(new Date('2026-11-25T23:00:00Z'), 540, 23, 8)).toBe(false); // 东京 8:00
+  });
+
+  it('不跨零点的时段', () => {
+    expect(isQuietHours(now, -480, 13, 17)).toBe(true); // 洛杉矶 16:00
+    expect(isQuietHours(now, -300, 13, 17)).toBe(false); // 纽约 19:00
+  });
+
+  it('时区未知 / 时段相等 → 不限制', () => {
+    expect(isQuietHours(new Date('2026-11-26T07:00:00Z'), undefined, 23, 8)).toBe(false);
+    expect(isQuietHours(now, 540, 0, 0)).toBe(false);
+  });
+
+  it('配置解析夜间时段', () => {
+    expect(parseConfig(JSON.stringify({ quietStartHour: 22, quietEndHour: 7 }))).toMatchObject({
+      quietStartHour: 22,
+      quietEndHour: 7,
+    });
+    expect(parseConfig(JSON.stringify({ quietStartHour: 24, quietEndHour: 1.5 }))).toMatchObject({
+      quietStartHour: 23,
+      quietEndHour: 8,
+    });
   });
 });

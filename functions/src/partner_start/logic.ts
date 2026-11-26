@@ -14,6 +14,9 @@ export interface PartnerStartConfig {
   body: string;
   /** 发起人没有昵称时代替 {nickname}。 */
   fallbackNickname: string;
+  /** 夜间时段(接收者设备当地时间的整点,[start, end),可跨零点;相等 = 不限制)。 */
+  quietStartHour: number;
+  quietEndHour: number;
 }
 
 export const CONFIG_PARAM_KEY = 'partner_start_push_config';
@@ -24,6 +27,8 @@ export const DEFAULT_CONFIG: PartnerStartConfig = {
   title: '{room}',
   body: '你的「{room}」运动伙伴 {nickname} 开始运动了!',
   fallbackNickname: 'TA',
+  quietStartHour: 23,
+  quietEndHour: 8,
 };
 
 /** 解析配置 JSON;缺失、类型不对、取值越界的字段用默认值。 */
@@ -41,6 +46,8 @@ export function parseConfig(raw: string | undefined | null): PartnerStartConfig 
   const obj = parsed as Record<string, unknown>;
   const nonNegative = (v: unknown, fallback: number) =>
     typeof v === 'number' && Number.isFinite(v) && v >= 0 ? v : fallback;
+  const hour = (v: unknown, fallback: number) =>
+    typeof v === 'number' && Number.isInteger(v) && v >= 0 && v <= 23 ? v : fallback;
   const nonEmpty = (v: unknown, fallback: string) =>
     typeof v === 'string' && v.trim() !== '' ? v : fallback;
   return {
@@ -49,6 +56,8 @@ export function parseConfig(raw: string | undefined | null): PartnerStartConfig 
     title: nonEmpty(obj.title, DEFAULT_CONFIG.title),
     body: nonEmpty(obj.body, DEFAULT_CONFIG.body),
     fallbackNickname: nonEmpty(obj.fallbackNickname, DEFAULT_CONFIG.fallbackNickname),
+    quietStartHour: hour(obj.quietStartHour, DEFAULT_CONFIG.quietStartHour),
+    quietEndHour: hour(obj.quietEndHour, DEFAULT_CONFIG.quietEndHour),
   };
 }
 
@@ -58,6 +67,23 @@ export function parseConfig(raw: string | undefined | null): PartnerStartConfig 
  */
 export function isStale(startedAt: Date, createdAt: Date, staleMinutes: number): boolean {
   return createdAt.getTime() - startedAt.getTime() > staleMinutes * 60_000;
+}
+
+/**
+ * 设备当地时间是否在夜间时段。[utcOffsetMinutes] 未知(旧登记)视为不在夜间,照常发送。
+ * 时段 [start, end) 按整点,start > end 表示跨零点(如 23 → 8);start == end 表示不限制。
+ */
+export function isQuietHours(
+  now: Date,
+  utcOffsetMinutes: number | null | undefined,
+  startHour: number,
+  endHour: number,
+): boolean {
+  if (typeof utcOffsetMinutes !== 'number' || !Number.isFinite(utcOffsetMinutes)) return false;
+  if (startHour === endHour) return false;
+  const local = new Date(now.getTime() + utcOffsetMinutes * 60_000);
+  const h = local.getUTCHours();
+  return startHour < endHour ? h >= startHour && h < endHour : h >= startHour || h < endHour;
 }
 
 export interface RoomInfo {

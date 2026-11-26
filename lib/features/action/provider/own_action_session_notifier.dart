@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/analytics/analytics_events.dart';
+import '../../../core/analytics/analytics_provider.dart';
 import '../../../firestore/ably_state_machine.dart';
 import '../../room/domain/entity/user_activity_status_entity.dart';
 import '../../notification/provider/notification_providers.dart';
@@ -70,6 +72,11 @@ class OwnActionSessionNotifier extends Notifier<TemplateCardSession?> {
 
     // 告诉服务端「开始运动了」,由它推送给伙伴;失败不影响运动。
     unawaited(_signalStart(session));
+    unawaited(
+      ref.read(analyticsTrackerProvider).log(AnalyticsEvents.cardStarted, {
+        AnalyticsEvents.pDurationSec: card.defaultDurationSec,
+      }),
+    );
 
     // 持久化失败不影响会话(只是失去被杀后的恢复能力)。
     unawaited(
@@ -183,6 +190,11 @@ class OwnActionSessionNotifier extends Notifier<TemplateCardSession?> {
     await ref
         .read(completeTemplateCardActionUsecaseProvider)
         .execute(session: session, card: card);
+    unawaited(
+      ref.read(analyticsTrackerProvider).log(AnalyticsEvents.cardCompleted, {
+        AnalyticsEvents.pDurationSec: card.defaultDurationSec,
+      }),
+    );
     // 打卡记录落库:fire-and-forget,失败不阻塞事件/presence 流。
     // app 在会话中被杀的情况由 recoverPending 在下次启动补记。
     unawaited(

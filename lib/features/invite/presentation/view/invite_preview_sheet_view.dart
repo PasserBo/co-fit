@@ -7,6 +7,7 @@ import '../../../../core/theme/cofit_dimens.dart';
 import '../../../auth/presentation/user_bootstrap_provider.dart';
 import '../../../avatar/presentation/idle_avatar_figure.dart';
 import '../../../room/presentation/join_room_provider.dart';
+import '../../../notification/provider/push_offer_request_provider.dart';
 import '../../../room/presentation/room_browser_provider.dart';
 import '../../domain/entity/invite_link_entity.dart';
 import '../../provider/invite_usecase_providers.dart';
@@ -75,6 +76,10 @@ class _InvitePreviewSheetViewState
               userId: widget.userId,
             );
         await ref.read(userBootstrapProvider.notifier).refreshJoinedRooms();
+        // 加入后询问通知(spec: 首次请求通知权限)
+        ref
+            .read(pushOfferRequestProvider.notifier)
+            .requestAfterJoin(result.room.name);
       }
       ref
           .read(roomBrowserProvider.notifier)

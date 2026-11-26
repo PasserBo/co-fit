@@ -38,8 +38,9 @@
   - evidence: `my_page_body_test.dart` 4 项;未在模拟器上目视(点模拟器需要用户授权设备访问)
 - [x] T14 房间菜单「静音通知 / 取消静音」(房主与成员都有),操作后 SnackBar — owner: agent · done 2026-11-26
   - evidence: `room_actions_sheet_test.dart` 4 项
-- [x] T15 和伙伴同房间完成一张卡后请求权限(系统只弹一次)— owner: agent · done 2026-11-26
-  - evidence: `shouldAskPushPermission` / `AskPushPermissionAfterWorkoutUsecase` 单测
+- [x] ~~T15 和伙伴同房间完成一张卡后请求权限(系统只弹一次)~~ dropped: 2026-11-26 用户改为加入房间后 App 内先问,见 T22
+- [x] T22 App 内通知提示:加入房间(邀请 / 发现 / 手输 ID)后、或更新前就在有人房间里的用户打开 App 时,先用确认弹层说明,点「打开通知」才弹系统请求;「以后再说」7 天内不再问;新建房间在邀请卡收起后问(文案说伙伴加入后)— owner: agent · done 2026-11-26
+  - evidence: `shouldOfferPushPermission` / `OfferPushPermissionUsecase` 单测;全量 436 过;新 token `motion.pushOfferDelay`(800ms)
 
 ## M4 · 外部配置与上线(me)
 

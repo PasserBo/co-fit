@@ -5,11 +5,13 @@ import '../data/firebase_notification_settings_repository.dart';
 import '../data/firebase_push_device_repository.dart';
 import '../data/firebase_push_messaging_gateway.dart';
 import '../data/firebase_workout_start_signal_repository.dart';
+import '../data/shared_preferences_push_offer_store.dart';
 import '../domain/entity/notification_settings.dart';
 import '../domain/entity/push_permission_status.dart';
 import '../domain/notification_settings_repository.dart';
 import '../domain/push_device_repository.dart';
 import '../domain/push_messaging_gateway.dart';
+import '../domain/push_offer_store.dart';
 import '../domain/workout_start_signal_repository.dart';
 import '../usecase/push_permission_prompt.dart';
 import '../usecase/signal_workout_start_usecase.dart';
@@ -62,13 +64,19 @@ final signalWorkoutStartUsecaseProvider = Provider<SignalWorkoutStartUsecase>((
   );
 });
 
-final askPushPermissionAfterWorkoutUsecaseProvider =
-    Provider<AskPushPermissionAfterWorkoutUsecase>((ref) {
-      return AskPushPermissionAfterWorkoutUsecase(
-        ref.watch(pushMessagingGatewayProvider),
-        ref.watch(syncPushDeviceUsecaseProvider),
-      );
-    });
+final pushOfferStoreProvider = Provider<PushOfferStore>((ref) {
+  return SharedPreferencesPushOfferStore();
+});
+
+final offerPushPermissionUsecaseProvider = Provider<OfferPushPermissionUsecase>(
+  (ref) {
+    return OfferPushPermissionUsecase(
+      ref.watch(pushMessagingGatewayProvider),
+      ref.watch(pushOfferStoreProvider),
+      ref.watch(syncPushDeviceUsecaseProvider),
+    );
+  },
+);
 
 final setPartnerStartPushUsecaseProvider = Provider<SetPartnerStartPushUsecase>(
   (ref) {

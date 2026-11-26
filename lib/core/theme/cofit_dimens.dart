@@ -160,6 +160,9 @@ abstract class CoFitMotion {
 
   /// 今日进度等不到庆祝节拍时直接更新的等待上限
   static const dailyProgressBeatTimeout = Duration(milliseconds: 2500);
+
+  /// 加入房间后等房间先出现、再弹 App 内通知提示
+  static const pushOfferDelay = Duration(milliseconds: 800);
 }
 
 /// decor.* — 装饰性绘制常量

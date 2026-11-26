@@ -7,7 +7,6 @@ import '../../../firestore/ably_state_machine.dart';
 import '../../room/domain/entity/user_activity_status_entity.dart';
 import '../../notification/provider/notification_providers.dart';
 import '../../room/provider/own_activity_status_provider.dart';
-import '../../room/provider/room_info_provider.dart';
 import '../domain/entity/action_template_card.dart';
 import '../domain/entity/pending_session_snapshot.dart';
 import '../domain/entity/template_card_session.dart';
@@ -203,7 +202,6 @@ class OwnActionSessionNotifier extends Notifier<TemplateCardSession?> {
         updatedAtEpochMs: DateTime.now().millisecondsSinceEpoch,
       ),
     );
-    unawaited(_maybeAskPushPermission(session));
   }
 
   Future<void> _signalStart(TemplateCardSession session) async {
@@ -218,21 +216,6 @@ class OwnActionSessionNotifier extends Notifier<TemplateCardSession?> {
           );
     } catch (error) {
       debugPrint('workout start signal failed: $error');
-    }
-  }
-
-  /// 第一次和伙伴同房间完成一张卡后请求通知权限(spec: 首次请求通知权限)。
-  Future<void> _maybeAskPushPermission(TemplateCardSession session) async {
-    try {
-      final members =
-          ref.read(roomInfoProvider(session.roomId)).value?.memberIds ??
-          const <String>[];
-      final others = members.where((id) => id != session.userId).length;
-      await ref
-          .read(askPushPermissionAfterWorkoutUsecaseProvider)
-          .execute(userId: session.userId, otherMemberCount: others);
-    } catch (error) {
-      debugPrint('push permission prompt failed: $error');
     }
   }
 

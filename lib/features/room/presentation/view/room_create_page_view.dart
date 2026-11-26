@@ -9,6 +9,7 @@ import '../create_room_provider.dart';
 import '../room_navigation.dart';
 import '../widget/room_created_sheet.dart';
 import '../widget/room_visibility_option.dart';
+import '../../../notification/provider/push_offer_request_provider.dart';
 
 /// 新建房间整页(change add-room-create-and-discovery,无定稿设计,沿用 #20 系文字语言):
 /// 房名(必填)/ 简介 / 可见性(默认公开)→「创建并进入」→ 收起所有工具页、
@@ -57,6 +58,8 @@ class _RoomCreatePageViewState extends ConsumerState<RoomCreatePageView> {
     }
     final navigator = Navigator.of(context);
     final roomName = state.name.trim();
+    // enterJoinedRoom 会关掉本页,之后不能再用 ref:先拿到 notifier
+    final pushOffer = ref.read(pushOfferRequestProvider.notifier);
     await enterJoinedRoom(ref, navigator, roomId: roomId, refreshJoined: true);
     if (!navigator.mounted) {
       return;
@@ -66,6 +69,8 @@ class _RoomCreatePageViewState extends ConsumerState<RoomCreatePageView> {
       roomName: roomName,
       link: InviteLinkFormat.build(roomId: roomId, hash: hash),
     );
+    // 邀请卡收起后询问通知(spec: 首次请求通知权限)
+    pushOffer.requestAfterCreate(roomName);
   }
 
   @override

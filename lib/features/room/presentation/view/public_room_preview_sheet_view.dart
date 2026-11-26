@@ -5,6 +5,7 @@ import '../../../../core/theme/cofit_colors.dart';
 import '../../../../core/theme/cofit_dimens.dart';
 import '../../domain/entity/room_info_entity.dart';
 import '../join_room_provider.dart';
+import '../../../notification/provider/push_offer_request_provider.dart';
 
 /// 公开房间预览(沿用 #20a 邀请预览的文字语言):房名 / 简介 / 成员数 +「加入」。
 /// 加入成功 pop(true),由调用方负责进房导航;失败内联显示,可重试或关闭。
@@ -59,6 +60,10 @@ class _PublicRoomPreviewSheetViewState
       await ref
           .read(joinRoomUsecaseProvider)
           .execute(roomId: widget.room.roomId, userId: widget.userId);
+      // 加入后询问通知(spec: 首次请求通知权限)
+      ref
+          .read(pushOfferRequestProvider.notifier)
+          .requestAfterJoin(widget.room.name);
       if (mounted) {
         Navigator.of(context).pop(true);
       }

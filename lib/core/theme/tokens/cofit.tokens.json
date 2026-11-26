@@ -1130,6 +1130,14 @@
         "unit": "ms"
       },
       "$description": "今日进度等不到庆祝节拍时直接更新的等待上限 (add-daily-card-goal design §8, seed v1)"
+    },
+    "pushOfferDelay": {
+      "$type": "duration",
+      "$value": {
+        "value": 800,
+        "unit": "ms"
+      },
+      "$description": "加入房间后等房间先出现、再弹 App 内通知提示 (add-partner-start-push, seed v1)"
     }
   }
 }

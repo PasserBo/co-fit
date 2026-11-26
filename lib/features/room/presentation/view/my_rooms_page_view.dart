@@ -15,6 +15,7 @@ import '../room_navigation.dart';
 import 'room_create_page_view.dart';
 import 'room_discover_page_view.dart';
 import 'room_members_sheet_view.dart';
+import '../../../notification/provider/push_offer_request_provider.dart';
 
 /// 「我的房间」(#20c 定稿,替代旧 RoomBrowsePage/RoomCommunityPage):
 /// 已加入房间列表(presence 副行 + 当前/进入)+ ＋新建 +
@@ -508,6 +509,12 @@ class _ManualJoinSheetState extends ConsumerState<_ManualJoinSheet> {
           .read(joinRoomUsecaseProvider)
           .execute(roomId: roomId, userId: widget.userId);
       await ref.read(userBootstrapProvider.notifier).refreshJoinedRooms();
+      // 加入后询问通知(spec: 首次请求通知权限);手输 ID 时不一定知道房间名
+      ref
+          .read(pushOfferRequestProvider.notifier)
+          .requestAfterJoin(
+            ref.read(roomInfoProvider(roomId)).value?.name ?? '',
+          );
       if (mounted) {
         Navigator.of(context).pop(true);
       }

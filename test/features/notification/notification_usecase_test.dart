@@ -8,6 +8,7 @@ import 'package:cofit/features/notification/domain/entity/push_permission_status
 import 'package:cofit/features/notification/domain/notification_settings_repository.dart';
 import 'package:cofit/features/notification/domain/push_device_repository.dart';
 import 'package:cofit/features/notification/domain/push_messaging_gateway.dart';
+import 'package:cofit/features/notification/domain/push_offer_store.dart';
 import 'package:cofit/features/notification/domain/workout_start_signal_repository.dart';
 import 'package:cofit/features/notification/usecase/push_permission_prompt.dart';
 import 'package:cofit/features/notification/usecase/signal_workout_start_usecase.dart';
@@ -84,6 +85,16 @@ class FakeDevices implements PushDeviceRepository {
     }
     registered.remove(token);
   }
+}
+
+class FakeOfferStore implements PushOfferStore {
+  DateTime? declinedAt;
+
+  @override
+  Future<DateTime?> lastDeclinedAt() async => declinedAt;
+
+  @override
+  Future<void> markDeclined(DateTime at) async => declinedAt = at;
 }
 
 class FakeSettings implements NotificationSettingsRepository {
@@ -182,31 +193,50 @@ void main() {
     });
   });
 
-  group('shouldAskPushPermission', () {
-    test('没问过且房间里有别人 → 问', () {
+  group('shouldOfferPushPermission', () {
+    final now = DateTime(2026, 11, 26, 12);
+
+    test('没问过、没选过以后再说 → 提示', () {
       expect(
-        shouldAskPushPermission(
+        shouldOfferPushPermission(
           status: PushPermissionStatus.notDetermined,
-          otherMemberCount: 1,
+          lastDeclinedAt: null,
+          now: now,
         ),
         isTrue,
       );
     });
 
-    test('一个人的房间 / 问过了 → 不问', () {
+    test('以后再说 7 天内不提示,满 7 天再提示', () {
       expect(
-        shouldAskPushPermission(
+        shouldOfferPushPermission(
           status: PushPermissionStatus.notDetermined,
-          otherMemberCount: 0,
+          lastDeclinedAt: now.subtract(const Duration(days: 3)),
+          now: now,
         ),
         isFalse,
       );
+      expect(
+        shouldOfferPushPermission(
+          status: PushPermissionStatus.notDetermined,
+          lastDeclinedAt: now.subtract(const Duration(days: 7)),
+          now: now,
+        ),
+        isTrue,
+      );
+    });
+
+    test('系统权限问过(允许或拒绝)→ 不提示', () {
       for (final status in [
         PushPermissionStatus.authorized,
         PushPermissionStatus.denied,
       ]) {
         expect(
-          shouldAskPushPermission(status: status, otherMemberCount: 3),
+          shouldOfferPushPermission(
+            status: status,
+            lastDeclinedAt: null,
+            now: now,
+          ),
           isFalse,
         );
       }
@@ -276,39 +306,78 @@ void main() {
     });
   });
 
-  group('AskPushPermissionAfterWorkoutUsecase', () {
-    test('第一次和伙伴同房间完成 → 请求,允许后登记', () async {
+  group('OfferPushPermissionUsecase', () {
+    final now = DateTime(2026, 11, 26, 12);
+
+    OfferPushPermissionUsecase build(
+      FakeGateway gateway,
+      FakeOfferStore store,
+      FakeDevices devices,
+    ) {
+      return OfferPushPermissionUsecase(
+        gateway,
+        store,
+        SyncPushDeviceUsecase(gateway, devices),
+        now: () => now,
+      );
+    }
+
+    test('点「打开通知」→ 弹系统请求,允许后登记设备', () async {
       final gateway = FakeGateway();
       final devices = FakeDevices();
-      final asked = await AskPushPermissionAfterWorkoutUsecase(
-        gateway,
-        SyncPushDeviceUsecase(gateway, devices),
-      ).execute(userId: 'u', otherMemberCount: 1);
-      expect(asked, isTrue);
+      var shown = 0;
+      final outcome = await build(gateway, FakeOfferStore(), devices).execute(
+        userId: 'u',
+        confirm: () async {
+          shown++;
+          return true;
+        },
+      );
+      expect(shown, 1);
+      expect(outcome, PushOfferOutcome.requested);
       expect(gateway.requests, 1);
       expect(devices.registered, {'tok-1'});
     });
 
-    test('一个人的房间 → 不请求', () async {
+    test('点「以后再说」→ 不弹系统请求,记下时间', () async {
       final gateway = FakeGateway();
-      final asked = await AskPushPermissionAfterWorkoutUsecase(
+      final store = FakeOfferStore();
+      final outcome = await build(
         gateway,
-        SyncPushDeviceUsecase(gateway, FakeDevices()),
-      ).execute(userId: 'u', otherMemberCount: 0);
-      expect(asked, isFalse);
+        store,
+        FakeDevices(),
+      ).execute(userId: 'u', confirm: () async => false);
+      expect(outcome, PushOfferOutcome.declined);
       expect(gateway.requests, 0);
+      expect(store.declinedAt, now);
     });
 
-    test('拒绝后不再请求', () async {
-      final gateway = FakeGateway(grant: PushPermissionStatus.denied);
-      final usecase = AskPushPermissionAfterWorkoutUsecase(
-        gateway,
-        SyncPushDeviceUsecase(gateway, FakeDevices()),
+    test('冷静期内 / 系统权限已问过 → 不显示提示', () async {
+      var shown = 0;
+      Future<bool> confirm() async {
+        shown++;
+        return true;
+      }
+
+      final snoozed = FakeOfferStore()
+        ..declinedAt = now.subtract(const Duration(days: 1));
+      expect(
+        await build(
+          FakeGateway(),
+          snoozed,
+          FakeDevices(),
+        ).execute(userId: 'u', confirm: confirm),
+        PushOfferOutcome.notShown,
       );
-      await usecase.execute(userId: 'u', otherMemberCount: 1);
-      final again = await usecase.execute(userId: 'u', otherMemberCount: 1);
-      expect(again, isFalse);
-      expect(gateway.requests, 1);
+      expect(
+        await build(
+          FakeGateway(status: PushPermissionStatus.denied),
+          FakeOfferStore(),
+          FakeDevices(),
+        ).execute(userId: 'u', confirm: confirm),
+        PushOfferOutcome.notShown,
+      );
+      expect(shown, 0);
     });
   });
 
